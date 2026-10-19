@@ -36,7 +36,7 @@ export default function Footer() {
           ))}
         </nav>
       </div>
-      <p className="footer-copy">© {new Date().getFullYear()} ExamsPrep. All rights reserved.</p>
+      <p className="footer-copy">© 2026 ExamsPrep. All rights reserved.</p>
     </footer>
   );
 }

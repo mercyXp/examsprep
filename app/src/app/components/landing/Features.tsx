@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, type CSSProperties } from "react";
 
 const WEEK = [
@@ -140,10 +141,6 @@ export default function Features() {
         <h2 id="features-title" className="features-title rise-in delay-1">
           Everything to feel ready.
         </h2>
-        <a className="features-more rise-in delay-2" href="/features">
-          more features
-          <ArrowIcon />
-        </a>
       </header>
 
       <div className="features-grid">
@@ -237,6 +234,13 @@ export default function Features() {
           </div>
         </article>
       </div>
+
+      <p className="features-more-wrap rise-in delay-5">
+        <Link className="features-more" href="/features">
+          more features
+          <ArrowIcon />
+        </Link>
+      </p>
 
       <a className="features-mock rise-in delay-5" href="#mock-exam" id="mock-exam" aria-label="Begin mock exam">
         <span className="features-mock-copy">

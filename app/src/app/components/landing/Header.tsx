@@ -149,14 +149,19 @@ export default function Header() {
               className="logo-lockup"
             />
           </span>
-          <Image
-            src="/logo/mark.png"
-            alt=""
-            width={340}
-            height={340}
-            priority
-            className="logo-mark theme-dark"
-          />
+          <span className="logo-dark theme-dark">
+            <Image
+              src="/logo/mark.png"
+              alt=""
+              width={340}
+              height={340}
+              priority
+              className="logo-mark"
+            />
+            <span className="logo-wordmark" aria-hidden="true">
+              ExamPrep
+            </span>
+          </span>
         </Link>
 
         <nav className="nav-desktop" aria-label="Primary">

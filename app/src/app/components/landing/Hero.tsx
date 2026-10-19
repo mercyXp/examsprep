@@ -59,6 +59,7 @@ export default function Hero() {
             alt="A student revising at a laptop, with a study plan, 73% progress, and a note from the AI coach."
             width={1536}
             height={1024}
+            priority
             sizes="(min-width: 1024px) 480px, 100vw"
             className="hero-shot theme-dark"
           />
