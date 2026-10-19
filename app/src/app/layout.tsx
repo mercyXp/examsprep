@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Script from "next/script";
+import { Suspense } from "react";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
 import Header from "@/app/components/landing/Header";
 import Footer from "@/app/components/landing/Footer";
@@ -32,15 +32,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${bricolage.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBoot }} />
+      </head>
       <body className="min-h-full flex flex-col">
-        <Script id="theme-boot" strategy="beforeInteractive">
-          {themeBoot}
-        </Script>
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
         <div className="page-shell">
-          <Header />
+          <Suspense>
+            <Header />
+          </Suspense>
           <main id="main-content">{children}</main>
           <Footer />
         </div>
