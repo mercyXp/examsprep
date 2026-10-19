@@ -73,15 +73,7 @@ export default function Programmes() {
             width={1536}
             height={1024}
             sizes="(min-width: 1024px) 720px, 100vw"
-            className="prog-shot theme-light"
-          />
-          <Image
-            src="/img/hero_dark.png"
-            alt=""
-            width={1536}
-            height={1024}
-            sizes="(min-width: 1024px) 720px, 100vw"
-            className="prog-shot theme-dark"
+            className="prog-shot"
           />
           <span className="prog-pill is-live">Available now</span>
         </div>

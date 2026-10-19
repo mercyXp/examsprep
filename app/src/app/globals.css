@@ -2311,6 +2311,185 @@ html[data-theme="dark"] .prog-soon {
   .module-list {
     grid-template-columns: 1fr 1fr;
   }
+
+  .how-panel,
+  .start-panel {
+    padding: 44px 28px 36px;
+  }
+
+  .how-lede,
+  .start-lede {
+    max-width: 48ch;
+  }
+
+  .how-step {
+    padding: 18px 18px 20px;
+    border-radius: 24px;
+  }
+
+  .how-step h3 {
+    font-size: 1.08rem;
+  }
+
+  .how-text {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+}
+
+.how-panel,
+.start-panel {
+  width: 100%;
+  margin-top: 20px;
+  padding: 32px 16px 28px;
+  background: var(--features-bg);
+  scroll-margin-top: 96px;
+}
+
+.how-head,
+.start-panel {
+  text-align: center;
+}
+
+.start-panel {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.how-title,
+.start-title {
+  margin: 10px 0 0;
+  color: var(--ink);
+  font-family: var(--font-bricolage), "Bricolage Grotesque", sans-serif;
+  font-size: clamp(1.55rem, 1rem + 2.4vw, 2.45rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.how-lede {
+  margin: 10px auto 0;
+  max-width: 36ch;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.start-lede {
+  margin: 4px auto 6px;
+  max-width: 46ch;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.how-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-step {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  padding: 14px 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  text-align: left;
+  transition: box-shadow 220ms ease-out, transform 120ms ease-out;
+}
+
+.how-step::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    108deg,
+    transparent 36%,
+    rgba(226, 232, 240, 0.2) 48%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(226, 232, 240, 0.2) 52%,
+    transparent 64%
+  );
+  background-size: 220% 100%;
+  background-position: -20% 0;
+  opacity: 0;
+}
+
+.how-step:hover,
+.how-step:focus-within {
+  box-shadow:
+    0 0 0 1px rgba(198, 208, 220, 0.82),
+    0 0 0 3px rgba(226, 232, 240, 0.22);
+}
+
+.how-step:hover::after,
+.how-step:active::after {
+  opacity: 1;
+  animation: btn-shine 720ms ease-out;
+}
+
+.how-num {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.how-num span {
+  color: var(--muted);
+}
+
+.how-step h3 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-bricolage), "Bricolage Grotesque", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.how-text {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+@media (min-width: 640px) {
+  .how-lede,
+  .start-lede {
+    margin: 12px auto 0;
+    max-width: 48ch;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .how-text {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .how-step h3 {
+    font-size: 1.08rem;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -2345,6 +2524,20 @@ html[data-theme="dark"] .prog-soon {
     padding: 52px 40px 48px;
     border: 1px solid var(--line);
     box-shadow: var(--shadow);
+  }
+
+  .how-panel,
+  .start-panel {
+    margin-top: 24px;
+    padding: 52px 40px 44px;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .how-steps {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
   }
 }
 
@@ -2436,7 +2629,10 @@ html[data-theme="dark"] .prog-soon {
 
   .prog-featured::after,
   .prog-featured:hover::after,
-  .prog-featured:active::after {
+  .prog-featured:active::after,
+  .how-step::after,
+  .how-step:hover::after,
+  .how-step:active::after {
     animation: none;
     opacity: 0;
   }
