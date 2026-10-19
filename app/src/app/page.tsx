@@ -1,13 +1,11 @@
-import Header from "@/app/components/landing/Header";
 import Hero from "@/app/components/landing/Hero";
+import Features from "@/app/components/landing/Features";
 
 export default function Home() {
   return (
-    <div className="page-shell">
-      <Header />
-      <main>
-        <Hero />
-      </main>
-    </div>
+    <>
+      <Hero />
+      <Features />
+    </>
   );
 }

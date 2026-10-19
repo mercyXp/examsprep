@@ -52,6 +52,15 @@ export default function Hero() {
             height={1024}
             priority
             sizes="(min-width: 1024px) 480px, 100vw"
+            className="hero-shot theme-light"
+          />
+          <Image
+            src="/img/hero_dark.png"
+            alt="A student revising at a laptop, with a study plan, 73% progress, and a note from the AI coach."
+            width={1536}
+            height={1024}
+            sizes="(min-width: 1024px) 480px, 100vw"
+            className="hero-shot theme-dark"
           />
         </div>
       </div>

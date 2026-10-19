@@ -4,11 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import Button from "@/app/components/ui/Button";
+import ThemeToggle from "@/app/components/ui/ThemeToggle";
 
 const NAV = [
-  { href: "#features", label: "Features" },
-  { href: "#courses", label: "Courses" },
-  { href: "#about", label: "About" },
+  { href: "/features", label: "Features" },
+  { href: "/#courses", label: "Courses" },
+  { href: "/#about", label: "About" },
 ];
 
 function SearchIcon() {
@@ -138,21 +139,23 @@ export default function Header() {
 
       <div className="header-bar">
         <Link href="/" className="logo" aria-label="ExamsPrep home">
+          <span className="logo-crop theme-light">
+            <Image
+              src="/logo/logo_light.png"
+              alt=""
+              width={2336}
+              height={908}
+              priority
+              className="logo-lockup"
+            />
+          </span>
           <Image
             src="/logo/mark.png"
             alt=""
             width={340}
             height={340}
             priority
-            className="logo-mark"
-          />
-          <Image
-            src="/logo/word.png"
-            alt=""
-            width={1117}
-            height={195}
-            priority
-            className="logo-word"
+            className="logo-mark theme-dark"
           />
         </Link>
 
@@ -195,7 +198,9 @@ export default function Header() {
             </button>
           </form>
 
-          <Button href="#get-started" className="header-cta">
+          <ThemeToggle />
+
+          <Button href="/#get-started" className="header-cta">
             Get started
           </Button>
 
@@ -222,10 +227,10 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-          <Button href="#get-started" onClick={closeMenu}>
+          <Button href="/#get-started" onClick={closeMenu}>
             Get started
           </Button>
-          <Link href="#sign-in" className="mobile-signin" onClick={closeMenu}>
+          <Link href="/#sign-in" className="mobile-signin" onClick={closeMenu}>
             Sign in
           </Link>
         </div>
