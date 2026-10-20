@@ -47,6 +47,34 @@ export async function createAccount(
   return readResult(response);
 }
 
+export type SessionUser = {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+};
+
+export async function getSessionUser(): Promise<SessionUser | null> {
+  const response = await fetch("/api/auth/me", { cache: "no-store" });
+  const data: unknown = await response.json().catch(() => null);
+  const payload = data && typeof data === "object" ? (data as { ok?: unknown; user?: unknown }) : null;
+  const user = payload?.user && typeof payload.user === "object" ? (payload.user as Record<string, unknown>) : null;
+
+  if (!response.ok || payload?.ok !== true || !user) return null;
+
+  const id = typeof user.id === "string" ? user.id : "";
+  const name = typeof user.name === "string" ? user.name : "";
+  const email = typeof user.email === "string" ? user.email : "";
+  const roles = Array.isArray(user.roles) ? user.roles.filter((item): item is string => typeof item === "string") : [];
+
+  if (!id || !email) return null;
+  return { id, name, email, roles };
+}
+
+export async function signOut(): Promise<void> {
+  await fetch("/api/auth/logout", { method: "POST" });
+}
+
 export async function requestPasswordReset(email: string): Promise<SignInResult> {
   const response = await fetch("/api/auth/forgot-password", {
     method: "POST",
