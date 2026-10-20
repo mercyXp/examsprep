@@ -33,6 +33,20 @@ export async function signInWithGoogle(): Promise<SignInResult> {
   return readResult(response);
 }
 
+export async function createAccount(
+  name: string,
+  email: string,
+  password: string,
+): Promise<SignInResult> {
+  const response = await fetch("/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  return readResult(response);
+}
+
 export async function requestPasswordReset(email: string): Promise<SignInResult> {
   const response = await fetch("/api/auth/forgot-password", {
     method: "POST",

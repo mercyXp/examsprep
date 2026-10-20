@@ -209,7 +209,7 @@ export default function Header() {
             Sign in
           </Link>
 
-          <Button href="/#get-started" className="header-cta">
+          <Button href="/signup" className="header-cta">
             Get started
           </Button>
 
@@ -236,7 +236,7 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-          <Button href="/#get-started" onClick={closeMenu}>
+          <Button href="/signup" onClick={closeMenu}>
             Get started
           </Button>
           <Link href="/login" className="mobile-signin" onClick={closeMenu}>

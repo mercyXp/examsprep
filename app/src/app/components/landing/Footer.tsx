@@ -5,7 +5,7 @@ const NAV = [
   { href: "/features", label: "Features" },
   { href: "/#programmes", label: "Programmes" },
   { href: "/#about", label: "About" },
-  { href: "/#get-started", label: "Get started" },
+  { href: "/signup", label: "Get started" },
 ];
 
 export default function Footer() {

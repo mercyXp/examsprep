@@ -33,7 +33,9 @@ function lookTarget(mood: CastMood): { x: number; y: number } | "away" | null {
     mood === "load"
       ? document.querySelector<HTMLElement>(".login-submit")
       : mood === "watch"
-        ? document.querySelector<HTMLElement>('input[name="email"]')
+        ? document.querySelector<HTMLElement>(".login-form input:focus") ||
+          document.querySelector<HTMLElement>('input[name="email"]') ||
+          document.querySelector<HTMLElement>('input[name="name"]')
         : mood === "cover"
           ? document.querySelector<HTMLElement>('input[name="password"]')
           : mood === "error"

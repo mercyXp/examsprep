@@ -32,7 +32,7 @@ export default function Hero() {
             Structured revision, personalized study plans, and AI coaching — built for Cavendish University Zambia students.
           </p>
           <div className="hero-actions rise-in delay-3">
-            <Button href="#get-started">
+            <Button href="/signup">
               Get started
               <ArrowIcon />
             </Button>

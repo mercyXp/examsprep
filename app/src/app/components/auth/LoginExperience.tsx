@@ -294,7 +294,7 @@ export default function LoginExperience() {
 
         <p className="login-foot">
           New here?{" "}
-          <Link className="text-link" href="/#get-started">
+          <Link className="text-link" href="/signup">
             Get started
           </Link>
         </p>
