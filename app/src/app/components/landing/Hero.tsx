@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import Button from "@/app/components/ui/Button";
 import HeroGrades from "@/app/components/landing/HeroGrades";
 
@@ -36,11 +37,11 @@ export default function Hero() {
               <ArrowIcon />
             </Button>
           </div>
-          <p className="account-line rise-in delay-4" id="sign-in">
+          <p className="account-line rise-in delay-4">
             Already have an account?{" "}
-            <a className="text-link" href="#sign-in">
+            <Link className="text-link" href="/login">
               Sign in
-            </a>
+            </Link>
           </p>
         </div>
 

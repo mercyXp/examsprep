@@ -205,6 +205,10 @@ export default function Header() {
 
           <ThemeToggle />
 
+          <Link href="/login" className="header-signin">
+            Sign in
+          </Link>
+
           <Button href="/#get-started" className="header-cta">
             Get started
           </Button>
@@ -235,7 +239,7 @@ export default function Header() {
           <Button href="/#get-started" onClick={closeMenu}>
             Get started
           </Button>
-          <Link href="/#sign-in" className="mobile-signin" onClick={closeMenu}>
+          <Link href="/login" className="mobile-signin" onClick={closeMenu}>
             Sign in
           </Link>
         </div>
