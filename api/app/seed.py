@@ -5,9 +5,11 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db import SessionLocal
-from app.models import AcademicYear, Module, Permission, Programme, Role, RolePermission, Semester
-from app.models.enums import ProgrammeStatus
+from app.models import AcademicYear, Module, Permission, Programme, Role, RolePermission, Semester, User, UserRole
+from app.models.enums import ProgrammeStatus, UserStatus
+from app.security import hash_password
 
 ROLES = [
     ("student", "Student", "Consumes published content and tracks personal progress."),
@@ -65,6 +67,12 @@ COMING_SOON = [
     ("law", "Law", "Law", "Build knowledge through legal reasoning."),
     ("business-management", "Business & Management", "Business & Management", "Explore management, enterprise and strategy."),
     ("health-sciences", "Health Sciences", "Health Sciences", "Prepare for a future in health and medicine."),
+]
+
+DEMO_USERS = [
+    ("Ada Student", "student@examsprep.local", "examsready", "student"),
+    ("Cam Creator", "creator@examsprep.local", "examsready", "creator"),
+    ("Ann Admin", "admin@examsprep.local", "examsready", "administrator"),
 ]
 
 Y2S1_MODULES = [
@@ -193,12 +201,42 @@ def seed_programmes(session: Session) -> None:
             )
 
 
+def seed_demo_users(session: Session) -> None:
+    if not settings.seed_demo_users:
+        return
+
+    for name, email, password, role_slug in DEMO_USERS:
+        role = session.scalar(select(Role).where(Role.slug == role_slug))
+        if role is None:
+            continue
+        user = session.scalar(select(User).where(User.email == email))
+        if user is None:
+            user = User(
+                name=name,
+                email=email,
+                password_hash=hash_password(password),
+                status=UserStatus.ACTIVE,
+            )
+            session.add(user)
+            session.flush()
+        else:
+            user.name = name
+            user.password_hash = hash_password(password)
+            user.status = UserStatus.ACTIVE
+        already = session.scalar(
+            select(UserRole).where(UserRole.user_id == user.id, UserRole.role_id == role.id)
+        )
+        if already is None:
+            session.add(UserRole(user_id=user.id, role_id=role.id))
+
+
 def seed(session: Session | None = None) -> None:
     own_session = session is None
     session = session or SessionLocal()
     try:
         seed_identity(session)
         seed_programmes(session)
+        seed_demo_users(session)
         session.commit()
     except Exception:
         session.rollback()
@@ -211,3 +249,8 @@ def seed(session: Session | None = None) -> None:
 if __name__ == "__main__":
     seed()
     print("Seed complete.")
+    if settings.seed_demo_users:
+        print("Demo logins (password: examsready)")
+        print("  student@examsprep.local")
+        print("  creator@examsprep.local")
+        print("  admin@examsprep.local")

@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { jsonFromBackend } from "@/lib/auth-cookie";
+import { callBackend, unavailable } from "@/lib/backend";
 
 type Body = {
   name?: unknown;
@@ -26,11 +28,25 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "We couldn’t create your account. Accounts aren’t connected yet.",
-    },
-    { status: 503 },
+  const response = await callBackend("/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  if (!response) {
+    return NextResponse.json(unavailable("create your account"), { status: 503 });
+  }
+
+  const payload = (await response.json().catch(() => null)) as {
+    ok?: unknown;
+    access_token?: unknown;
+    message?: unknown;
+  } | null;
+
+  return jsonFromBackend(
+    response,
+    payload ?? {},
+    "We couldn’t create your account. Please try again.",
   );
 }

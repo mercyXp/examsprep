@@ -122,8 +122,15 @@ uvicorn app.main:app --reload
 - BSc Computing (`available`), years 1–4, both semesters
 - Year 2 Semester 1 modules IT211–IT215
 - Coming-soon programme stubs: Accounting, Law, Business, Health Sciences
+- Local demo accounts (password for all is `examsready`):
 
-No user accounts are created. Sign in / create account in the Next.js app still return an honest failure until FastAPI auth is connected.
+| Email | Role |
+| --- | --- |
+| student@examsprep.local | Student |
+| creator@examsprep.local | Content creator |
+| admin@examsprep.local | Administrator |
+
+You can also create a new account on `/signup`. Google and forgot-password still return an honest “not connected” response.
 
 ## 6. View tables in pgAdmin
 
@@ -143,15 +150,18 @@ SELECT code, name FROM modules ORDER BY code;
 
 ## 7. Run the Next.js app
 
-In a second terminal:
+Keep the API running. In a second terminal:
 
 ```powershell
 cd C:\examsprep\app
+copy .env.example .env
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The marketing site still uses in-repo catalogue data until the frontend is wired to FastAPI.
+`app/.env` should contain `API_URL=http://127.0.0.1:8000`.
+
+Open [http://localhost:3000/login](http://localhost:3000/login) and sign in with `student@examsprep.local` / `examsready`. The marketing catalogue is still in-repo until those pages read FastAPI.
 
 ## Troubleshooting
 
@@ -162,5 +172,6 @@ Open [http://localhost:3000](http://localhost:3000). The marketing site still us
 | Tables folder is empty | Run `alembic upgrade head`, then right-click **examsprep** → **Refresh**. |
 | `password authentication failed` | Use the installer postgres password. Encode special characters in the URL. |
 | `psql` is not recognized | Use `C:\Program Files\PostgreSQL\18\bin\psql.exe`, or add that `bin` folder to PATH. |
+| Sign in says the account service isn’t running | Start FastAPI with `uvicorn app.main:app --reload` from `api/`, and set `API_URL=http://127.0.0.1:8000` in `app/.env`. |
 
 Production hosting (Vercel + Railway) is described in [operations/deployment.md](operations/deployment.md). Schema details are in [database/erd.md](database/erd.md).

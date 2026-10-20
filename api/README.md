@@ -27,7 +27,7 @@ uvicorn app.main:app --reload
 - Year 2 Semester 1 modules IT211–IT215
 - Coming-soon programme stubs: Accounting, Law, Business, Health Sciences
 
-No user accounts are created. Login remains disconnected until authentication is implemented.
+Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`. Google and password reset are still disconnected.
 
 ## Railway
 

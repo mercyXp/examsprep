@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { jsonFromBackend } from "@/lib/auth-cookie";
+import { callBackend, unavailable } from "@/lib/backend";
 
 type Body = {
   email?: unknown;
@@ -17,11 +19,25 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json(
-    {
-      ok: false,
-      message: "We couldn’t sign you in. Accounts aren’t connected yet.",
-    },
-    { status: 503 },
+  const response = await callBackend("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!response) {
+    return NextResponse.json(unavailable("sign you in"), { status: 503 });
+  }
+
+  const payload = (await response.json().catch(() => null)) as {
+    ok?: unknown;
+    access_token?: unknown;
+    message?: unknown;
+  } | null;
+
+  return jsonFromBackend(
+    response,
+    payload ?? {},
+    "We couldn’t sign you in. Check your email and password.",
   );
 }
