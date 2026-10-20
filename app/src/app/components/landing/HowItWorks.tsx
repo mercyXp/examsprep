@@ -51,7 +51,7 @@ export default function HowItWorks() {
         <h2 id="start-title" className="start-title">
           Start preparing today.
         </h2>
-        <p className="start-lede">Computing exam prep for Cavendish University Zambia.</p>
+        <p className="start-lede">Exam Prep for Cavendish University Zambia.</p>
         <Button href="/signup">
           Get started
           <ArrowIcon />

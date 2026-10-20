@@ -6,11 +6,15 @@ Keep product, design, and architecture notes next to the code. Write a document 
 
 | Document | Path |
 | --- | --- |
+| Local setup | [SETUP.md](SETUP.md) |
 | Product requirements | [product/prd.md](product/prd.md) |
 | Roadmap | [product/roadmap.md](product/roadmap.md) |
 | UI/UX specification | [design/ui-ux-spec.md](design/ui-ux-spec.md) |
 | System architecture | [architecture/system-architecture.md](architecture/system-architecture.md) |
 | Database design | [database/erd.md](database/erd.md) |
+| Hosting and deployment | [operations/deployment.md](operations/deployment.md) |
+
+The FastAPI package and PostgreSQL schema live in [`api/`](../api/README.md).
 
 ## Next, alongside implementation
 
@@ -27,6 +31,7 @@ docs/
   security/         security.md · privacy.md
   testing/          test-plan.md
   operations/       deployment.md
+  SETUP.md          local Postgres, pgAdmin, API, Next.js walkthrough
   user-guides/      student-guide.md · admin-guide.md
 ```
 

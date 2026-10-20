@@ -2558,12 +2558,7 @@ html[data-theme="dark"] .prog-soon {
   }
 }
 
-body:has(.login-shell) .site-header,
-body:has(.login-shell) .site-footer {
-  display: none;
-}
-
-body:has(.login-shell) .page-shell {
+.page-shell.is-auth {
   padding: 0;
   min-height: 100vh;
   min-height: 100dvh;
@@ -2572,7 +2567,7 @@ body:has(.login-shell) .page-shell {
   justify-content: center;
 }
 
-body:has(.login-shell) .page-shell > main {
+.page-shell.is-auth > main {
   width: 100%;
   max-width: none;
   display: flex;
@@ -2650,6 +2645,7 @@ html[data-theme="dark"] .login-art {
   gap: 8px;
   min-width: 0;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .login-brand .logo-mark {
@@ -3332,13 +3328,13 @@ html[data-theme="dark"] .login-error {
 }
 
 @media (min-width: 900px) {
-  body:has(.login-shell) .page-shell {
+  .page-shell.is-auth {
     padding: 24px;
     align-items: center;
     justify-content: center;
   }
 
-  body:has(.login-shell) .page-shell > main {
+  .page-shell.is-auth > main {
     flex: 0 1 auto;
     width: min(980px, 100%);
     align-items: center;
@@ -3414,7 +3410,7 @@ html[data-theme="dark"] .login-error {
 }
 
 @media (min-width: 1024px) {
-  body:has(.login-shell) .page-shell {
+  .page-shell.is-auth {
     padding: var(--frame);
   }
 }

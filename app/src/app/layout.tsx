@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
-import Header from "@/app/components/landing/Header";
-import Footer from "@/app/components/landing/Footer";
+import SiteChrome from "@/app/components/SiteChrome";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,13 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <div className="page-shell">
-          <Suspense>
-            <Header />
-          </Suspense>
-          <main id="main-content">{children}</main>
-          <Footer />
-        </div>
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );
