@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import uuid
+from datetime import date
 
-from sqlalchemy import Boolean, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, UniqueConstraint, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -24,6 +26,35 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     roles: Mapped[list[UserRole]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    profile: Mapped[StudentProfile | None] = relationship(
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+
+class StudentProfile(TimestampMixin, Base):
+    __tablename__ = "student_profiles"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    university: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    programme: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    year_of_study: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    semester_of_study: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    exam_date: Mapped[date] = mapped_column(Date, nullable=False, default=date(2026, 11, 23), server_default="2026-11-23")
+    exam_dates: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    exam_timetable: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
+    daily_goal_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=60, server_default="60")
+    pace: Mapped[str] = mapped_column(String(16), nullable=False, default="balanced", server_default="balanced")
+    study_days: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    module_codes: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    onboarding_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    onboarding_completed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+
+    user: Mapped[User] = relationship(back_populates="profile")
 
 
 class Role(UUIDPrimaryKeyMixin, TimestampMixin, Base):

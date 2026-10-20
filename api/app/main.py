@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.config import settings
 from app.db import engine
 from app.routers.auth import router as auth_router
+from app.routers.onboarding import router as onboarding_router
 
 app = FastAPI(title="ExamsPrep API", version="0.1.0")
 app.add_middleware(
@@ -18,6 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(auth_router)
+app.include_router(onboarding_router)
 
 
 @app.exception_handler(StarletteHTTPException)

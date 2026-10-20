@@ -7,11 +7,20 @@ type AuthPayload = {
   ok?: unknown;
   access_token?: unknown;
   message?: unknown;
+  user?: unknown;
 };
+
+function onboardingCompleted(user: unknown) {
+  if (!user || typeof user !== "object") return false;
+  return (user as { onboarding_completed?: unknown }).onboarding_completed === true;
+}
 
 export function jsonFromBackend(response: Response, payload: AuthPayload, fallback: string) {
   if (response.ok && payload.ok === true && typeof payload.access_token === "string") {
-    const next = NextResponse.json({ ok: true });
+    const next = NextResponse.json({
+      ok: true,
+      onboardingCompleted: onboardingCompleted(payload.user),
+    });
     next.cookies.set({
       name: TOKEN_COOKIE,
       value: payload.access_token,

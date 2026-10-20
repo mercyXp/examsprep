@@ -127,7 +127,7 @@ export default function SignupExperience() {
       const result = await createAccount(nextName, nextEmail, password);
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace("/dashboard"), 900);
+        navOff.current = window.setTimeout(() => router.replace("/onboarding"), 900);
         return;
       }
       fail(result.message);
@@ -147,7 +147,7 @@ export default function SignupExperience() {
       const result = await signInWithGoogle();
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace("/dashboard"), 900);
+        navOff.current = window.setTimeout(() => router.replace("/onboarding"), 900);
         return;
       }
       fail(result.message);

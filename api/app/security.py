@@ -41,7 +41,7 @@ def role_slugs(user: User) -> list[str]:
 def load_user_by_email(session: Session, email: str) -> User | None:
     return session.scalars(
         select(User)
-        .options(joinedload(User.roles).joinedload(UserRole.role))
+        .options(joinedload(User.roles).joinedload(UserRole.role), joinedload(User.profile))
         .where(User.email == email)
     ).unique().one_or_none()
 
@@ -49,7 +49,7 @@ def load_user_by_email(session: Session, email: str) -> User | None:
 def load_user_by_id(session: Session, user_id: UUID) -> User | None:
     return session.scalars(
         select(User)
-        .options(joinedload(User.roles).joinedload(UserRole.role))
+        .options(joinedload(User.roles).joinedload(UserRole.role), joinedload(User.profile))
         .where(User.id == user_id)
     ).unique().one_or_none()
 

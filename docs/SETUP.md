@@ -130,7 +130,7 @@ uvicorn app.main:app --reload
 | creator@examsprep.local | Content creator |
 | admin@examsprep.local | Administrator |
 
-You can also create a new account on `/signup`. Google and forgot-password still return an honest “not connected” response.
+You can also create a new account on `/signup`. New students go through `/onboarding` before the dashboard. The demo student account already has onboarding completed. Google and forgot-password still return an honest “not connected” response.
 
 ## 6. View tables in pgAdmin
 

@@ -11,7 +11,7 @@ from app.models.content import (
     QuizVersionQuestion,
     Resource,
 )
-from app.models.identity import Permission, Role, RolePermission, User, UserRole
+from app.models.identity import Permission, Role, RolePermission, StudentProfile, User, UserRole
 from app.models.learning import AttemptAnswer, Bookmark, Enrolment, LessonProgress, QuizAttempt
 
 __all__ = [
@@ -37,6 +37,7 @@ __all__ = [
     "Role",
     "RolePermission",
     "Semester",
+    "StudentProfile",
     "Topic",
     "User",
     "UserRole",

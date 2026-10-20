@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.db import SessionLocal
-from app.models import AcademicYear, Module, Permission, Programme, Role, RolePermission, Semester, User, UserRole
+from app.models import AcademicYear, Module, Permission, Programme, Role, RolePermission, Semester, StudentProfile, User, UserRole
 from app.models.enums import ProgrammeStatus, UserStatus
 from app.security import hash_password
 
@@ -228,6 +230,25 @@ def seed_demo_users(session: Session) -> None:
         )
         if already is None:
             session.add(UserRole(user_id=user.id, role_id=role.id))
+
+        if role_slug == "student":
+            profile = session.get(StudentProfile, user.id)
+            if profile is None:
+                profile = StudentProfile(user_id=user.id)
+                session.add(profile)
+            profile.university = "Cavendish University Zambia"
+            profile.programme = "Bachelor of Science in Computing"
+            profile.year_of_study = 2
+            profile.semester_of_study = 1
+            profile.exam_date = date(2026, 11, 23)
+            profile.exam_dates = ["2026-11-23"]
+            profile.exam_timetable = {}
+            profile.daily_goal_minutes = 60
+            profile.pace = "balanced"
+            profile.study_days = ["mon", "tue", "wed", "thu", "fri"]
+            profile.module_codes = ["IT211", "IT212", "IT213", "IT214", "IT215"]
+            profile.onboarding_step = 5
+            profile.onboarding_completed = True
 
 
 def seed(session: Session | None = None) -> None:

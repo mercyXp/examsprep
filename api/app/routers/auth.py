@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.db import get_session
 from app.models import AuditLog, Role, User, UserRole
 from app.models.enums import UserStatus
+from app.profile import ensure_profile, user_out
 from app.schemas import AuthOut, ErrorOut, ForgotPasswordIn, LoginIn, SignupIn, UserOut
 from app.security import (
     create_access_token,
@@ -25,10 +26,7 @@ def _normalize_email(email: str) -> str:
 def _auth_out(user: User) -> AuthOut:
     roles = role_slugs(user)
     token = create_access_token(user_id=user.id, email=user.email, roles=roles)
-    return AuthOut(
-        access_token=token,
-        user=UserOut(id=user.id, name=user.name, email=user.email, roles=roles),
-    )
+    return AuthOut(access_token=token, user=user_out(user))
 
 
 @router.post("/signup", response_model=AuthOut, responses={400: {"model": ErrorOut}, 409: {"model": ErrorOut}})
@@ -58,6 +56,7 @@ def signup(body: SignupIn, session: Session = Depends(get_session)) -> AuthOut:
     session.add(user)
     session.flush()
     session.add(UserRole(user_id=user.id, role_id=student.id))
+    ensure_profile(session, user)
     session.add(
         AuditLog(
             actor_id=user.id,
@@ -91,12 +90,16 @@ def login(body: LoginIn, session: Session = Depends(get_session)) -> AuthOut:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This account isn’t active.",
         )
-    return _auth_out(user)
+    ensure_profile(session, user)
+    loaded = load_user_by_email(session, email)
+    assert loaded is not None
+    return _auth_out(loaded)
 
 
 @router.get("/me", response_model=UserOut)
-def me(user: User = Depends(require_user)) -> UserOut:
-    return UserOut(id=user.id, name=user.name, email=user.email, roles=role_slugs(user))
+def me(user: User = Depends(require_user), session: Session = Depends(get_session)) -> UserOut:
+    ensure_profile(session, user)
+    return user_out(user)
 
 
 @router.post("/google", response_model=ErrorOut, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)

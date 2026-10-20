@@ -3,29 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { computingModules } from "@/data/programmes";
-import { getSessionUser, signOut, type SessionUser } from "@/lib/auth";
+import { getSessionUser, saveOnboarding, signOut, type SessionUser } from "@/lib/auth";
+import { daysUntil, examDateParts, formatExamDate, formatGoal, nextExamDate, recommendedModule, SEMESTER_MODULES, todayISO } from "@/lib/study";
+import { ExamDatePicker } from "../ui/ExamCalendar";
 import ThemeToggle from "../ui/ThemeToggle";
 
-const EXAM_DATE = new Date("2026-11-23T00:00:00");
-const MODULES = computingModules["2-1"] ?? [];
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const NAV = [
   { id: "home", label: "Dashboard", href: "/dashboard", icon: "home" },
   { id: "courses", label: "My Courses", href: "#dash-courses", icon: "book" },
   { id: "planner", label: "Study Planner", href: "#dash-goal", icon: "cal" },
+  { id: "timetable", label: "Create Exam Timetable", href: "#dash-timetable", icon: "table" },
   { id: "practice", label: "Practice Exams", href: "#dash-exams", icon: "quiz" },
   { id: "assistant", label: "AI Assistant", href: "#dash-ai", icon: "spark" },
   { id: "progress", label: "Progress & Analytics", href: "#dash-analytics", icon: "chart" },
   { id: "resources", label: "Resources", href: "#dash-resources", icon: "folder" },
 ] as const;
-
-function daysUntilExam() {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return Math.max(0, Math.ceil((EXAM_DATE.getTime() - now.getTime()) / 86400000));
-}
 
 function firstName(user: SessionUser | null) {
   const name = user?.name?.trim();
@@ -39,8 +33,8 @@ function initials(user: SessionUser | null) {
   return ((parts[0]?.[0] ?? "E") + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-function formatExamDate() {
-  return EXAM_DATE.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+function shortExam(iso: string) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function NavIcon({ name }: { name: (typeof NAV)[number]["icon"] }) {
@@ -65,6 +59,14 @@ function NavIcon({ name }: { name: (typeof NAV)[number]["icon"] }) {
       <svg {...common}>
         <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" strokeWidth="1.8" />
         <path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (name === "table") {
+    return (
+      <svg {...common}>
+        <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 10h16M4 15h16M10 5v15" stroke="currentColor" strokeWidth="1.8" />
       </svg>
     );
   }
@@ -104,6 +106,7 @@ export default function DashboardExperience() {
   const [query, setQuery] = useState("");
   const [notesOpen, setNotesOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [tab, setTab] = useState<"home" | "timetable">("home");
 
   useEffect(() => {
     let cancelled = false;
@@ -111,6 +114,10 @@ export default function DashboardExperience() {
       if (cancelled) return;
       if (!session) {
         router.replace("/login");
+        return;
+      }
+      if (!session.onboardingCompleted) {
+        router.replace("/onboarding");
         return;
       }
       setUser(session);
@@ -129,17 +136,56 @@ export default function DashboardExperience() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const remaining = useMemo(() => daysUntilExam(), []);
-  const examLabel = useMemo(() => formatExamDate(), []);
+  useEffect(() => {
+    const apply = () => setTab(window.location.hash === "#dash-timetable" ? "timetable" : "home");
+    apply();
+    window.addEventListener("hashchange", apply);
+    return () => window.removeEventListener("hashchange", apply);
+  }, []);
+
+  const modules = useMemo(() => {
+    const codes = user?.moduleCodes ?? [];
+    return codes.length ? SEMESTER_MODULES.filter((mod) => codes.includes(mod.code)) : SEMESTER_MODULES;
+  }, [user]);
+  const examDates = user?.examDates ?? [];
+  const timetable = user?.examTimetable ?? {};
+  const nextIso = useMemo(() => {
+    const assigned = Object.values(timetable);
+    return nextExamDate(assigned.length ? assigned : examDates);
+  }, [examDates, timetable]);
+  const remaining = useMemo(() => daysUntil(nextIso), [nextIso]);
+  const goalMinutes = user?.dailyGoalMinutes ?? 60;
+  const goalLabel = formatGoal(goalMinutes);
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return MODULES;
-    return MODULES.filter((mod) => `${mod.code} ${mod.name}`.toLowerCase().includes(needle));
-  }, [query]);
+    if (!needle) return modules;
+    return modules.filter((mod) => `${mod.code} ${mod.name}`.toLowerCase().includes(needle));
+  }, [query, modules]);
 
   async function handleSignOut() {
     await signOut();
     router.replace("/login");
+  }
+
+  async function saveExamDates(dates: string[]) {
+    const allowed = new Set(dates);
+    const nextTable = Object.fromEntries(Object.entries(timetable).filter(([, day]) => allowed.has(day)));
+    setUser((current) =>
+      current ? { ...current, examDates: dates, examDate: dates[0] ?? current.examDate, examTimetable: nextTable } : current,
+    );
+    const saved = await saveOnboarding({ exam_dates: dates, exam_timetable: nextTable, exam_date: dates[0] });
+    if (saved) setUser(saved);
+  }
+
+  async function assignModule(code: string, iso: string) {
+    let nextTable: Record<string, string> = {};
+    setUser((current) => {
+      if (!current) return current;
+      nextTable = { ...current.examTimetable, [code]: iso };
+      return { ...current, examTimetable: nextTable };
+    });
+    const saved = await saveOnboarding({ exam_timetable: nextTable });
+    if (saved) setUser(saved);
   }
 
   if (!ready) {
@@ -151,7 +197,7 @@ export default function DashboardExperience() {
   }
 
   const name = firstName(user);
-  const continueModule = MODULES[0];
+  const continueModule = recommendedModule(user?.moduleCodes ?? []);
 
   return (
     <div className={`dash-shell${menuOpen ? " is-open" : ""}`}>
@@ -170,8 +216,21 @@ export default function DashboardExperience() {
             <a
               key={item.id}
               href={item.href}
-              className={item.id === "home" ? "is-active" : undefined}
-              onClick={() => setMenuOpen(false)}
+              className={
+                (item.id === "timetable" && tab === "timetable") || (item.id === "home" && tab === "home") ? "is-active" : undefined
+              }
+              onClick={(event) => {
+                if (item.id === "timetable") {
+                  setTab("timetable");
+                } else {
+                  setTab("home");
+                  if (item.id === "home" && window.location.hash) {
+                    event.preventDefault();
+                    history.replaceState(null, "", "/dashboard");
+                  }
+                }
+                setMenuOpen(false);
+              }}
             >
               <NavIcon name={item.icon} />
               {item.label}
@@ -280,13 +339,66 @@ export default function DashboardExperience() {
           </div>
 
           <div className="dash-hello">
-            <h1>
-              Hey {name} <span aria-hidden="true">👋</span>
-            </h1>
-            <p>Keep going! You’re doing great. Study smart, not just hard.</p>
+            {tab === "timetable" ? (
+              <>
+                <h1>Create exam timetable</h1>
+                <p>Assign each selected module to its exact exam date.</p>
+              </>
+            ) : (
+              <>
+                <h1>
+                  Hey {name} <span aria-hidden="true">👋</span>
+                </h1>
+                <p>Keep going! You’re doing great. Study smart, not just hard.</p>
+              </>
+            )}
           </div>
         </header>
 
+        {tab === "timetable" ? (
+          <div className="dash-body">
+            <article className="dash-card dash-time" id="dash-timetable">
+              <header className="dash-card-head">
+                <h2>Exam dates</h2>
+                <span>
+                  {modules.filter((mod) => timetable[mod.code]).length}/{modules.length} modules placed
+                </span>
+              </header>
+              <p className="dash-time-lede">Choose every exam sitting, then match modules to those dates.</p>
+              <ExamDatePicker values={examDates} min={todayISO()} onChange={saveExamDates} />
+              {!examDates.length ? (
+                <p className="dash-empty">Add at least one exam date to build your timetable.</p>
+              ) : (
+                <ul className="dash-time-mods">
+                  {modules.map((mod, index) => (
+                    <li key={mod.code}>
+                      <p>
+                        <span className={`dash-mod is-mod-${index}`} aria-hidden="true" />
+                        <strong>
+                          {mod.code} — {mod.name}
+                        </strong>
+                      </p>
+                      <div className="onb-chips">
+                        {examDates.map((iso) => (
+                          <button
+                            key={iso}
+                            type="button"
+                            className={timetable[mod.code] === iso ? "is-on" : undefined}
+                            aria-pressed={timetable[mod.code] === iso}
+                            onClick={() => assignModule(mod.code, iso)}
+                          >
+                            {shortExam(iso)}
+                          </button>
+                        ))}
+                      </div>
+                      <small>{timetable[mod.code] ? formatExamDate(timetable[mod.code]) : "Not allocated yet"}</small>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          </div>
+        ) : (
         <div className="dash-body">
           <section className="dash-stats" aria-label="Study snapshot">
             <article className="dash-stat is-streak">
@@ -327,9 +439,9 @@ export default function DashboardExperience() {
             <article className="dash-card" id="dash-goal">
               <header className="dash-card-head">
                 <h2>Daily Study Goal</h2>
-                <span>0m / 3h</span>
+                <span>0m / {goalLabel}</span>
               </header>
-              <p>Study for at least 3 hours today</p>
+              <p>Study for {goalLabel} today</p>
               <div className="dash-bar" aria-label="Daily goal 0 percent">
                 <span style={{ width: "0%" }} />
               </div>
@@ -362,17 +474,18 @@ export default function DashboardExperience() {
                   <div className="dash-continue">
                     <div className="dash-continue-art" aria-hidden="true" />
                     <div className="dash-continue-copy">
-                      <p className="dash-kicker is-live">Not started</p>
+                      <p className="dash-kicker is-live">Recommended</p>
                       <h3>
                         {continueModule.code} — {continueModule.name}
                       </h3>
-                      <p>Lessons for this module aren’t published yet.</p>
+                      <p className="dash-today">Today’s goal · Study for {goalLabel}</p>
+                      <p>Learn one topic and complete a short quiz.</p>
                     </div>
                     <div className="dash-bar" aria-label="Module progress 0 percent">
                       <span style={{ width: "0%" }} />
                     </div>
                     <Link href="/programmes/computing" className="dash-primary">
-                      Open programme
+                      Start my first lesson
                     </Link>
                   </div>
                 ) : null}
@@ -429,26 +542,32 @@ export default function DashboardExperience() {
                   <span>{remaining} days left</span>
                 </header>
                 <ul className="dash-exams">
-                  {MODULES.map((mod, index) => (
-                    <li key={mod.code} className={`is-mod-${index}`}>
-                      <div className="dash-exam-date">
-                        <strong>23</strong>
-                        <span>Nov 2026</span>
-                      </div>
-                      <div>
-                        <h3>
-                          {mod.code} — {mod.name}
-                        </h3>
-                        <p>
-                          {examLabel} · {remaining} days left
-                        </p>
-                        <div className="dash-bar">
-                          <span style={{ width: "0%" }} />
+                  {modules.map((mod, index) => {
+                    const iso = timetable[mod.code];
+                    const parts = iso ? examDateParts(iso) : null;
+                    return (
+                      <li key={mod.code} className={`is-mod-${index}`}>
+                        <div className="dash-exam-date">
+                          <strong>{parts?.day ?? "—"}</strong>
+                          <span>{parts ? `${parts.month} ${parts.year}` : "Set date"}</span>
                         </div>
-                      </div>
-                      <span className="dash-plan">Study plan soon</span>
-                    </li>
-                  ))}
+                        <div>
+                          <h3>
+                            {mod.code} — {mod.name}
+                          </h3>
+                          <p>
+                            {iso ? `${shortExam(iso)} · ${daysUntil(iso)} days left` : "Not on the timetable yet"}
+                          </p>
+                          <div className="dash-bar">
+                            <span style={{ width: "0%" }} />
+                          </div>
+                        </div>
+                        <a className="dash-plan" href="#dash-timetable" onClick={() => setTab("timetable")}>
+                          {iso ? "Change date" : "Create exam timetable"}
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </article>
 
@@ -458,7 +577,7 @@ export default function DashboardExperience() {
                   <Link href="/programmes/computing">View all</Link>
                 </header>
                 <ul className="dash-courses">
-                  {(query.trim() ? filtered : MODULES).map((mod, index) => (
+                  {(query.trim() ? filtered : modules).map((mod, index) => (
                     <li key={mod.code}>
                       <span className={`dash-mod is-mod-${index}`} aria-hidden="true" />
                       <div>
@@ -481,6 +600,7 @@ export default function DashboardExperience() {
             </div>
           </section>
         </div>
+        )}
       </div>
     </div>
   );

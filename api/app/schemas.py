@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -23,6 +24,36 @@ class UserOut(BaseModel):
     name: str
     email: str
     roles: list[str]
+    onboarding_completed: bool = False
+    onboarding_step: int = 1
+    university: str | None = None
+    programme: str | None = None
+    year_of_study: int | None = None
+    semester_of_study: int | None = None
+    exam_date: date = date(2026, 11, 23)
+    exam_dates: list[str] = Field(default_factory=list)
+    exam_timetable: dict[str, str] = Field(default_factory=dict)
+    daily_goal_minutes: int = 60
+    pace: str = "balanced"
+    study_days: list[str] = Field(default_factory=list)
+    module_codes: list[str] = Field(default_factory=list)
+
+
+class OnboardingIn(BaseModel):
+    name: str | None = Field(default=None, max_length=120)
+    university: str | None = Field(default=None, max_length=160)
+    programme: str | None = Field(default=None, max_length=160)
+    year_of_study: int | None = Field(default=None, ge=1, le=4)
+    semester_of_study: int | None = Field(default=None, ge=1, le=2)
+    exam_date: date | None = None
+    exam_dates: list[str] | None = None
+    exam_timetable: dict[str, str] | None = None
+    daily_goal_minutes: int | None = Field(default=None, ge=15, le=240)
+    pace: str | None = Field(default=None, max_length=16)
+    study_days: list[str] | None = None
+    module_codes: list[str] | None = None
+    onboarding_step: int | None = Field(default=None, ge=1, le=5)
+    complete: bool = False
 
 
 class AuthOut(BaseModel):

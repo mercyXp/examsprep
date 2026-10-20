@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/app/components/ui/Button";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
 import LoginCast, { type CastMood } from "@/app/components/auth/LoginCast";
-import { signIn, signInWithGoogle } from "@/lib/auth";
+import { afterAuthPath, signIn, signInWithGoogle } from "@/lib/auth";
 
 function GoogleMark() {
   return (
@@ -114,7 +114,7 @@ export default function LoginExperience() {
       const result = await signIn(nextEmail, password);
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace("/dashboard"), 900);
+        navOff.current = window.setTimeout(() => router.replace(afterAuthPath(result.onboardingCompleted)), 900);
         return;
       }
       fail(result.message);
@@ -134,7 +134,7 @@ export default function LoginExperience() {
       const result = await signInWithGoogle();
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace("/dashboard"), 900);
+        navOff.current = window.setTimeout(() => router.replace(afterAuthPath(result.onboardingCompleted)), 900);
         return;
       }
       fail(result.message);

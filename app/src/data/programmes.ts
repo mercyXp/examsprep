@@ -11,6 +11,30 @@ export const featuredProgramme = {
   href: "/programmes/computing",
 };
 
+export const studyProgrammes = [
+  { slug: "computing", name: "Bachelor of Science in Computing", available: true },
+  { slug: "bac", name: "Bachelor of Accounting (BAC)", available: false },
+  { slug: "ba-bf", name: "Bachelor of Arts in Banking and Finance", available: false },
+  { slug: "llb", name: "Bachelor of Laws (LLB)", available: false },
+  { slug: "bba", name: "Bachelor of Business Administration (BBA)", available: false },
+  { slug: "project-management", name: "Project Management", available: false },
+  { slug: "clinical", name: "Clinical Sciences", available: false },
+  { slug: "nursing", name: "Nursing", available: false },
+  { slug: "mbchb", name: "Bachelor of Medicine and Surgery (MBChB)", available: false },
+] as const;
+
+export type StudyProgramme = (typeof studyProgrammes)[number];
+
+export function programmeBySlug(slug: string) {
+  return studyProgrammes.find((item) => item.slug === slug);
+}
+
+export function programmeByName(name: string) {
+  const needle = name.trim().toLowerCase();
+  if (!needle) return undefined;
+  return studyProgrammes.find((item) => item.name.toLowerCase() === needle);
+}
+
 export const upcomingGroups = [
   {
     title: "Accounting & Finance",
