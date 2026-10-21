@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import BrandLogo from "@/app/components/ui/BrandLogo";
 import { useRouter } from "next/navigation";
 import Button from "@/app/components/ui/Button";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
@@ -114,7 +114,7 @@ export default function LoginExperience() {
       const result = await signIn(nextEmail, password);
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace(afterAuthPath(result.onboardingCompleted)), 900);
+        navOff.current = window.setTimeout(() => router.replace(afterAuthPath(result.onboardingCompleted, result.roles)), 900);
         return;
       }
       fail(result.message);
@@ -134,7 +134,7 @@ export default function LoginExperience() {
       const result = await signInWithGoogle();
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace(afterAuthPath(result.onboardingCompleted)), 900);
+        navOff.current = window.setTimeout(() => router.replace(afterAuthPath(result.onboardingCompleted, result.roles)), 900);
         return;
       }
       fail(result.message);
@@ -153,10 +153,7 @@ export default function LoginExperience() {
 
       <div className="login-panel">
         <div className="login-panel-top">
-          <Link href="/" className="login-brand" aria-label="ExamsPrep home">
-            <Image src="/logo/mark.png" alt="" width={340} height={340} priority className="logo-mark" />
-            <span className="login-wordmark">ExamPrep</span>
-          </Link>
+          <BrandLogo className="login-brand" priority />
           <ThemeToggle />
         </div>
 
@@ -170,7 +167,7 @@ export default function LoginExperience() {
         <form
           className="login-form"
           onSubmit={onSubmit}
-          aria-busy={submitting || undefined}
+          aria-busy={Boolean(submitting) || undefined}
           noValidate
           onFocusCapture={(event) => {
             const name = (event.target as HTMLElement).getAttribute("name");

@@ -24,11 +24,12 @@ def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
 
 
-def create_access_token(*, user_id: UUID, email: str, roles: list[str]) -> str:
+def create_access_token(*, user_id: UUID, email: str, roles: list[str], token_version: int = 0) -> str:
     payload = {
         "sub": str(user_id),
         "email": email,
         "roles": roles,
+        "ver": token_version,
         "exp": datetime.now(UTC) + timedelta(minutes=settings.access_token_minutes),
     }
     return jwt.encode(payload, settings.secret_key, algorithm="HS256")
@@ -64,13 +65,30 @@ def require_user(
     try:
         payload = jwt.decode(credentials.credentials, settings.secret_key, algorithms=["HS256"])
         user_id = UUID(str(payload["sub"]))
-    except (jwt.InvalidTokenError, KeyError, ValueError) as error:
+        token_version = int(payload.get("ver", 0))
+    except (jwt.InvalidTokenError, KeyError, ValueError, TypeError) as error:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Sign in to continue.",
         ) from error
 
     user = load_user_by_id(session, user_id)
-    if user is None or user.status != UserStatus.ACTIVE:
+    if user is None or user.status != UserStatus.ACTIVE or int(user.token_version or 0) != token_version:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sign in to continue.")
+    return user
+
+
+STAFF_ROLES = frozenset({"creator", "administrator", "super_administrator"})
+ADMIN_ROLES = frozenset({"administrator", "super_administrator"})
+
+
+def require_staff(user: User = Depends(require_user)) -> User:
+    if not STAFF_ROLES.intersection(role_slugs(user)):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Administrator access is required.")
+    return user
+
+
+def require_admin(user: User = Depends(require_user)) -> User:
+    if not ADMIN_ROLES.intersection(role_slugs(user)):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Administrator access is required.")
     return user

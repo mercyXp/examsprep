@@ -19,6 +19,15 @@ class ForgotPasswordIn(BaseModel):
     email: str = Field(min_length=3, max_length=255)
 
 
+class ProfileIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+
+
+class PasswordIn(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
 class UserOut(BaseModel):
     id: UUID
     name: str
@@ -37,6 +46,8 @@ class UserOut(BaseModel):
     pace: str = "balanced"
     study_days: list[str] = Field(default_factory=list)
     module_codes: list[str] = Field(default_factory=list)
+    module_exam_plans: dict[str, dict] = Field(default_factory=dict)
+    revision_start: date | None = None
 
 
 class OnboardingIn(BaseModel):
@@ -52,6 +63,8 @@ class OnboardingIn(BaseModel):
     pace: str | None = Field(default=None, max_length=16)
     study_days: list[str] | None = None
     module_codes: list[str] | None = None
+    module_exam_plans: dict[str, dict] | None = None
+    revision_start: date | None = None
     onboarding_step: int | None = Field(default=None, ge=1, le=5)
     complete: bool = False
 

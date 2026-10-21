@@ -16,7 +16,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
-from app.models.catalogue import Module, Topic
+from app.models.catalogue import Chapter, Module, Topic
 from app.models.enums import (
     ContentStatus,
     QuizKind,
@@ -35,10 +35,19 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 
 class Lesson(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "lessons"
+    __table_args__ = (
+        UniqueConstraint("module_id", "position", name="uq_lessons_module_position", deferrable=True, initially="DEFERRED"),
+    )
 
     module_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("modules.id", ondelete="CASCADE"), nullable=False)
+    chapter_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("chapters.id", ondelete="SET NULL"), nullable=True)
     creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    objectives: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    difficulty: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     status: Mapped[ContentStatus] = mapped_column(
         content_status_enum,
         nullable=False,
@@ -52,6 +61,7 @@ class Lesson(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     module: Mapped[Module] = relationship(back_populates="lessons")
+    chapter: Mapped[Chapter | None] = relationship(back_populates="lessons")
     creator: Mapped[User] = relationship(foreign_keys=[creator_id])
     versions: Mapped[list[LessonVersion]] = relationship(
         back_populates="lesson",
@@ -72,6 +82,12 @@ class LessonVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     lesson_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
     version_number: Mapped[int] = mapped_column(Integer, nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    slides: Mapped[list] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+        server_default=text("'[]'::jsonb"),
+    )
     attachments: Mapped[list] = mapped_column(
         JSONB,
         nullable=False,

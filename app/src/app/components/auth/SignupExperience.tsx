@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import BrandLogo from "@/app/components/ui/BrandLogo";
 import Button from "@/app/components/ui/Button";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
 import LoginCast, { type CastMood } from "@/app/components/auth/LoginCast";
@@ -168,10 +168,7 @@ export default function SignupExperience() {
 
       <div className="login-panel">
         <div className="login-panel-top">
-          <Link href="/" className="login-brand" aria-label="ExamsPrep home">
-            <Image src="/logo/mark.png" alt="" width={340} height={340} priority className="logo-mark" />
-            <span className="login-wordmark">ExamPrep</span>
-          </Link>
+          <BrandLogo className="login-brand" priority />
           <ThemeToggle />
         </div>
 
@@ -185,7 +182,7 @@ export default function SignupExperience() {
         <form
           className="login-form"
           onSubmit={onSubmit}
-          aria-busy={submitting || undefined}
+          aria-busy={Boolean(submitting) || undefined}
           noValidate
           onFocusCapture={(event) => {
             const field = (event.target as HTMLElement).getAttribute("name");

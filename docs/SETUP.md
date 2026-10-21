@@ -117,18 +117,22 @@ uvicorn app.main:app --reload
 
 ### What the seed loads
 
-- Roles: student, creator, administrator, super_administrator
+- Roles: student, creator (content creator), administrator (program administrator), super_administrator
 - Named permissions mapped to those roles
 - BSc Computing (`available`), years 1–4, both semesters
 - Year 2 Semester 1 modules IT211–IT215
 - Coming-soon programme stubs: Accounting, Law, Business, Health Sciences
+- `program_modules` rows for every existing module, plus demo assignments
 - Local demo accounts (password for all is `examsready`):
 
-| Email | Role |
-| --- | --- |
-| student@examsprep.local | Student |
-| creator@examsprep.local | Content creator |
-| admin@examsprep.local | Administrator |
+| Email | Role | Seeded scope |
+| --- | --- | --- |
+| student@examsprep.local | Student | Published Computing Y2S1 modules |
+| creator@examsprep.local | Content creator | Computing · IT212 and IT213 only |
+| admin@examsprep.local | Program administrator | Bachelor of Science in Computing (all modules) |
+| super@examsprep.local | Super administrator | Entire platform |
+
+Staff sign in at [http://localhost:3000/login](http://localhost:3000/login) and land on `/admin`. Super Admin assigns program administrators and creators at `/admin/assignments`. Creators only see assigned modules and submit lessons for review instead of publishing. Details: [access-control.md](architecture/access-control.md).
 
 You can also create a new account on `/signup`. New students go through `/onboarding` before the dashboard. The demo student account already has onboarding completed. Google and forgot-password still return an honest “not connected” response.
 
@@ -137,7 +141,7 @@ You can also create a new account on `/signup`. New students go through `/onboar
 1. Right-click **examsprep** → **Refresh**.
 2. Expand **examsprep → Schemas → public → Tables**.
 
-You should see `users`, `roles`, `permissions`, `programmes`, `academic_years`, `semesters`, `modules`, `lessons`, `lesson_versions`, `content_reviews`, `audit_logs`, and the rest.
+You should see `users`, `roles`, `permissions`, `programmes`, `academic_years`, `semesters`, `modules`, `program_modules`, `program_admin_assignments`, `content_creator_assignments`, `chapters`, `lessons`, `lesson_versions`, `content_reviews`, `audit_logs`, and the rest.
 
 To inspect rows: right-click a table → **View/Edit Data → All Rows**.
 
@@ -146,6 +150,16 @@ Or right-click **examsprep** → **Query Tool**:
 ```sql
 SELECT slug, name, status FROM programmes;
 SELECT code, name FROM modules ORDER BY code;
+SELECT u.email, p.name AS programme
+FROM program_admin_assignments a
+JOIN users u ON u.id = a.user_id
+JOIN programmes p ON p.id = a.programme_id;
+SELECT u.email, p.name AS programme, m.code, m.name AS module
+FROM content_creator_assignments a
+JOIN users u ON u.id = a.user_id
+JOIN program_modules pm ON pm.id = a.program_module_id
+JOIN programmes p ON p.id = pm.programme_id
+JOIN modules m ON m.id = pm.module_id;
 ```
 
 ## 7. Run the Next.js app
@@ -161,7 +175,7 @@ npm run dev
 
 `app/.env` should contain `API_URL=http://127.0.0.1:8000`.
 
-Open [http://localhost:3000/login](http://localhost:3000/login) and sign in with `student@examsprep.local` / `examsready`. The marketing catalogue is still in-repo until those pages read FastAPI.
+Open [http://localhost:3000/login](http://localhost:3000/login). Use `student@examsprep.local` / `examsready` for the student dashboard, or the staff accounts above for `/admin`. The marketing catalogue is still in-repo until those pages read FastAPI.
 
 ## Troubleshooting
 

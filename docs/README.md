@@ -11,6 +11,7 @@ Keep product, design, and architecture notes next to the code. Write a document 
 | Roadmap | [product/roadmap.md](product/roadmap.md) |
 | UI/UX specification | [design/ui-ux-spec.md](design/ui-ux-spec.md) |
 | System architecture | [architecture/system-architecture.md](architecture/system-architecture.md) |
+| Access control | [architecture/access-control.md](architecture/access-control.md) |
 | Database design | [database/erd.md](database/erd.md) |
 | Hosting and deployment | [operations/deployment.md](operations/deployment.md) |
 
@@ -24,7 +25,7 @@ Create these when the matching work starts — not before.
 docs/
   product/          prd.md · roadmap.md
   design/           ui-ux-spec.md · animations.md
-  architecture/     system-architecture.md · adr/
+  architecture/     system-architecture.md · access-control.md · adr/
   database/         erd.md · data-dictionary.md
   api/              openapi.yaml · api-guidelines.md
   ai/               ai-specification.md · ai-evaluation.md

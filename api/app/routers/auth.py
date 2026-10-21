@@ -6,11 +6,12 @@ from app.db import get_session
 from app.models import AuditLog, Role, User, UserRole
 from app.models.enums import UserStatus
 from app.profile import ensure_profile, user_out
-from app.schemas import AuthOut, ErrorOut, ForgotPasswordIn, LoginIn, SignupIn, UserOut
+from app.schemas import AuthOut, ErrorOut, ForgotPasswordIn, LoginIn, PasswordIn, ProfileIn, SignupIn, UserOut
 from app.security import (
     create_access_token,
     hash_password,
     load_user_by_email,
+    load_user_by_id,
     require_user,
     role_slugs,
     verify_password,
@@ -25,7 +26,12 @@ def _normalize_email(email: str) -> str:
 
 def _auth_out(user: User) -> AuthOut:
     roles = role_slugs(user)
-    token = create_access_token(user_id=user.id, email=user.email, roles=roles)
+    token = create_access_token(
+        user_id=user.id,
+        email=user.email,
+        roles=roles,
+        token_version=int(user.token_version or 0),
+    )
     return AuthOut(access_token=token, user=user_out(user))
 
 
@@ -100,6 +106,51 @@ def login(body: LoginIn, session: Session = Depends(get_session)) -> AuthOut:
 def me(user: User = Depends(require_user), session: Session = Depends(get_session)) -> UserOut:
     ensure_profile(session, user)
     return user_out(user)
+
+
+@router.patch("/me", response_model=UserOut)
+def update_profile(body: ProfileIn, user: User = Depends(require_user), session: Session = Depends(get_session)) -> UserOut:
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Enter your name.")
+    user.name = name
+    session.add(
+        AuditLog(
+            actor_id=user.id,
+            action="user.profile.update",
+            resource_type="user",
+            resource_id=user.id,
+            payload={"name": name},
+        )
+    )
+    session.flush()
+    ensure_profile(session, user)
+    loaded = load_user_by_id(session, user.id)
+    assert loaded is not None
+    return user_out(loaded)
+
+
+@router.post("/password", response_model=AuthOut)
+def change_password(body: PasswordIn, user: User = Depends(require_user), session: Session = Depends(get_session)) -> AuthOut:
+    if user.password_hash is None or not verify_password(body.current_password, user.password_hash):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Current password is incorrect.")
+    if body.current_password == body.new_password:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Choose a new password that is different from the current one.")
+    user.password_hash = hash_password(body.new_password)
+    user.token_version = int(user.token_version or 0) + 1
+    session.add(
+        AuditLog(
+            actor_id=user.id,
+            action="user.password.change",
+            resource_type="user",
+            resource_id=user.id,
+            payload={},
+        )
+    )
+    session.flush()
+    loaded = load_user_by_id(session, user.id)
+    assert loaded is not None
+    return _auth_out(loaded)
 
 
 @router.post("/google", response_model=ErrorOut, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)

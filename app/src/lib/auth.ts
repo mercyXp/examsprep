@@ -1,15 +1,25 @@
 import { EXAM_DATE_ISO, normalizeExamDates } from "@/lib/study";
 
 export type SignInResult =
-  | { ok: true; onboardingCompleted: boolean }
+  | { ok: true; onboardingCompleted: boolean; roles: string[] }
   | { ok: false; message: string };
+
+const STAFF_ROLES = new Set(["creator", "administrator", "super_administrator"]);
+
+export function isStaffRole(roles: string[]) {
+  return roles.some((role) => STAFF_ROLES.has(role));
+}
 
 async function readResult(response: Response): Promise<SignInResult> {
   const data: unknown = await response.json().catch(() => null);
-  const payload = data && typeof data === "object" ? (data as { ok?: unknown; message?: unknown; onboardingCompleted?: unknown }) : null;
+  const payload = data && typeof data === "object" ? (data as { ok?: unknown; message?: unknown; onboardingCompleted?: unknown; roles?: unknown }) : null;
 
   if (response.ok && payload?.ok === true) {
-    return { ok: true, onboardingCompleted: payload.onboardingCompleted === true };
+    return {
+      ok: true,
+      onboardingCompleted: payload.onboardingCompleted === true,
+      roles: Array.isArray(payload.roles) ? payload.roles.filter((item): item is string => typeof item === "string") : [],
+    };
   }
 
   const message =
@@ -67,6 +77,8 @@ export type SessionUser = {
   pace: string;
   studyDays: string[];
   moduleCodes: string[];
+  moduleExamPlans: Record<string, { examType: string; dateMode: string; estimatedDate: string | null }>;
+  revisionStart: string | null;
 };
 
 function asString(value: unknown) {
@@ -109,7 +121,24 @@ export function parseSessionUser(user: Record<string, unknown>): SessionUser | n
     pace: asString(user.pace) || "balanced",
     studyDays: asStringList(user.study_days),
     moduleCodes: asStringList(user.module_codes),
+    moduleExamPlans: asExamPlans(user.module_exam_plans),
+    revisionStart: asString(user.revision_start) || null,
   };
+}
+
+function asExamPlans(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const plans: SessionUser["moduleExamPlans"] = {};
+  for (const [code, raw] of Object.entries(value)) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) continue;
+    const item = raw as Record<string, unknown>;
+    plans[code] = {
+      examType: asString(item.examType) || "regular",
+      dateMode: asString(item.dateMode) || "official",
+      estimatedDate: asString(item.estimatedDate) || null,
+    };
+  }
+  return plans;
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -120,6 +149,33 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   if (!response.ok || payload?.ok !== true || !user) return null;
   return parseSessionUser(user);
+}
+
+export async function updateProfile(name: string): Promise<{ ok: true; user: SessionUser } | { ok: false; message: string }> {
+  const response = await fetch("/api/auth/me", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name }),
+  });
+  const data: unknown = await response.json().catch(() => null);
+  const payload = data && typeof data === "object" ? (data as { ok?: unknown; user?: unknown; message?: unknown }) : null;
+  const user = payload?.user && typeof payload.user === "object" ? parseSessionUser(payload.user as Record<string, unknown>) : null;
+  if (!response.ok || payload?.ok !== true || !user) {
+    return {
+      ok: false,
+      message: typeof payload?.message === "string" && payload.message ? payload.message : "We couldn’t update your profile.",
+    };
+  }
+  return { ok: true, user };
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<SignInResult> {
+  const response = await fetch("/api/auth/password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+  return readResult(response);
 }
 
 export type OnboardingPatch = {
@@ -135,6 +191,8 @@ export type OnboardingPatch = {
   pace?: string;
   study_days?: string[];
   module_codes?: string[];
+  module_exam_plans?: Record<string, { examType: string; dateMode: string; estimatedDate: string | null }>;
+  revision_start?: string | null;
   onboarding_step?: number;
   complete?: boolean;
 };
@@ -152,7 +210,8 @@ export async function saveOnboarding(body: OnboardingPatch): Promise<SessionUser
   return parseSessionUser(user);
 }
 
-export function afterAuthPath(onboardingCompleted: boolean) {
+export function afterAuthPath(onboardingCompleted: boolean, roles: string[] = []) {
+  if (isStaffRole(roles)) return "/admin";
   return onboardingCompleted ? "/dashboard" : "/onboarding";
 }
 

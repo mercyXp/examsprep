@@ -2,29 +2,25 @@
 
 ## Now
 
-- Landing page and visual system (done).
-- Programme catalogue on the homepage; Computing programme explorer (in progress).
-- Auth screens (sign in, create account, forgot password) — honest 503 until FastAPI exists.
-- Documentation in `docs/` for hosting, roles, and the review workflow.
-- PostgreSQL schema, Alembic migration, and Computing seed in `api/` (not yet connected to the Next.js app).
+- Landing page and visual system.
+- Programme catalogue on the homepage; Computing programme explorer.
+- Email/password auth against FastAPI and Postgres. Google and forgot-password still return an honest “not connected” response.
+- Student dashboard, My Courses, and the lesson player (published content only).
+- Admin CMS: modules, chapters, typed lesson editor, drafts, preview, publish.
+- Scoped staff roles: Super Admin, program administrator, content creator. Assignments name a programme and a module. Backend enforcement, no URL bypass. See [access-control.md](../architecture/access-control.md).
 
-## Next (backend foundation)
+## Next
 
-Build in this order so the lesson workflow becomes the pattern for quizzes and exams:
-
-1. FastAPI authentication against `users` / `roles` / `permissions`.
-2. Programme catalogue API; migrate the Next.js app off `app/src/data/`.
-3. Lessons and `lesson_versions`; creator draft editor in Next.js.
-4. Submit, review, feedback, approve/reject (no self-approval).
-5. Version-safe publish / unpublish and student retrieval of the live version only.
-6. Apply the same rules to questions, quizzes, and mock exams.
-7. Admin review queue, audit logs, and permission tests.
+1. Apply the lesson submit → review → publish pattern to questions, quizzes, and mock exams.
+2. Dedicated review queue UI and scoped audit-log views.
+3. Permission tests for assignment revocation and URL guessing.
+4. Migrate marketing catalogue pages off `app/src/data/` onto FastAPI.
 
 Confirm remaining Computing module lists (all years/semesters) and credits with the official curriculum in parallel.
 
 ## Later
 
-- Student dashboard, enrolments, attempts, bookmarks, AI tutor over published notes.
+- AI tutor over published notes.
 - Remaining Cavendish programmes as content is ready (`available` / `coming_soon` / `preview`).
 - Object storage for PDFs and lecture notes.
 - Past papers where authorised.

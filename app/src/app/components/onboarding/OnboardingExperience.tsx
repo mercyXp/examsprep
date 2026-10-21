@@ -1,24 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ExamDatePicker } from "@/app/components/ui/ExamCalendar";
+import BrandLogo from "@/app/components/ui/BrandLogo";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
 import { computingModules, programmeByName, programmeBySlug, studyProgrammes } from "@/data/programmes";
 import { getSessionUser, saveOnboarding, type SessionUser } from "@/lib/auth";
+import { loadExamSchedule, type StudentExamSchedule } from "@/lib/learn-api";
 import {
   GOAL_OPTIONS,
   PACE_OPTIONS,
   SEMESTER_MODULES,
   STUDY_DAYS,
+  examSittingCaption,
   formatExamDate,
+  formatExamWindow,
   formatGoal,
   recommendedModule,
-  normalizeExamDates,
-  todayISO,
 } from "@/lib/study";
+
+type ModulePlan = { examType: string; dateMode: string; estimatedDate: string | null };
+
+const FALLBACK_EXAM_TYPES = [
+  { slug: "regular", name: "Regular examinations" },
+  { slug: "supplementary", name: "Supplementary examinations" },
+  { slug: "deferred", name: "Deferred examinations" },
+  { slug: "other", name: "Other / resit examination" },
+];
+
+function emptyPlan(examType = "regular", dateMode = "official"): ModulePlan {
+  return { examType, dateMode, estimatedDate: null };
+}
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -52,7 +65,11 @@ export default function OnboardingExperience() {
   const [goal, setGoal] = useState(60);
   const [pace, setPace] = useState("balanced");
   const [days, setDays] = useState<string[]>(["mon", "tue", "wed", "thu", "fri"]);
-  const [examDates, setExamDates] = useState<string[]>([]);
+  const [official, setOfficial] = useState<StudentExamSchedule | null>(null);
+  const [plans, setPlans] = useState<Record<string, ModulePlan>>({});
+  const [defaultType, setDefaultType] = useState("regular");
+  const [dateMode, setDateMode] = useState<"official" | "estimated">("official");
+  const [revisionStart, setRevisionStart] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -77,7 +94,12 @@ export default function OnboardingExperience() {
       setGoal(session.dailyGoalMinutes || 60);
       setPace(session.pace || "balanced");
       setDays(session.studyDays.length ? session.studyDays : ["mon", "tue", "wed", "thu", "fri"]);
-      setExamDates(session.onboardingStep >= 4 ? normalizeExamDates(session.examDates, session.examDate) : []);
+      const savedPlans = session.moduleExamPlans || {};
+      setPlans(savedPlans);
+      const firstPlan = Object.values(savedPlans)[0];
+      if (firstPlan?.examType) setDefaultType(firstPlan.examType);
+      if (firstPlan?.dateMode === "estimated") setDateMode("estimated");
+      setRevisionStart(session.revisionStart || "");
       const resume = Math.min(5, Math.max(1, session.onboardingStep)) as Step;
       setStep(resume);
       setReady(true);
@@ -86,6 +108,13 @@ export default function OnboardingExperience() {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (step < 4) return;
+    loadExamSchedule().then((result) => {
+      if (result.ok) setOfficial(result.data);
+    });
+  }, [step]);
 
   const first = recommendedModule(modules);
   const goalLabel = formatGoal(goal);
@@ -105,6 +134,65 @@ export default function OnboardingExperience() {
     setDays((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
   };
 
+  const examTypes = official?.examTypes?.length ? official.examTypes : FALLBACK_EXAM_TYPES;
+  const sittings = official?.sittings ?? [];
+
+  function planFor(code: string): ModulePlan {
+    return plans[code] ?? emptyPlan(defaultType, dateMode);
+  }
+
+  function sittingFor(code: string, examType: string) {
+    return sittings.find((item) => item.code === code && item.examType === examType) ?? null;
+  }
+
+  function applyType(slug: string) {
+    setDefaultType(slug);
+    setPlans((current) =>
+      Object.fromEntries(modules.map((code) => [code, { ...(current[code] ?? emptyPlan(slug, dateMode)), examType: slug }])),
+    );
+  }
+
+  function applyDateMode(mode: "official" | "estimated") {
+    setDateMode(mode);
+    setPlans((current) =>
+      Object.fromEntries(
+        modules.map((code) => [
+          code,
+          {
+            ...(current[code] ?? emptyPlan(defaultType, mode)),
+            dateMode: mode,
+            estimatedDate: mode === "official" ? current[code]?.estimatedDate ?? null : current[code]?.estimatedDate ?? null,
+          },
+        ]),
+      ),
+    );
+  }
+
+  function patchPlan(code: string, patch: Partial<ModulePlan>) {
+    setPlans((current) => ({
+      ...current,
+      [code]: { ...(current[code] ?? emptyPlan(defaultType, dateMode)), ...patch },
+    }));
+  }
+
+  function plansPayload() {
+    return Object.fromEntries(
+      modules.map((code) => {
+        const plan = planFor(code);
+        const sitting = sittingFor(code, plan.examType);
+        const mode = sitting ? "official" : plan.dateMode === "estimated" && plan.estimatedDate ? "estimated" : plan.dateMode;
+        return [
+          code,
+          {
+            examType: plan.examType,
+            dateMode: mode === "official" && !sitting && plan.estimatedDate ? "estimated" : mode,
+            estimatedDate: sitting ? null : plan.estimatedDate,
+          },
+        ];
+      }),
+    );
+  }
+
   async function persist(nextStep: Step, extra: Parameters<typeof saveOnboarding>[0] = {}) {
     setBusy(true);
     try {
@@ -117,7 +205,7 @@ export default function OnboardingExperience() {
   }
 
   async function finish() {
-    if (!programmeName || !year || !semester || !examDates.length) return;
+    if (!programmeName || !year || !semester) return;
     setBusy(true);
     try {
       await saveOnboarding({
@@ -126,12 +214,12 @@ export default function OnboardingExperience() {
         programme: programmeName,
         year_of_study: year,
         semester_of_study: semester,
-        exam_date: examDates[0],
-        exam_dates: examDates,
         daily_goal_minutes: goal,
         pace,
         study_days: days,
         module_codes: modules,
+        module_exam_plans: plansPayload(),
+        revision_start: revisionStart || null,
         onboarding_step: 5,
         complete: true,
       });
@@ -160,24 +248,7 @@ export default function OnboardingExperience() {
   return (
     <div className="onb-shell">
       <header className="onb-top">
-        <Link href="/" className="logo onb-brand" aria-label="ExamsPrep home">
-          <span className="logo-crop theme-light">
-            <Image
-              src="/logo/logo_light.png"
-              alt=""
-              width={2336}
-              height={908}
-              priority
-              className="logo-lockup"
-            />
-          </span>
-          <span className="logo-dark theme-dark">
-            <Image src="/logo/mark.png" alt="" width={340} height={340} priority className="logo-mark" />
-            <span className="logo-wordmark" aria-hidden="true">
-              ExamPrep
-            </span>
-          </span>
-        </Link>
+        <BrandLogo className="logo onb-brand" priority />
         <p className="onb-count">
           {step} of 5
         </p>
@@ -349,22 +420,97 @@ export default function OnboardingExperience() {
               className="onb-form"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (!examDates.length) return;
                 persist(5, {
-                  exam_date: examDates[0],
-                  exam_dates: examDates,
                   daily_goal_minutes: goal,
                   pace,
                   study_days: days,
                   module_codes: modules,
+                  module_exam_plans: plansPayload(),
+                  revision_start: revisionStart || null,
                 });
               }}
             >
-              <p className="onb-lede">Select every exam date from the calendar, then set a daily goal and study rhythm.</p>
-              <div className="onb-cal">
-                <p id="onb-exam-label">Exam dates</p>
-                <ExamDatePicker values={examDates} min={todayISO()} labelledBy="onb-exam-label" onChange={setExamDates} />
-              </div>
+              <p className="onb-lede">Choose the examination you are preparing for. Official dates are used when published.</p>
+              <fieldset>
+                <legend>Which examination are you preparing for?</legend>
+                <div className="onb-chips">
+                  {examTypes.map((item) => (
+                    <button
+                      key={item.slug}
+                      type="button"
+                      className={defaultType === item.slug ? "is-on" : undefined}
+                      aria-pressed={defaultType === item.slug}
+                      onClick={() => applyType(item.slug)}
+                    >
+                      {item.name.replace(" examinations", "")}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend>How will the examination date be determined?</legend>
+                <div className="onb-paces">
+                  <button type="button" className={dateMode === "official" ? "is-on" : undefined} onClick={() => applyDateMode("official")}>
+                    <strong>Use the official date</strong>
+                    <span>Published by the university for this exam type.</span>
+                  </button>
+                  <button type="button" className={dateMode === "estimated" ? "is-on" : undefined} onClick={() => applyDateMode("estimated")}>
+                    <strong>Not published yet</strong>
+                    <span>Enter an estimate or continue without a date.</span>
+                  </button>
+                </div>
+              </fieldset>
+              <ul className="onb-plans">
+                {modules.map((code) => {
+                  const mod = publishedModules.find((item) => item.code === code) ?? SEMESTER_MODULES.find((item) => item.code === code);
+                  const plan = planFor(code);
+                  const sitting = sittingFor(code, plan.examType);
+                  return (
+                    <li key={code} className="onb-plan">
+                      <header>
+                        <strong>{mod ? `${mod.code} — ${mod.name}` : code}</strong>
+                        <small>{sitting ? examSittingCaption(sitting) : "No official date for this type"}</small>
+                      </header>
+                      <div className="onb-plan-row">
+                        <label>
+                          Exam type
+                          <select value={plan.examType} onChange={(event) => patchPlan(code, { examType: event.target.value })}>
+                            {examTypes.map((item) => (
+                              <option key={item.slug} value={item.slug}>
+                                {item.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        {sitting ? (
+                          <p>
+                            Official date
+                            <strong>{examSittingCaption(sitting)}</strong>
+                          </p>
+                        ) : (
+                          <label>
+                            Estimated date <span>optional</span>
+                            <input
+                              type="date"
+                              value={plan.estimatedDate || ""}
+                              onChange={(event) =>
+                                patchPlan(code, {
+                                  dateMode: event.target.value ? "estimated" : "none",
+                                  estimatedDate: event.target.value || null,
+                                })
+                              }
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <label>
+                Personal revision start <span>optional</span>
+                <input type="date" value={revisionStart} onChange={(event) => setRevisionStart(event.target.value)} />
+              </label>
               <fieldset>
                 <legend>Daily study goal</legend>
                 <div className="onb-chips">
@@ -411,21 +557,21 @@ export default function OnboardingExperience() {
                   ))}
                 </div>
               </fieldset>
-              <button type="submit" className="onb-cta" disabled={busy || !examDates.length}>
+              <button type="submit" className="onb-cta" disabled={busy}>
                 Build my study plan
               </button>
               <button
                 type="button"
                 className="onb-skip"
-                disabled={busy || !examDates.length}
+                disabled={busy}
                 onClick={() =>
                   persist(5, {
-                    exam_date: examDates[0],
-                    exam_dates: examDates,
                     daily_goal_minutes: goal,
                     pace,
                     study_days: days,
                     module_codes: modules,
+                    module_exam_plans: plansPayload(),
+                    revision_start: revisionStart || null,
                   })
                 }
               >
@@ -440,7 +586,18 @@ export default function OnboardingExperience() {
               <div className="onb-ready">
                 <p>
                   <span>Exam dates</span>
-                  <strong>{examDates.map((iso) => formatExamDate(iso)).join(" · ") || "Not selected"}</strong>
+                  <strong>
+                    {modules
+                      .map((code) => {
+                        const plan = planFor(code);
+                        const sitting = sittingFor(code, plan.examType);
+                        if (sitting?.examDate) return `${code} Official ${formatExamDate(sitting.examDate)}`;
+                        if (sitting) return `${code} Official ${formatExamWindow(sitting.windowStart, sitting.windowEnd)}`;
+                        if (plan.estimatedDate) return `${code} Estimated ${formatExamDate(plan.estimatedDate)}`;
+                        return `${code} not published yet`;
+                      })
+                      .join(" · ")}
+                  </strong>
                 </p>
                 <p>
                   <span>Daily goal</span>

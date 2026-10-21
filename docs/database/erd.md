@@ -1,16 +1,22 @@
 # Database design
 
-SQLAlchemy models and the first Alembic revision live in `api/`. Catalogue rows still also exist in `app/src/data/programmes.ts` until the Next.js app reads from FastAPI. Seed Computing and roles with `python -m app.seed` after `alembic upgrade head`.
+SQLAlchemy models and Alembic revisions live in `api/`. Marketing catalogue copy still also exists in `app/src/data/programmes.ts` until those pages read FastAPI. Seed Computing, roles, and demo assignments with `python -m app.seed` after `alembic upgrade head`.
+
+Assignment and enforcement rules: [access-control.md](../architecture/access-control.md).
 
 ## Hierarchy
 
 ```
 users ── user_roles ── roles
+users ── program_admin_assignments ── programmes
+programmes ── program_modules ── modules
+users ── content_creator_assignments ── program_modules
 programme
   academic_year
     semester
       module
-        lesson ── lesson_versions ── content_reviews
+        chapter
+          lesson ── lesson_versions ── content_reviews
         quiz ── quiz_questions ── questions ── question_versions
         topic
           resource
@@ -18,15 +24,36 @@ enrolment / attempt / progress / bookmark   (student learning)
 audit_logs
 ```
 
+```mermaid
+erDiagram
+    USERS ||--o{ PROGRAM_ADMIN_ASSIGNMENTS : has
+    PROGRAMMES ||--o{ PROGRAM_ADMIN_ASSIGNMENTS : authorizes
+    PROGRAMMES ||--o{ PROGRAM_MODULES : contains
+    MODULES ||--o{ PROGRAM_MODULES : included_in
+    USERS ||--o{ CONTENT_CREATOR_ASSIGNMENTS : receives
+    PROGRAM_MODULES ||--o{ CONTENT_CREATOR_ASSIGNMENTS : scopes
+    MODULES ||--o{ CHAPTERS : contains
+    CHAPTERS ||--o{ LESSONS : contains
+    LESSONS ||--o{ LESSON_VERSIONS : versions
+```
+
 ## Identity and access
 
 **users** — `id`, `name`, `email` (unique), `password_hash`, `status`, timestamps.
 
-**roles** — `student` | `creator` | `administrator` | `super_administrator`.
+**roles** — `student` | `creator` | `administrator` | `super_administrator`. The `administrator` role is a **program administrator**: it does not imply system-wide access.
 
-**user_roles** — a person may hold more than one role when authorised.
+**user_roles** — a person may hold more than one role when authorised. The content-creator **role** is separate from creator **assignments**.
 
-Administrators must not receive blanket access to every student’s private fields. Scope reads to what the duty requires.
+**program_modules** — `programme_id`, `module_id` (unique together). Names a module’s inclusion in a particular programme. Modules still sit under semester → academic year → programme; this join exists so creator grants can target that pair, including when the same code later exists in two programmes.
+
+**program_admin_assignments** — `user_id`, `programme_id` (unique together), `assigned_by_id`. Grants program-administrator access to every module in that programme. Removing a row revokes future access and does not cascade-delete lessons.
+
+**content_creator_assignments** — `user_id`, `program_module_id` (unique together), `assigned_by_id`. Grants content-creation access to that exact programme–module combination.
+
+Do not rely on frontend filtering. FastAPI loads `AccessScope` from these tables and checks every CMS and learn operation. Super administrators skip the assignment tables and see everything. A program administrator with no assignment rows sees nothing.
+
+Administrators must not receive blanket access to every student’s private fields. Scope student lists to assigned programmes.
 
 ## Academic catalogue (first migration)
 
@@ -36,9 +63,11 @@ Administrators must not receive blanket access to every student’s private fiel
 
 **semester** — `id`, `academic_year_id` (FK), `semester_number` (1–2).
 
-**module** — `id`, `semester_id` (FK), `code` (e.g. IT212), `name`, `credits` (nullable until confirmed).
+**module** — `id`, `semester_id` (FK), `code` (e.g. IT212), `name`, `credits` (nullable until confirmed). Codes are unique **per programme**, not globally, so the same code can exist in another programme later.
 
-Unique: `(programme_id, slug)`, `(semester_id, code)`.
+**chapter** — `id`, `module_id` (FK), `title`, `position`, `status`. Lessons belong to a chapter inside a module, which already belongs to a programme.
+
+Unique: programme `slug`; `program_modules (programme_id, module_id)`; module `code` unique per programme on create.
 
 ## Versioned learning content
 
@@ -56,10 +85,9 @@ Allowed transitions (validated in FastAPI, not by writing a status column from t
 
 | From | To |
 | --- | --- |
-| `DRAFT` | `IN_REVIEW` |
-| `IN_REVIEW` | `CHANGES_REQUESTED` or `APPROVED` |
-| `CHANGES_REQUESTED` | `IN_REVIEW` (after a new submitted version) |
-| `APPROVED` | `PUBLISHED` |
+| `DRAFT` | `IN_REVIEW` (creator submit) or `PUBLISHED` (admin publish within scope) |
+| `IN_REVIEW` | `CHANGES_REQUESTED` (reject) or `PUBLISHED` (approve) |
+| `CHANGES_REQUESTED` | `IN_REVIEW` (resubmit) |
 | `PUBLISHED` | `UNPUBLISHED` |
 | any retired path | `ARCHIVED` |
 
@@ -69,7 +97,7 @@ Allowed transitions (validated in FastAPI, not by writing a status column from t
 
 ## Audit
 
-**audit_logs** — actor, action, resource type/id, version id, payload, timestamp. Required for submit, approve, reject, publish, unpublish, role changes, and suspensions. Super administrators cannot bypass this.
+**audit_logs** — actor, action, resource type/id, version id, payload, timestamp. Required for submit, approve, reject, publish, unpublish, assignments, role changes, and suspensions. Super administrators cannot bypass this.
 
 ## Seed (Computing)
 

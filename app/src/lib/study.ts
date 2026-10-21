@@ -87,3 +87,52 @@ export function daysUntil(iso = EXAM_DATE_ISO) {
   now.setHours(0, 0, 0, 0);
   return Math.max(0, Math.ceil((exam.getTime() - now.getTime()) / 86400000));
 }
+
+export function formatExamTime(value?: string | null) {
+  if (!value) return "";
+  const [hourText, minuteText = "00"] = value.split(":");
+  const hour = Number(hourText);
+  if (!Number.isFinite(hour)) return value;
+  const suffix = hour >= 12 ? "pm" : "am";
+  const display = hour % 12 || 12;
+  return `${display}:${minuteText.padStart(2, "0")} ${suffix}`;
+}
+
+export function formatExamWindow(start?: string | null, end?: string | null) {
+  if (!start) return "Not scheduled";
+  if (!end || end === start) return formatExamDate(start);
+  return `${formatExamDate(start)} – ${formatExamDate(end)}`;
+}
+
+export function remainingLabel(iso?: string | null) {
+  if (!iso) return "No exam date yet";
+  const days = daysUntil(iso);
+  if (days === 0) return "Exam day";
+  if (days === 1) return "1 day left";
+  return `${days} days left`;
+}
+
+export type ExamSittingLabel = {
+  official?: boolean;
+  source?: string;
+  examDate?: string | null;
+  examTime?: string | null;
+  windowStart?: string | null;
+  windowEnd?: string | null;
+  examTypeName?: string | null;
+};
+
+export function examSittingCaption(item: ExamSittingLabel) {
+  const type = item.examTypeName?.trim();
+  const typeBit = type ? `${type} · ` : "";
+  if (item.official && item.source === "module" && item.examDate) {
+    return `Official · ${typeBit}${formatExamDate(item.examDate)}${item.examTime ? ` · ${formatExamTime(item.examTime)}` : ""}`;
+  }
+  if (item.official && (item.source === "program" || item.source === "period")) {
+    return `Official window · ${typeBit}${formatExamWindow(item.windowStart, item.windowEnd)}`;
+  }
+  if ((item.source === "estimated" || item.source === "personal") && item.examDate) {
+    return `Estimated · ${typeBit}${formatExamDate(item.examDate)}`;
+  }
+  return type ? `${type} · Not published yet` : "Not published yet";
+}

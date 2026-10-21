@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import BrandLogo from "@/app/components/ui/BrandLogo";
 
 const NAV = [
   { href: "/features", label: "Features" },
@@ -13,16 +13,7 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <Link href="/" className="footer-logo" aria-label="ExamsPrep home">
-            <Image
-              src="/logo/mark.png"
-              alt=""
-              width={340}
-              height={340}
-              className="footer-mark"
-            />
-            <span>ExamsPrep</span>
-          </Link>
+          <BrandLogo className="footer-logo" />
           <p>
             Structured revision for Cavendish University Zambia students — study plans, quizzes, and mock exams in one place.
           </p>

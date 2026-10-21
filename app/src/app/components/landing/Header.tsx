@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import BrandLogo from "@/app/components/ui/BrandLogo";
 import Button from "@/app/components/ui/Button";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
 
@@ -138,31 +138,7 @@ export default function Header() {
       ) : null}
 
       <div className="header-bar">
-        <Link href="/" className="logo" aria-label="ExamsPrep home">
-          <span className="logo-crop theme-light">
-            <Image
-              src="/logo/logo_light.png"
-              alt=""
-              width={2336}
-              height={908}
-              priority
-              className="logo-lockup"
-            />
-          </span>
-          <span className="logo-dark theme-dark">
-            <Image
-              src="/logo/mark.png"
-              alt=""
-              width={340}
-              height={340}
-              priority
-              className="logo-mark"
-            />
-            <span className="logo-wordmark" aria-hidden="true">
-              ExamPrep
-            </span>
-          </span>
-        </Link>
+        <BrandLogo className="logo" priority />
 
         <nav className="nav-desktop" aria-label="Primary">
           {NAV.map((item) => (

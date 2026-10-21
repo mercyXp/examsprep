@@ -2,11 +2,17 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { callBackend, TOKEN_COOKIE, unavailable } from "@/lib/backend";
 
-export async function GET() {
+async function withToken() {
   const token = (await cookies()).get(TOKEN_COOKIE)?.value;
   if (!token) {
-    return NextResponse.json({ ok: false, message: "Sign in to continue." }, { status: 401 });
+    return { token: null as string | null, error: NextResponse.json({ ok: false, message: "Sign in to continue." }, { status: 401 }) };
   }
+  return { token, error: null };
+}
+
+export async function GET() {
+  const { token, error } = await withToken();
+  if (!token) return error;
 
   const response = await callBackend("/api/auth/me", {
     headers: { Authorization: `Bearer ${token}` },
@@ -22,6 +28,32 @@ export async function GET() {
       typeof payload?.message === "string" && payload.message
         ? payload.message
         : "Sign in to continue.";
+    return NextResponse.json({ ok: false, message }, { status: response.status });
+  }
+
+  return NextResponse.json({ ok: true, user: payload });
+}
+
+export async function PATCH(request: Request) {
+  const { token, error } = await withToken();
+  if (!token) return error;
+
+  const body = await request.text();
+  const response = await callBackend("/api/auth/me", {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body,
+  });
+  if (!response) {
+    return NextResponse.json(unavailable("update your profile"), { status: 503 });
+  }
+
+  const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!response.ok) {
+    const message =
+      typeof payload?.message === "string" && payload.message
+        ? payload.message
+        : "We couldn’t update your profile.";
     return NextResponse.json({ ok: false, message }, { status: response.status });
   }
 

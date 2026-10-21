@@ -1,6 +1,6 @@
 # ExamsPrep API
 
-FastAPI + PostgreSQL. This folder owns the database schema, migrations, and seed data. Auth and review endpoints come after the schema is running.
+FastAPI + PostgreSQL. This folder owns the database schema, migrations, seed data, auth, CMS, learn APIs, and scoped staff assignments.
 
 ## Local setup
 
@@ -21,13 +21,16 @@ uvicorn app.main:app --reload
 
 ## What is seeded
 
-- Roles: student, creator, administrator, super_administrator
+- Roles: student, creator, administrator (program administrator), super_administrator
 - Named permissions mapped to those roles
 - BSc Computing (`available`) with years 1–4 and both semesters
 - Year 2 Semester 1 modules IT211–IT215
 - Coming-soon programme stubs: Accounting, Law, Business, Health Sciences
+- Demo assignments: Ann Admin → Computing; Cam Creator → Computing IT212 and IT213
 
-Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`. Google and password reset are still disconnected.
+Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`, `super@examsprep.local`. Google and password reset are still disconnected.
+
+Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md).
 
 ## Railway
 

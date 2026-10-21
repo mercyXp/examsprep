@@ -25,6 +25,7 @@ def ensure_profile(session: Session, user: User) -> StudentProfile:
         pace="balanced",
         study_days=["mon", "tue", "wed", "thu", "fri"],
         module_codes=[],
+        module_exam_plans={},
         onboarding_step=1,
         onboarding_completed=False,
     )
@@ -55,6 +56,8 @@ def user_out(user: User) -> UserOut:
         pace=profile.pace if profile else "balanced",
         study_days=list(profile.study_days or []) if profile else [],
         module_codes=list(profile.module_codes or []) if profile else [],
+        module_exam_plans=dict(profile.module_exam_plans or {}) if profile else {},
+        revision_start=profile.revision_start if profile else None,
     )
 
 

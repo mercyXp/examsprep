@@ -18,6 +18,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     status: Mapped[UserStatus] = mapped_column(
         user_status_enum,
         nullable=False,
@@ -51,6 +52,8 @@ class StudentProfile(TimestampMixin, Base):
     pace: Mapped[str] = mapped_column(String(16), nullable=False, default="balanced", server_default="balanced")
     study_days: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
     module_codes: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    module_exam_plans: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
+    revision_start: Mapped[date | None] = mapped_column(Date, nullable=True)
     onboarding_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
     onboarding_completed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
 

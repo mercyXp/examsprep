@@ -10,7 +10,11 @@ const AUTH_PATHS = new Set(["/login", "/signup", "/forgot-password"]);
 export default function SiteChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAuth = AUTH_PATHS.has(pathname);
-  const isApp = pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
+  const isApp =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/learn");
   const chrome = isAuth ? "is-auth" : isApp ? "is-app" : "";
 
   return (

@@ -39,10 +39,10 @@ Before real students use the platform, pay a **small monthly amount** for a alwa
 
 Example sign-in path:
 
-1. Student clicks Sign in on Next.js (Vercel).
+1. Student or staff clicks Sign in on Next.js (Vercel).
 2. FastAPI validates credentials (Railway API).
-3. PostgreSQL returns the user (Railway database, private network).
-4. Next.js loads the dashboard from published content and the student’s progress.
+3. PostgreSQL returns the user, roles, and assignment rows (Railway database, private network).
+4. Students load published content they are authorised to see. Staff load only the programmes and modules in their scope.
 
 Keep the database private. Store secrets in environment variables. Use HTTPS, Alembic migrations, and managed backups before storing academic records.
 

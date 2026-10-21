@@ -46,6 +46,9 @@ class LessonProgress(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         nullable=True,
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    current_slide_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    revealed_units: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    check_results: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
 
     user: Mapped[User] = relationship()
     lesson: Mapped[Lesson] = relationship()

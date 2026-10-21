@@ -70,14 +70,9 @@ def save_onboarding(
         table = dict(profile.exam_timetable or {})
         profile.exam_timetable = {code: day for code, day in table.items() if day in allowed}
     if body.exam_timetable is not None:
-        allowed = set(profile.exam_dates or [])
-        if not allowed and profile.exam_date is not None:
-            allowed = {profile.exam_date.isoformat()}
         cleaned: dict[str, str] = {}
         for code, day in body.exam_timetable.items():
             if code not in ALLOWED_MODULES or not DATE_RE.match(day):
-                continue
-            if allowed and day not in allowed:
                 continue
             cleaned[code] = day
         profile.exam_timetable = cleaned
@@ -89,6 +84,35 @@ def save_onboarding(
         profile.study_days = [day for day in body.study_days if day in ALLOWED_DAYS]
     if body.module_codes is not None:
         profile.module_codes = [code for code in body.module_codes if code in ALLOWED_MODULES]
+    if body.module_exam_plans is not None:
+        plans: dict[str, dict] = {}
+        for code, raw in body.module_exam_plans.items():
+            if code not in ALLOWED_MODULES or not isinstance(raw, dict):
+                continue
+            exam_type = raw.get("examType") if isinstance(raw.get("examType"), str) else "regular"
+            date_mode = raw.get("dateMode") if isinstance(raw.get("dateMode"), str) else "official"
+            estimated = raw.get("estimatedDate") if isinstance(raw.get("estimatedDate"), str) else None
+            if not isinstance(exam_type, str) or not re.fullmatch(r"[a-z0-9-]{2,40}", exam_type):
+                exam_type = "regular"
+            if date_mode not in {"official", "estimated", "none"}:
+                date_mode = "official"
+            if estimated and not DATE_RE.match(estimated):
+                estimated = None
+            if date_mode == "none":
+                estimated = None
+            plans[code] = {
+                "examType": exam_type,
+                "dateMode": date_mode,
+                "estimatedDate": estimated,
+            }
+        profile.module_exam_plans = plans
+        profile.exam_timetable = {
+            code: item["estimatedDate"]
+            for code, item in plans.items()
+            if item.get("estimatedDate")
+        }
+    if body.revision_start is not None:
+        profile.revision_start = body.revision_start
     advancing = body.complete or (body.onboarding_step is not None and body.onboarding_step >= 3)
     if advancing and (
         profile.programme not in ALLOWED_PROGRAMMES

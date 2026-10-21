@@ -5,18 +5,35 @@ from __future__ import annotations
 from datetime import date
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.config import settings
 from app.db import SessionLocal
-from app.models import AcademicYear, Module, Permission, Programme, Role, RolePermission, Semester, StudentProfile, User, UserRole
-from app.models.enums import ProgrammeStatus, UserStatus
+from app.access import ensure_program_module, sync_program_modules
+from app.calendar import seed_demo_schedule
+from app.models import (
+    AcademicYear,
+    Chapter,
+    Lesson,
+    LessonVersion,
+    Module,
+    Permission,
+    Programme,
+    Role,
+    RolePermission,
+    Semester,
+    StudentProfile,
+    User,
+    UserRole,
+)
+from app.models.access import ContentCreatorAssignment, ProgramAdminAssignment
+from app.models.enums import ContentStatus, ProgrammeStatus, UserStatus, VersionStatus
 from app.security import hash_password
 
 ROLES = [
     ("student", "Student", "Consumes published content and tracks personal progress."),
-    ("creator", "Content creator", "Prepares drafts and submits them for review."),
-    ("administrator", "Administrator", "Reviews, publishes, and operates the catalogue."),
+    ("creator", "Content creator", "Creates and edits lessons for assigned programme-module combinations."),
+    ("administrator", "Program administrator", "Manages all modules and lessons within assigned programmes."),
     (
         "super_administrator",
         "Super administrator",
@@ -74,6 +91,7 @@ COMING_SOON = [
 DEMO_USERS = [
     ("Ada Student", "student@examsprep.local", "examsready", "student"),
     ("Cam Creator", "creator@examsprep.local", "examsready", "creator"),
+    ("Sam Super", "super@examsprep.local", "examsready", "super_administrator"),
     ("Ann Admin", "admin@examsprep.local", "examsready", "administrator"),
 ]
 
@@ -185,9 +203,38 @@ def seed_programmes(session: Session) -> None:
     )
     assert y2s1 is not None
     existing_codes = set(session.scalars(select(Module.code).where(Module.semester_id == y2s1.id)))
+    descriptions = {
+        "IT211": "Analyse business problems and design information systems that people can actually use.",
+        "IT212": "Design, query, and manage relational databases, from tables through SQL to integrity.",
+        "IT213": "Understand how computers exchange data across local and wide-area networks.",
+        "IT214": "Study processes, memory, files, and the software that manages a computer’s resources.",
+        "IT215": "Build the mathematical reasoning used in computing: logic, sets, graphs, and proofs.",
+    }
+    objectives = {
+        "IT211": ["Model a system with diagrams", "Gather and document requirements", "Propose a workable design"],
+        "IT212": ["Write SQL to query data", "Design normalised tables", "Explain keys and relationships"],
+        "IT213": ["Describe the OSI layers", "Compare common network media", "Identify addressing basics"],
+        "IT214": ["Explain process scheduling", "Describe memory management", "Outline file-system roles"],
+        "IT215": ["Use propositional logic", "Work with sets and relations", "Read a simple graph argument"],
+    }
     for code, name in Y2S1_MODULES:
         if code not in existing_codes:
-            session.add(Module(semester_id=y2s1.id, code=code, name=name))
+            session.add(
+                Module(
+                    semester_id=y2s1.id,
+                    code=code,
+                    name=name,
+                    description=descriptions.get(code, ""),
+                    objectives=objectives.get(code, []),
+                    status=ContentStatus.PUBLISHED,
+                )
+            )
+        else:
+            row = session.scalar(select(Module).where(Module.semester_id == y2s1.id, Module.code == code))
+            if row is not None and not row.description:
+                row.description = descriptions.get(code, "")
+                row.objectives = objectives.get(code, [])
+                row.status = ContentStatus.PUBLISHED
 
     for slug, name, category, blurb in COMING_SOON:
         row = session.scalar(select(Programme).where(Programme.slug == slug))
@@ -247,8 +294,181 @@ def seed_demo_users(session: Session) -> None:
             profile.pace = "balanced"
             profile.study_days = ["mon", "tue", "wed", "thu", "fri"]
             profile.module_codes = ["IT211", "IT212", "IT213", "IT214", "IT215"]
+            profile.module_exam_plans = {
+                code: {"examType": "regular", "dateMode": "official", "estimatedDate": None}
+                for code in profile.module_codes
+            }
             profile.onboarding_step = 5
             profile.onboarding_completed = True
+
+
+def seed_assignments(session: Session) -> None:
+    sync_program_modules(session)
+    computing = session.scalar(select(Programme).where(Programme.slug == "computing"))
+    admin = session.scalar(select(User).where(User.email == "admin@examsprep.local"))
+    creator = session.scalar(select(User).where(User.email == "creator@examsprep.local"))
+    if computing is None:
+        return
+    if admin is not None:
+        exists = session.scalar(
+            select(ProgramAdminAssignment).where(
+                ProgramAdminAssignment.user_id == admin.id,
+                ProgramAdminAssignment.programme_id == computing.id,
+            )
+        )
+        if exists is None:
+            session.add(ProgramAdminAssignment(user_id=admin.id, programme_id=computing.id, assigned_by_id=admin.id))
+    for code in ("IT212", "IT213"):
+        module = session.scalars(
+            select(Module).options(joinedload(Module.semester).joinedload(Semester.academic_year)).where(Module.code == code)
+        ).unique().one_or_none()
+        if creator is None or module is None:
+            continue
+        link = ensure_program_module(session, module)
+        if link is None:
+            continue
+        exists = session.scalar(
+            select(ContentCreatorAssignment).where(
+                ContentCreatorAssignment.user_id == creator.id,
+                ContentCreatorAssignment.program_module_id == link.id,
+            )
+        )
+        if exists is None:
+            session.add(
+                ContentCreatorAssignment(
+                    user_id=creator.id,
+                    program_module_id=link.id,
+                    assigned_by_id=admin.id if admin else None,
+                )
+            )
+
+
+def seed_sample_lesson(session: Session) -> None:
+    module = session.scalar(select(Module).where(Module.code == "IT212"))
+    admin = session.scalar(select(User).where(User.email == "admin@examsprep.local"))
+    if module is None or admin is None:
+        return
+    chapter = session.scalar(select(Chapter).where(Chapter.module_id == module.id, Chapter.title == "SQL Fundamentals"))
+    if chapter is None:
+        chapter = Chapter(
+            module_id=module.id,
+            title="SQL Fundamentals",
+            description="The language used to ask questions of a relational database.",
+            position=0,
+            status=ContentStatus.PUBLISHED,
+        )
+        session.add(chapter)
+        session.flush()
+    existing = session.scalar(select(Lesson).where(Lesson.module_id == module.id, Lesson.title == "Introduction to SQL"))
+    if existing is not None:
+        return
+    lesson = Lesson(
+        module_id=module.id,
+        chapter_id=chapter.id,
+        creator_id=admin.id,
+        title="Introduction to SQL",
+        description="What SQL is, why it matters, and how a first SELECT statement is written.",
+        objectives=["Explain what SQL is used for", "Read a simple SELECT statement", "Recognise a table as rows and columns"],
+        duration_minutes=18,
+        difficulty="beginner",
+        position=0,
+        status=ContentStatus.PUBLISHED,
+    )
+    session.add(lesson)
+    session.flush()
+    slides = [
+        {
+            "id": "slide-sql-1",
+            "title": "What is SQL?",
+            "blocks": [
+                {
+                    "id": "b1",
+                    "type": "text",
+                    "variant": "heading",
+                    "text": "SQL is how we talk to a database.",
+                    "items": [],
+                },
+                {
+                    "id": "b2",
+                    "type": "text",
+                    "variant": "paragraph",
+                    "text": "SQL stands for Structured Query Language. It is the standard way to create, read, update, and delete data in a relational database. Instead of opening a spreadsheet by hand, you write a precise request and the database engine returns exactly the rows you asked for.",
+                    "items": [],
+                },
+                {
+                    "id": "b3",
+                    "type": "callout",
+                    "tone": "tip",
+                    "text": "Think of a table as a named grid: columns describe the kind of data, and each row is one record.",
+                },
+            ],
+        },
+        {
+            "id": "slide-sql-2",
+            "title": "A first SELECT",
+            "blocks": [
+                {
+                    "id": "b4",
+                    "type": "text",
+                    "variant": "paragraph",
+                    "text": "The SELECT statement asks for columns from a table. FROM names the table. A semicolon ends the statement. You can start with SELECT * when you want every column, then narrow it once you know the names you need.",
+                    "items": [],
+                },
+                {
+                    "id": "b5",
+                    "type": "code",
+                    "language": "sql",
+                    "code": "SELECT student_name, email\nFROM students;",
+                },
+                {
+                    "id": "b6",
+                    "type": "text",
+                    "variant": "definition",
+                    "text": "SELECT lists the columns to return. FROM names the table those columns come from.",
+                    "items": [],
+                },
+            ],
+        },
+        {
+            "id": "slide-sql-3",
+            "title": "Check your understanding",
+            "blocks": [
+                {
+                    "id": "b7",
+                    "type": "text",
+                    "variant": "paragraph",
+                    "text": "Before you move on, confirm the role of SELECT. A knowledge check is required to complete this lesson.",
+                    "items": [],
+                },
+                {
+                    "id": "b8",
+                    "type": "check",
+                    "prompt": "What does a SELECT statement do?",
+                    "options": [
+                        {"id": "opt-a", "label": "Deletes a table from the database"},
+                        {"id": "opt-b", "label": "Asks the database to return specified columns from a table"},
+                        {"id": "opt-c", "label": "Creates a new user account"},
+                    ],
+                    "correctId": "opt-b",
+                    "explanation": "SELECT retrieves data. It does not remove tables or create users.",
+                    "feedbackCorrect": "That’s right. SELECT reads data; it does not change the table structure.",
+                    "feedbackWrong": "SELECT is a query. It returns rows; it does not delete tables or create accounts.",
+                },
+            ],
+        },
+    ]
+    version = LessonVersion(
+        lesson_id=lesson.id,
+        version_number=1,
+        body="SQL is how we talk to a database.",
+        slides=slides,
+        author_id=admin.id,
+        status=VersionStatus.APPROVED,
+    )
+    session.add(version)
+    session.flush()
+    lesson.published_version_id = version.id
+    lesson.status = ContentStatus.PUBLISHED
 
 
 def seed(session: Session | None = None) -> None:
@@ -258,6 +478,9 @@ def seed(session: Session | None = None) -> None:
         seed_identity(session)
         seed_programmes(session)
         seed_demo_users(session)
+        seed_sample_lesson(session)
+        seed_assignments(session)
+        seed_demo_schedule(session)
         session.commit()
     except Exception:
         session.rollback()
@@ -275,3 +498,4 @@ if __name__ == "__main__":
         print("  student@examsprep.local")
         print("  creator@examsprep.local")
         print("  admin@examsprep.local")
+        print("  super@examsprep.local")
