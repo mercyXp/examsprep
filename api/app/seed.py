@@ -258,6 +258,15 @@ def seed_demo_users(session: Session) -> None:
         role = session.scalar(select(Role).where(Role.slug == role_slug))
         if role is None:
             continue
+        if role_slug == "super_administrator":
+            real_super = session.scalar(
+                select(User.id)
+                .join(UserRole, UserRole.user_id == User.id)
+                .join(Role, Role.id == UserRole.role_id)
+                .where(Role.slug == "super_administrator", User.email != email)
+            )
+            if real_super is not None:
+                continue
         user = session.scalar(select(User).where(User.email == email))
         if user is None:
             user = User(

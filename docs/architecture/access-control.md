@@ -77,7 +77,7 @@ Super Admin assigns `administrator` and `creator` to accounts that already exist
 
 The local demo accounts, including `super@examsprep.local`, are inserted only when `SEED_DEMO_USERS=true`. Production leaves that flag `false`.
 
-The real super administrator is created once, from the API service, either by `SUPER_ADMIN_NAME`, `SUPER_ADMIN_EMAIL`, and `SUPER_ADMIN_PASSWORD` at startup or by `python -m app.create_super_admin`. Both refuse the demo email, the demo password, an email that already exists, and a second super administrator. Steps: [deployment.md](../operations/deployment.md).
+The real super administrator is installed from the API service. `SUPER_ADMIN_NAME`, `SUPER_ADMIN_EMAIL`, and `SUPER_ADMIN_PASSWORD` are written onto a user row at startup. Sign-in then checks that row, not the variables. If the demo super administrator is the only one, the demo user is kept and the role moves to the configured email. A second real super administrator is refused. The shell command `python -m app.create_super_admin` creates the first one and does not replace the demo account. Steps: [deployment.md](../operations/deployment.md).
 
 Seeded local demo (password `examsready`):
 

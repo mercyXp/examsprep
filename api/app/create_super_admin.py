@@ -23,7 +23,7 @@ from app.config import settings
 from app.db import SessionLocal
 from app.models import Role, User, UserRole
 from app.models.enums import UserStatus
-from app.security import hash_password
+from app.security import hash_password, verify_password
 
 SUPER_ROLE = "super_administrator"
 DEMO_EMAIL = "super@examsprep.local"
@@ -155,15 +155,87 @@ def _ensure_super_role(session: Session) -> None:
     session.flush()
 
 
+def _super_administrators(session: Session) -> list[User]:
+    return list(
+        session.scalars(
+            select(User)
+            .join(UserRole, UserRole.user_id == User.id)
+            .join(Role, Role.id == UserRole.role_id)
+            .where(Role.slug == SUPER_ROLE)
+        ).unique()
+    )
+
+
+def _retire_demo_super_role(session: Session, role: Role) -> bool:
+    """Drop the super-administrator role from the demo account. The user row stays."""
+    demo = session.scalar(select(User).where(User.email == DEMO_EMAIL))
+    if demo is None:
+        return False
+    link = session.scalar(select(UserRole).where(UserRole.user_id == demo.id, UserRole.role_id == role.id))
+    if link is None:
+        return False
+    session.delete(link)
+    return True
+
+
 def bootstrap_from_environment(session: Session) -> str | None:
-    """Create the super administrator from env vars. None means the variables are unset."""
+    """Install the configured super administrator. None means the variables are unset.
+
+    Login never reads these variables. It checks the password stored on the user row.
+    The demo super administrator does not block this. That account is kept, and the
+    role moves to the configured email. A different real super administrator still blocks it.
+    """
     credentials = _environment_credentials()
     if credentials is None:
         return None
     name, email, password = credentials
+    name = name.strip()
+    email = email.strip().lower()
     validate_credentials(name, email, password)
-    user = run_bootstrap(session, name=name, email=email, password=password, ensure_role=True)
-    return f"Super administrator created for {user.email}."
+    _require_tables(session)
+    _ensure_super_role(session)
+    role = session.scalar(select(Role).where(Role.slug == SUPER_ROLE))
+    if role is None:
+        raise BootstrapError("The super_administrator role is missing. No account was created.")
+
+    holders = _super_administrators(session)
+    if any(user.email not in {DEMO_EMAIL, email} for user in holders):
+        raise BootstrapError("A super administrator already exists. This command does not create another one.")
+
+    existing = session.scalar(select(User).where(User.email == email))
+    created = existing is None
+    if existing is None:
+        existing = User(name=name, email=email, password_hash=hash_password(password), status=UserStatus.ACTIVE)
+        session.add(existing)
+        session.flush()
+    else:
+        already_super = any(user.id == existing.id for user in holders)
+        if not already_super:
+            raise BootstrapError("An account with that email already exists. This command does not change existing accounts.")
+        if not verify_password(password, existing.password_hash or ""):
+            existing.password_hash = hash_password(password)
+        existing.name = name
+        existing.status = UserStatus.ACTIVE
+
+    link = session.scalar(select(UserRole).where(UserRole.user_id == existing.id, UserRole.role_id == role.id))
+    if link is None:
+        session.add(UserRole(user=existing, role=role))
+    retired = _retire_demo_super_role(session, role)
+    session.commit()
+
+    if created and retired:
+        return (
+            f"Super administrator created for {email}. "
+            "The demo account was kept and no longer has the super administrator role."
+        )
+    if created:
+        return f"Super administrator created for {email}."
+    if retired:
+        return (
+            f"Super administrator ready for {email}. "
+            "The demo account was kept and no longer has the super administrator role."
+        )
+    return f"Super administrator ready for {email}."
 
 
 def apply_environment_bootstrap(session: Session) -> str | None:

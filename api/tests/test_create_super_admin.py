@@ -165,8 +165,38 @@ class SuperAdminBootstrapTests(unittest.TestCase):
         with self._use_environment("Mercy", "mercy@example.com", "a-real-secret"):
             apply_environment_bootstrap(self.session)
             again = apply_environment_bootstrap(self.session)
-        self.assertIn("already exists", again or "")
+        self.assertIn("ready for mercy@example.com", again or "")
         self.assertEqual(set(self.session.scalars(select(User.email))), {"mercy@example.com"})
+        kept = self.session.scalar(select(User).where(User.email == "mercy@example.com"))
+        self.assertIsNotNone(kept)
+        self.assertTrue(verify_password("a-real-secret", kept.password_hash or ""))
+
+    def test_environment_bootstrap_replaces_the_demo_super_role(self) -> None:
+        demo = User(name="Sam Super", email="super@examsprep.local", password_hash="demo-hash", status=UserStatus.ACTIVE)
+        self.session.add(demo)
+        self.session.flush()
+        self.session.add(UserRole(user=demo, role=self.role))
+        self.session.commit()
+        with self._use_environment("Mercy Phiri", "mercy@example.com", "a-real-secret"):
+            message = apply_environment_bootstrap(self.session)
+        self.assertIn("created for mercy@example.com", message or "")
+        self.assertIn("demo account was kept", message or "")
+        self.assertNotIn("a-real-secret", message or "")
+        demo_row = self.session.scalar(select(User).where(User.email == "super@examsprep.local"))
+        real = self.session.scalar(select(User).where(User.email == "mercy@example.com"))
+        self.assertIsNotNone(demo_row)
+        self.assertIsNotNone(real)
+        self.assertEqual(demo_row.password_hash, "demo-hash")
+        self.assertEqual(demo_row.roles, [])
+        self.assertTrue(verify_password("a-real-secret", real.password_hash or ""))
+        self.assertEqual([item.role.slug for item in real.roles if item.role is not None], ["super_administrator"])
+
+    def test_environment_bootstrap_does_not_replace_a_real_super_administrator(self) -> None:
+        run_bootstrap(self.session, name="First", email="first@example.com", password="first-secret")
+        with self._use_environment("Mercy", "mercy@example.com", "a-real-secret"):
+            message = apply_environment_bootstrap(self.session)
+        self.assertIn("already exists", message or "")
+        self.assertIsNone(self.session.scalar(select(User).where(User.email == "mercy@example.com")))
 
     def test_environment_bootstrap_requires_all_three_values(self) -> None:
         with self._use_environment("Mercy", "", ""):

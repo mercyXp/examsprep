@@ -73,9 +73,13 @@ SUPER_ADMIN_EMAIL=you@your-domain.com
 SUPER_ADMIN_PASSWORD=a long password that is not the demo password
 ```
 
-The deploy log prints `Super administrator created for you@your-domain.com.` It does not print the password. Delete the three variables and redeploy. Leaving them set does not create another account, but the password stays visible in the dashboard.
+Sign-in checks the email and password stored on the user row. It does not check these variables. On startup the API writes that row: it creates the account, or, if this email is already the super administrator, it stores the configured password.
 
-If the log says a super administrator already exists, sign in with that account. If it says the email already exists, choose a different email.
+If the only super administrator is the demo account `super@examsprep.local`, that user is kept and the super-administrator role moves to the configured email. The demo password can still sign in, but that account is no longer a super administrator. A different real super administrator is left unchanged, and the log says one already exists.
+
+The deploy log prints `Super administrator created for you@your-domain.com.` or `Super administrator ready for you@your-domain.com.` It does not print the password. Delete the three variables and redeploy. While they remain set, a restart keeps that password on the configured account, and the password stays visible in the Render dashboard.
+
+If the log says an account with that email already exists, the address belongs to someone who is not a super administrator. Choose a different email. The command does not promote that account.
 
 A host with a shell can prompt for the same account instead:
 
