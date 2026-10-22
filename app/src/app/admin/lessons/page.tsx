@@ -38,6 +38,7 @@ function LessonsManager() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [canPublish, setCanPublish] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "drafts" | "review" | "published">("all");
 
   const selectedModule = modules.find((item) => item.id === moduleId);
 
@@ -88,9 +89,21 @@ function LessonsManager() {
   }, [moduleId]);
 
   const visibleLessons = useMemo(
-    () => lessons.filter((item) => (chapterId ? item.chapterId === chapterId : true)).filter((item) => item.title.toLowerCase().includes(query.toLowerCase())),
-    [lessons, chapterId, query],
+    () =>
+      lessons
+        .filter((item) => (chapterId ? item.chapterId === chapterId : true))
+        .filter((item) => item.title.toLowerCase().includes(query.toLowerCase()))
+        .filter((item) => {
+          if (statusFilter === "drafts") return ["DRAFT", "CHANGES_REQUESTED", "UNPUBLISHED"].includes(item.status);
+          if (statusFilter === "review") return item.status === "IN_REVIEW";
+          if (statusFilter === "published") return item.status === "PUBLISHED";
+          return true;
+        }),
+    [lessons, chapterId, query, statusFilter],
   );
+
+  const draftLessons = lessons.filter((item) => ["DRAFT", "CHANGES_REQUESTED", "UNPUBLISHED", "IN_REVIEW"].includes(item.status));
+  const draftCount = draftLessons.filter((item) => item.status !== "IN_REVIEW").length;
 
   async function move(list: string[], index: number, direction: -1 | 1, kind: "chapter" | "lesson") {
     const next = index + direction;
@@ -142,7 +155,61 @@ function LessonsManager() {
             Search lessons
             <input value={query} onChange={(event) => setQuery(event.target.value)} />
           </label>
+          <div className="cms-filters" role="group" aria-label="Lesson status">
+            <button type="button" className={statusFilter === "all" ? "is-on" : undefined} onClick={() => setStatusFilter("all")}>
+              All
+            </button>
+            <button type="button" className={statusFilter === "drafts" ? "is-on" : undefined} onClick={() => setStatusFilter("drafts")}>
+              Drafts{draftCount ? ` (${draftCount})` : ""}
+            </button>
+            <button type="button" className={statusFilter === "review" ? "is-on" : undefined} onClick={() => setStatusFilter("review")}>
+              In review
+            </button>
+            <button type="button" className={statusFilter === "published" ? "is-on" : undefined} onClick={() => setStatusFilter("published")}>
+              Published
+            </button>
+          </div>
         </div>
+        <article className="dash-card cms-drafts">
+          <header className="dash-card-head">
+            <h2>Your drafts</h2>
+          </header>
+          {draftLessons.length ? (
+            <ul className="cms-lessons">
+              {draftLessons.map((lesson) => (
+                <li key={lesson.id}>
+                  <div>
+                    <h3>{lesson.title}</h3>
+                    <p>
+                      {statusLabel(lesson.status)} · {lesson.slideCount} slides · {lesson.chapterTitle || "Unassigned"}
+                    </p>
+                  </div>
+                  <div className="cms-actions">
+                    <Link className="dash-primary" href={`/admin/lessons/${lesson.id}/edit`}>
+                      Edit draft
+                    </Link>
+                    <Link href={`/learn/lessons/${lesson.id}?preview=1`}>Preview</Link>
+                    {lesson.status !== "IN_REVIEW" ? (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!confirm(`Delete draft “${lesson.title}”? This cannot be undone.`)) return;
+                          const result = await deleteLesson(lesson.id);
+                          if (!result.ok) setError(result.message);
+                          else refresh();
+                        }}
+                      >
+                        Delete draft
+                      </button>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="dash-empty">No drafts in this course yet. Create a lesson and it will stay here until you publish it.</p>
+          )}
+        </article>
         <div className="cms-split">
           <article className="dash-card">
             <header className="dash-card-head">
@@ -242,7 +309,9 @@ function LessonsManager() {
               {visibleLessons.map((lesson) => (
                 <li key={lesson.id}>
                   <div>
-                    <h3>{lesson.title}</h3>
+                    <h3>
+                      <Link href={`/admin/lessons/${lesson.id}/edit`}>{lesson.title}</Link>
+                    </h3>
                     <p>
                       {statusLabel(lesson.status)} · {lesson.slideCount} slides · {lesson.chapterTitle || "Unassigned"}
                     </p>
@@ -254,7 +323,9 @@ function LessonsManager() {
                     <button type="button" onClick={() => move(lessons.map((item) => item.id), lessons.findIndex((item) => item.id === lesson.id), 1, "lesson")}>
                       Down
                     </button>
-                    <Link href={`/admin/lessons/${lesson.id}/edit`}>Edit</Link>
+                    <Link className="dash-primary" href={`/admin/lessons/${lesson.id}/edit`}>
+                      {lesson.status === "PUBLISHED" ? "Edit" : "Edit draft"}
+                    </Link>
                     <Link href={`/learn/lessons/${lesson.id}?preview=1`}>Preview</Link>
                     <LessonWorkflowButtons
                       lessonId={lesson.id}
@@ -274,17 +345,27 @@ function LessonsManager() {
                     >
                       Archive
                     </button>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!confirm(`Delete draft “${lesson.title}”?`)) return;
-                        const result = await deleteLesson(lesson.id);
-                        if (!result.ok) setError(result.message);
-                        else refresh();
-                      }}
-                    >
-                      Delete
-                    </button>
+                    {lesson.status !== "PUBLISHED" ? (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const waiting = lesson.status === "IN_REVIEW";
+                          if (
+                            !confirm(
+                              waiting
+                                ? `“${lesson.title}” is waiting for review. Delete this draft anyway? This cannot be undone.`
+                                : `Delete draft “${lesson.title}”? This cannot be undone.`,
+                            )
+                          )
+                            return;
+                          const result = await deleteLesson(lesson.id);
+                          if (!result.ok) setError(result.message);
+                          else refresh();
+                        }}
+                      >
+                        Delete draft
+                      </button>
+                    ) : null}
                   </div>
                 </li>
               ))}

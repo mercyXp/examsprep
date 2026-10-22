@@ -10,6 +10,7 @@ from app.db import engine
 from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.learn import router as learn_router
+from app.routers.media import router as media_router
 from app.routers.onboarding import router as onboarding_router
 
 app = FastAPI(title="ExamsPrep API", version="0.1.0")
@@ -24,6 +25,7 @@ app.include_router(auth_router)
 app.include_router(onboarding_router)
 app.include_router(admin_router)
 app.include_router(learn_router)
+app.include_router(media_router)
 
 
 @app.exception_handler(StarletteHTTPException)

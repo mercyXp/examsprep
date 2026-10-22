@@ -30,7 +30,11 @@ uvicorn app.main:app --reload
 
 Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`, `super@examsprep.local`. Google and password reset are still disconnected.
 
-Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md).
+Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md). Lesson JSON schema and studio notes: [docs/cms/lesson-studio.md](../docs/cms/lesson-studio.md).
+
+```bash
+python -m unittest tests.test_cms_slides tests.test_media
+```
 
 ## Railway
 

@@ -13,6 +13,7 @@ Keep product, design, and architecture notes next to the code. Write a document 
 | System architecture | [architecture/system-architecture.md](architecture/system-architecture.md) |
 | Access control | [architecture/access-control.md](architecture/access-control.md) |
 | Database design | [database/erd.md](database/erd.md) |
+| Lesson Authoring Studio | [cms/lesson-studio.md](cms/lesson-studio.md) |
 | Hosting and deployment | [operations/deployment.md](operations/deployment.md) |
 
 The FastAPI package and PostgreSQL schema live in [`api/`](../api/README.md).

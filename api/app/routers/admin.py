@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -46,6 +46,7 @@ from app.calendar import (
     set_current_period,
 )
 from app.db import get_session
+from app.media import store_upload
 from app.models import (
     AcademicPeriod,
     AcademicYear,
@@ -178,7 +179,8 @@ def latest_version(lesson: Lesson) -> LessonVersion | None:
 
 def next_position(session: Session, model, **filters: Any) -> int:
     query = select(func.coalesce(func.max(model.position), -1)).filter_by(**filters)
-    return int(session.scalar(query) or -1) + 1
+    current = session.scalar(query)
+    return int(current if current is not None else -1) + 1
 
 
 def module_out(module: Module, *, chapter_count: int = 0, lesson_count: int = 0, published_lessons: int = 0) -> dict[str, Any]:
@@ -764,6 +766,24 @@ def save_lesson_content(
     session.flush()
     write_audit(session, user, "lesson.save", "lesson", lesson.id, {"slides": len(slides)})
     return {"ok": True, "item": lesson_out(lesson, include_content=True, slides=slides)}
+
+
+@router.post("/lessons/{lesson_id}/media")
+def upload_lesson_media(
+    lesson_id: uuid.UUID,
+    kind: str = Query("image"),
+    file: UploadFile = File(...),
+    scope: AccessScope = SCOPE,
+    session: Session = Depends(get_session),
+) -> dict[str, Any]:
+    lesson = get_lesson(session, lesson_id)
+    scope.require_module(lesson.module_id)
+    data = file.file.read()
+    if not data:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Choose a file to upload.")
+    stored = store_upload(lesson.id, data, kind=kind, original_name=file.filename or "")
+    write_audit(session, scope.user, "lesson.media", "lesson", lesson.id, {"filename": stored["filename"], "kind": kind})
+    return {"ok": True, "item": stored}
 
 
 @router.post("/lessons/{lesson_id}/duplicate")

@@ -52,7 +52,7 @@ export function LessonWorkflowButtons({
       <>
         {status === "IN_REVIEW" ? (
           <>
-            <button type="button" className="dash-primary" onClick={() => run("approve")}>
+            <button type="button" className="studio-btn-publish" onClick={() => run("approve")}>
               Approve & publish
             </button>
             <button type="button" onClick={() => run("reject")}>
@@ -65,7 +65,7 @@ export function LessonWorkflowButtons({
             Unpublish
           </button>
         ) : status !== "IN_REVIEW" ? (
-          <button type="button" onClick={() => run("publish")}>
+          <button type="button" className="studio-btn-publish" onClick={() => run("publish")}>
             Publish
           </button>
         ) : null}
@@ -80,8 +80,8 @@ export function LessonWorkflowButtons({
     return <span>Waiting for review</span>;
   }
   return (
-    <button type="button" onClick={() => run("submit")}>
-      Submit for review
+    <button type="button" className="studio-btn-review" onClick={() => run("submit")}>
+      Submit for Review
     </button>
   );
 }

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     access_token_minutes: int = 60 * 24 * 7
     cors_origins: str = "http://localhost:3000"
     seed_demo_users: bool = True
+    media_root: str = "var/media"
 
 
 settings = Settings()

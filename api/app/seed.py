@@ -359,27 +359,30 @@ def seed_sample_lesson(session: Session) -> None:
         )
         session.add(chapter)
         session.flush()
-    existing = session.scalar(select(Lesson).where(Lesson.module_id == module.id, Lesson.title == "Introduction to SQL"))
-    if existing is not None:
-        return
-    lesson = Lesson(
-        module_id=module.id,
-        chapter_id=chapter.id,
-        creator_id=admin.id,
-        title="Introduction to SQL",
-        description="What SQL is, why it matters, and how a first SELECT statement is written.",
-        objectives=["Explain what SQL is used for", "Read a simple SELECT statement", "Recognise a table as rows and columns"],
-        duration_minutes=18,
-        difficulty="beginner",
-        position=0,
-        status=ContentStatus.PUBLISHED,
-    )
-    session.add(lesson)
-    session.flush()
+    lesson = session.scalar(select(Lesson).where(Lesson.module_id == module.id, Lesson.title == "Introduction to SQL"))
+    if lesson is None:
+        lesson = Lesson(
+            module_id=module.id,
+            chapter_id=chapter.id,
+            creator_id=admin.id,
+            title="Introduction to SQL",
+            description="What SQL is, why it matters, and how a first SELECT statement is written.",
+            objectives=["Explain what SQL is used for", "Read a simple SELECT statement", "Recognise a table as rows and columns"],
+            duration_minutes=18,
+            difficulty="beginner",
+            position=0,
+            status=ContentStatus.PUBLISHED,
+        )
+        session.add(lesson)
+        session.flush()
     slides = [
         {
             "id": "slide-sql-1",
             "title": "What is SQL?",
+            "layout": "text",
+            "revealMode": "block",
+            "titleImmediate": True,
+            "transition": "fade",
             "blocks": [
                 {
                     "id": "b1",
@@ -387,38 +390,78 @@ def seed_sample_lesson(session: Session) -> None:
                     "variant": "heading",
                     "text": "SQL is how we talk to a database.",
                     "items": [],
+                    "appear": "immediate",
+                    "animation": "fade",
                 },
                 {
                     "id": "b2",
                     "type": "text",
                     "variant": "paragraph",
-                    "text": "SQL stands for Structured Query Language. It is the standard way to create, read, update, and delete data in a relational database. Instead of opening a spreadsheet by hand, you write a precise request and the database engine returns exactly the rows you asked for.",
+                    "text": "SQL stands for Structured Query Language.",
                     "items": [],
+                    "appear": "click",
+                    "animation": "up",
+                },
+                {
+                    "id": "b2b",
+                    "type": "text",
+                    "variant": "paragraph",
+                    "text": "It is the standard way to create, read, update, and delete data in a relational database.",
+                    "items": [],
+                    "appear": "click",
+                    "animation": "up",
+                },
+                {
+                    "id": "b2c",
+                    "type": "text",
+                    "variant": "paragraph",
+                    "text": "Instead of opening a spreadsheet by hand, you write a precise request and the database engine returns exactly the rows you asked for.",
+                    "items": [],
+                    "appear": "click",
+                    "animation": "up",
                 },
                 {
                     "id": "b3",
                     "type": "callout",
                     "tone": "tip",
                     "text": "Think of a table as a named grid: columns describe the kind of data, and each row is one record.",
+                    "appear": "click",
+                    "animation": "fade",
                 },
             ],
         },
         {
             "id": "slide-sql-2",
             "title": "A first SELECT",
+            "layout": "code",
+            "revealMode": "block",
+            "titleImmediate": True,
             "blocks": [
                 {
                     "id": "b4",
                     "type": "text",
                     "variant": "paragraph",
-                    "text": "The SELECT statement asks for columns from a table. FROM names the table. A semicolon ends the statement. You can start with SELECT * when you want every column, then narrow it once you know the names you need.",
+                    "text": "The SELECT statement asks for columns from a table.",
                     "items": [],
+                    "appear": "click",
+                    "animation": "fade",
+                },
+                {
+                    "id": "b4b",
+                    "type": "text",
+                    "variant": "paragraph",
+                    "text": "FROM names the table. A semicolon ends the statement.",
+                    "items": [],
+                    "appear": "click",
+                    "animation": "up",
                 },
                 {
                     "id": "b5",
                     "type": "code",
                     "language": "sql",
                     "code": "SELECT student_name, email\nFROM students;",
+                    "appear": "click",
+                    "animation": "zoom",
                 },
                 {
                     "id": "b6",
@@ -426,12 +469,17 @@ def seed_sample_lesson(session: Session) -> None:
                     "variant": "definition",
                     "text": "SELECT lists the columns to return. FROM names the table those columns come from.",
                     "items": [],
+                    "appear": "click",
+                    "animation": "fade",
                 },
             ],
         },
         {
             "id": "slide-sql-3",
             "title": "Check your understanding",
+            "layout": "assessment",
+            "revealMode": "block",
+            "titleImmediate": True,
             "blocks": [
                 {
                     "id": "b7",
@@ -439,6 +487,8 @@ def seed_sample_lesson(session: Session) -> None:
                     "variant": "paragraph",
                     "text": "Before you move on, confirm the role of SELECT. A knowledge check is required to complete this lesson.",
                     "items": [],
+                    "appear": "click",
+                    "animation": "fade",
                 },
                 {
                     "id": "b8",
@@ -453,19 +503,29 @@ def seed_sample_lesson(session: Session) -> None:
                     "explanation": "SELECT retrieves data. It does not remove tables or create users.",
                     "feedbackCorrect": "That’s right. SELECT reads data; it does not change the table structure.",
                     "feedbackWrong": "SELECT is a query. It returns rows; it does not delete tables or create accounts.",
+                    "appear": "click",
+                    "animation": "fade",
                 },
             ],
         },
     ]
-    version = LessonVersion(
-        lesson_id=lesson.id,
-        version_number=1,
-        body="SQL is how we talk to a database.",
-        slides=slides,
-        author_id=admin.id,
-        status=VersionStatus.APPROVED,
+    version = session.scalar(
+        select(LessonVersion).where(LessonVersion.lesson_id == lesson.id).order_by(LessonVersion.version_number.desc())
     )
-    session.add(version)
+    if version is None:
+        version = LessonVersion(
+            lesson_id=lesson.id,
+            version_number=1,
+            body="SQL is how we talk to a database.",
+            slides=slides,
+            author_id=admin.id,
+            status=VersionStatus.APPROVED,
+        )
+        session.add(version)
+    else:
+        version.slides = slides
+        version.body = "SQL is how we talk to a database."
+        version.status = VersionStatus.APPROVED
     session.flush()
     lesson.published_version_id = version.id
     lesson.status = ContentStatus.PUBLISHED

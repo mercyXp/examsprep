@@ -246,6 +246,33 @@ export async function saveLessonContent(id: string, slides: Slide[]) {
   });
 }
 
+export type UploadedMedia = {
+  url: string;
+  filename: string;
+  originalName: string;
+  contentType: string;
+  size: number;
+  kind: string;
+};
+
+export async function uploadLessonMedia(lessonId: string, file: File, kind: "image" | "video" | "audio" | "file") {
+  const body = new FormData();
+  body.append("file", file);
+  const result = await fetch(`/api/admin/lessons/${lessonId}/media?kind=${encodeURIComponent(kind)}`, {
+    method: "POST",
+    body,
+  });
+  const payload = (await result.json().catch(() => null)) as { ok?: boolean; message?: string; item?: UploadedMedia } | null;
+  if (!result.ok || !payload?.ok || !payload.item) {
+    return {
+      ok: false as const,
+      message: payload?.message || "That file could not be uploaded.",
+      status: result.status,
+    };
+  }
+  return { ok: true as const, data: payload.item };
+}
+
 export async function publishLesson(id: string, action: "publish" | "unpublish" | "archive" | "duplicate" | "submit") {
   return api<{ item: AdminLesson }>(`/api/admin/lessons/${id}/${action}`, { method: "POST" });
 }

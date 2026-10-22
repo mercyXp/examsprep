@@ -7,7 +7,7 @@ import Footer from "@/app/components/landing/Footer";
 
 const AUTH_PATHS = new Set(["/login", "/signup", "/forgot-password"]);
 
-export default function SiteChrome({ children }: { children: ReactNode }) {
+function SiteChromeInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAuth = AUTH_PATHS.has(pathname);
   const isApp =
@@ -27,5 +27,19 @@ export default function SiteChrome({ children }: { children: ReactNode }) {
       <main id="main-content">{children}</main>
       {isAuth || isApp ? null : <Footer />}
     </div>
+  );
+}
+
+export default function SiteChrome({ children }: { children: ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="page-shell is-app">
+          <main id="main-content">{children}</main>
+        </div>
+      }
+    >
+      <SiteChromeInner>{children}</SiteChromeInner>
+    </Suspense>
   );
 }

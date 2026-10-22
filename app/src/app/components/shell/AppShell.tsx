@@ -65,12 +65,14 @@ export default function AppShell({
   title,
   subtitle,
   actions,
+  layout = "default",
   children,
 }: {
   variant: Variant;
   title?: string;
   subtitle?: string;
   actions?: ReactNode;
+  layout?: "default" | "studio";
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -119,12 +121,16 @@ export default function AppShell({
 
   if (!ready) {
     return (
-      <div className="dash-shell">
+      <div className={`dash-shell${layout === "studio" ? " is-studio" : ""}`}>
         <div className="dash-main">
           <p className="dash-empty">Loading your workspace…</p>
         </div>
       </div>
     );
+  }
+
+  if (layout === "studio") {
+    return <div className="dash-shell is-studio">{children}</div>;
   }
 
   return (
