@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -58,7 +60,13 @@ def signup(body: SignupIn, session: Session = Depends(get_session)) -> AuthOut:
             detail="We couldn’t create your account. Roles aren’t seeded yet.",
         )
 
-    user = User(name=name, email=email, password_hash=hash_password(body.password), status=UserStatus.ACTIVE)
+    user = User(
+        name=name,
+        email=email,
+        password_hash=hash_password(body.password),
+        status=UserStatus.ACTIVE,
+        last_login_at=datetime.now(timezone.utc),
+    )
     session.add(user)
     session.flush()
     session.add(UserRole(user_id=user.id, role_id=student.id))
@@ -96,6 +104,7 @@ def login(body: LoginIn, session: Session = Depends(get_session)) -> AuthOut:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This account isn’t active.",
         )
+    user.last_login_at = datetime.now(timezone.utc)
     ensure_profile(session, user)
     loaded = load_user_by_email(session, email)
     assert loaded is not None

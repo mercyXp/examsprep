@@ -398,6 +398,7 @@ def list_students(
                 "lessonsStarted": started,
                 "lessonsCompleted": completed,
                 "createdAt": user.created_at.isoformat() if user.created_at else None,
+                "lastLoginAt": user.last_login_at.isoformat() if user.last_login_at else None,
             }
         )
     return {"ok": True, "total": total, "page": page, "pageSize": page_size, "summary": summary, "items": items}
@@ -434,6 +435,7 @@ def student_detail(student_id: uuid.UUID, scope: AccessScope = SCOPE, session: S
             "moduleCodes": profile.module_codes or [],
             "onboardingCompleted": bool(profile.onboarding_completed),
             "createdAt": user.created_at.isoformat() if user.created_at else None,
+            "lastLoginAt": user.last_login_at.isoformat() if user.last_login_at else None,
         },
         "progress": [
             {

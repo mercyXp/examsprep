@@ -105,6 +105,7 @@ export type AdminStudent = {
   lessonsStarted: number;
   lessonsCompleted: number;
   createdAt?: string | null;
+  lastLoginAt?: string | null;
 };
 
 export type StudentSummary = {

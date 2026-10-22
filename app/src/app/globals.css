@@ -8879,6 +8879,34 @@ html[data-theme="dark"] .lp-block.is-on {
   min-width: 0;
 }
 
+.admin-login {
+  display: grid;
+  gap: 2px;
+  min-width: 140px;
+}
+
+.admin-login strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-login em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.admin-login.is-recent strong::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #14804a;
+}
+
 .admin-person span {
   display: grid;
   min-width: 0;

@@ -14,6 +14,32 @@ function formatDate(iso: string | null | undefined) {
   return `${MONTHS[Number(match[2]) - 1]} ${Number(match[3])}, ${match[1]}`;
 }
 
+function lastLoginLabel(iso: string | null | undefined, now: number | null) {
+  if (!iso) return { when: "Never", ago: "No sign-in yet", recent: false };
+  if (now == null) return { when: formatDate(iso), ago: "", recent: false };
+  const then = Date.parse(iso);
+  if (Number.isNaN(then)) return { when: "—", ago: "", recent: false };
+  const date = new Date(then);
+  const time = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const startOf = (value: number) => {
+    const day = new Date(value);
+    day.setHours(0, 0, 0, 0);
+    return day.getTime();
+  };
+  const dayGap = Math.round((startOf(now) - startOf(then)) / 86_400_000);
+  const when = dayGap === 0 ? `Today, ${time}` : dayGap === 1 ? `Yesterday, ${time}` : `${formatDate(iso)}, ${time}`;
+  const minutes = Math.max(0, Math.round((now - then) / 60_000));
+  let ago = "";
+  if (minutes < 1) ago = "Just now";
+  else if (minutes < 60) ago = `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  else if (minutes < 60 * 24) {
+    const hours = Math.round(minutes / 60);
+    ago = `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  } else if (dayGap === 1) ago = "1 day ago";
+  else if (dayGap > 1) ago = `${dayGap} days ago`;
+  return { when, ago, recent: minutes < 60 * 24 };
+}
+
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "ST";
@@ -45,6 +71,7 @@ export default function AdminStudentsPage() {
   const [progress, setProgress] = useState<Array<{ title: string | null; moduleCode: string | null; completedAt: string | null }>>([]);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [now, setNow] = useState<number | null>(null);
 
   async function refresh(nextPage = page, nextQuery = query, nextStatus = status, nextProgramme = programme) {
     const result = await loadStudents(nextQuery, nextPage, {
@@ -67,6 +94,7 @@ export default function AdminStudentsPage() {
     loadScope().then((result) => {
       if (result.ok) setScope(result.data);
     });
+    setNow(Date.now());
   }, []);
 
   useEffect(() => {
@@ -201,6 +229,7 @@ export default function AdminStudentsPage() {
                   <th>Status</th>
                   <th>Lessons</th>
                   <th>Programme</th>
+                  <th>Last login</th>
                   <th>Joined</th>
                   <th>Actions</th>
                 </tr>
@@ -233,6 +262,17 @@ export default function AdminStudentsPage() {
                         </span>
                       </td>
                       <td>{item.programme || "—"}</td>
+                      <td>
+                        {(() => {
+                          const login = lastLoginLabel(item.lastLoginAt, now);
+                          return (
+                            <span className={login.recent ? "admin-login is-recent" : "admin-login"}>
+                              <strong>{login.when}</strong>
+                              {login.ago ? <em>{login.ago}</em> : null}
+                            </span>
+                          );
+                        })()}
+                      </td>
                       <td>{formatDate(item.createdAt)}</td>
                       <td>
                         <div className="admin-menu">
@@ -298,7 +338,9 @@ export default function AdminStudentsPage() {
               {selected.programme || "No programme"} · Year {selected.yearOfStudy ?? "—"} · Semester {selected.semesterOfStudy ?? "—"}
             </p>
             <p>Modules: {selected.moduleCodes.join(", ") || "None selected"}</p>
-            <p>Joined {formatDate(selected.createdAt)} · Status {selected.status}</p>
+            <p>
+              Last login {lastLoginLabel(selected.lastLoginAt, now).when} · Joined {formatDate(selected.createdAt)} · Status {selected.status}
+            </p>
             <div className="cms-actions">
               {selected.status === "active" ? (
                 <button type="button" onClick={() => changeStatus(selected, "suspended")}>Suspend</button>
