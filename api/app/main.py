@@ -13,6 +13,7 @@ from app.db import SessionLocal, engine
 from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.learn import router as learn_router
+from app.routers.staff import router as staff_router
 from app.routers.media import router as media_router
 from app.routers.onboarding import router as onboarding_router
 
@@ -44,6 +45,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(onboarding_router)
 app.include_router(admin_router)
+app.include_router(staff_router)
 app.include_router(learn_router)
 app.include_router(media_router)
 

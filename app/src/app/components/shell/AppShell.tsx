@@ -29,6 +29,12 @@ const ADMIN_NAV: { href: string; label: string; icon: NavIconName; show?: (scope
   { href: "/admin/courses", label: "Courses & Modules", icon: "book" },
   { href: "/admin/lessons", label: "Chapters & Lessons", icon: "lessons" },
   {
+    href: "/admin/staff",
+    label: "Staff",
+    icon: "people",
+    show: (scope) => Boolean(scope?.role === "super_administrator" || scope?.roles?.includes("super_administrator")),
+  },
+  {
     href: "/admin/assignments",
     label: "Assignments",
     icon: "people",

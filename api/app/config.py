@@ -13,6 +13,13 @@ class Settings(BaseSettings):
     super_admin_name: str = ""
     super_admin_email: str = ""
     super_admin_password: str = ""
+    app_url: str = "http://localhost:3000"
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_tls: bool = True
 
 
 settings = Settings()

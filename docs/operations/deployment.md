@@ -89,6 +89,8 @@ python -m app.create_super_admin
 
 The shell command does not create the `super_administrator` role. The Render variables do, when the tables from `alembic upgrade head` exist and that role row is missing. Who may assign the other roles is described in [access-control.md](../architecture/access-control.md).
 
+Creator and administrator accounts are invited from Staff after this account exists. Set `APP_URL` to the Vercel origin with no trailing slash. To email the link, also set `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`, and, when the provider requires it, `SMTP_USERNAME`, `SMTP_PASSWORD`, and `SMTP_TLS`. Without SMTP the invitation is still saved and the Staff page shows the acceptance link once.
+
 ## Database access from a laptop
 
 The API uses the internal `postgresql+psycopg://` URL. `pg_dump` and `pg_restore` use the database’s **external** URL, which starts with `postgresql://` and includes `sslmode=require`. Do not put either URL in Git.

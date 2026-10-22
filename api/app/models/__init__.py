@@ -14,6 +14,7 @@ from app.models.content import (
     Resource,
 )
 from app.models.identity import Permission, Role, RolePermission, StudentProfile, User, UserRole
+from app.models.staff import StaffInvitation
 from app.models.settings import AcademicPeriod, ExamType, ModuleExamSlot, ProgramExamSchedule
 from app.models.learning import AttemptAnswer, Bookmark, Enrolment, LessonProgress, QuizAttempt
 
@@ -50,6 +51,7 @@ __all__ = [
     "Role",
     "RolePermission",
     "Semester",
+    "StaffInvitation",
     "StudentProfile",
     "Topic",
     "User",

@@ -969,13 +969,16 @@ def reorder_lessons(
     return {"ok": True}
 
 
-def _ensure_role(session: Session, user: User, slug: str) -> None:
+def _require_staff_role(session: Session, user: User, slug: str) -> None:
     role = session.scalar(select(Role).where(Role.slug == slug))
     if role is None:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Roles aren’t seeded yet.")
     already = session.scalar(select(UserRole).where(UserRole.user_id == user.id, UserRole.role_id == role.id))
     if already is None:
-        session.add(UserRole(user_id=user.id, role_id=role.id))
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invite this person as staff before assigning work. Existing students are not promoted.",
+        )
 
 
 def _staff_users(session: Session, slug: str) -> list[User]:
@@ -1076,7 +1079,7 @@ def assign_program_admin(body: ProgramAdminIn, scope: AccessScope = SCOPE, sessi
     programme = session.get(Programme, body.programme_id)
     if user is None or programme is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User or programme not found.")
-    _ensure_role(session, user, "administrator")
+    _require_staff_role(session, user, "administrator")
     existing = session.scalar(
         select(ProgramAdminAssignment).where(
             ProgramAdminAssignment.user_id == user.id,
@@ -1134,7 +1137,7 @@ def assign_creator(body: CreatorAssignIn, scope: AccessScope = SCOPE, session: S
     link = ensure_program_module(session, module)
     if link is None:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "This module isn’t linked to a programme yet.")
-    _ensure_role(session, user, "creator")
+    _require_staff_role(session, user, "creator")
     existing = session.scalar(
         select(ContentCreatorAssignment).where(
             ContentCreatorAssignment.user_id == user.id,

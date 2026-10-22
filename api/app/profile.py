@@ -1,5 +1,6 @@
 from datetime import date
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import StudentProfile, User
@@ -16,6 +17,10 @@ def is_student(user: User) -> bool:
 def ensure_profile(session: Session, user: User) -> StudentProfile:
     if user.profile is not None:
         return user.profile
+    existing = session.get(StudentProfile, user.id)
+    if existing is not None:
+        user.profile = existing
+        return existing
     profile = StudentProfile(
         user_id=user.id,
         exam_date=DEFAULT_EXAM,
@@ -29,8 +34,16 @@ def ensure_profile(session: Session, user: User) -> StudentProfile:
         onboarding_step=1,
         onboarding_completed=False,
     )
-    session.add(profile)
-    session.flush()
+    try:
+        with session.begin_nested():
+            session.add(profile)
+            session.flush()
+    except IntegrityError:
+        existing = session.get(StudentProfile, user.id)
+        if existing is None:
+            raise
+        user.profile = existing
+        return existing
     user.profile = profile
     return profile
 
