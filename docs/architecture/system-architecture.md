@@ -6,7 +6,7 @@ Next.js in `app/` talks to FastAPI in `api/` over `/api/*` proxies. PostgreSQL h
 
 - **UI:** React, TypeScript, Tailwind v4, CSS custom properties for light/dark (`html[data-theme]`).
 - **Marketing:** `/`, `/features`, `/programmes/computing`. Catalogue copy on those pages is still in `app/src/data/` until they read FastAPI.
-- **Auth:** email/password against Postgres (`examsprep_token` cookie). Google and forgot-password still return an honest “not connected” response.
+- **Auth:** email/password against Postgres (`examsprep_token` cookie). Google sign-in is not connected. Password reset and staff invitations are emailed through Resend.
 - **Student:** `/dashboard`, My Courses, lesson player with recorded progress. Students only receive **published** lessons they are authorised to see.
 - **Staff:** `/admin` CMS — courses, chapters, Lesson Authoring Studio, assignments. Navigation and lists follow the signed-in user’s scope. The studio writes versioned `slides` JSON (ordered reveal items). The student player at `/learn/lessons/[id]` uses the same renderer for progressive reveal and full notes.
 - **Access:** Super administrator, program administrator, and content creator. Creator assignments name a programme **and** a module. FastAPI checks every content operation. See [access-control.md](access-control.md).

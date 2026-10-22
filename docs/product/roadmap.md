@@ -4,7 +4,7 @@
 
 - Landing page and visual system.
 - Programme catalogue on the homepage; Computing programme explorer.
-- Email/password auth against FastAPI and Postgres. Google and forgot-password still return an honest “not connected” response.
+- Email/password auth against FastAPI and Postgres. Google sign-in is not connected. Password reset emails go out through Resend when the API is configured.
 - Student dashboard, My Courses, and the lesson player (published content only).
 - Admin CMS: modules, chapters, typed lesson editor, drafts, preview, publish.
 - Scoped staff roles: Super Admin, program administrator, content creator. Assignments name a programme and a module. Backend enforcement, no URL bypass. See [access-control.md](../architecture/access-control.md).

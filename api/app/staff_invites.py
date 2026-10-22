@@ -8,14 +8,13 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-import smtplib
 from datetime import datetime, timedelta, timezone
-from email.message import EmailMessage
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.config import settings
+from app.config import public_origin
+from app.emailer import send_staff_invitation
 from app.models.enums import UserStatus
 from app.models.identity import Role, User, UserRole
 from app.models.staff import StaffInvitation
@@ -223,44 +222,10 @@ def set_staff_access(session: Session, user_id, active: bool) -> User:
 
 
 def acceptance_url(raw_token: str) -> str:
-    base = (settings.app_url or "http://localhost:3000").rstrip("/")
-    return f"{base}/invite/{raw_token}"
+    return f"{public_origin()}/invite/{raw_token}"
 
 
 def send_invitation_email(email: str, role_slug: str, raw_token: str) -> bool:
-    """Send the link when SMTP is configured. Return False when mail is not set up or sending fails."""
-    host = (settings.smtp_host or "").strip()
-    sender = (settings.smtp_from or "").strip()
-    if not host or not sender:
-        return False
+    """Send the link through Resend. Return False when mail is not set up or sending fails."""
     label = ROLE_LABELS.get(role_slug, "staff member")
-    link = acceptance_url(raw_token)
-    message = EmailMessage()
-    message["Subject"] = f"Your ExamsPrep {label} invitation"
-    message["From"] = sender
-    message["To"] = email
-    message.set_content(
-        "\n".join(
-            [
-                f"You have been invited to ExamsPrep as a {label}.",
-                "",
-                "Open this link to choose your password and activate your account.",
-                "The link works once and expires in 24 hours.",
-                "",
-                link,
-                "",
-                "If you were not expecting this, you can ignore the message.",
-            ]
-        )
-    )
-    try:
-        with smtplib.SMTP(host, int(settings.smtp_port or 587), timeout=10) as smtp:
-            if settings.smtp_tls:
-                smtp.starttls()
-            username = (settings.smtp_username or "").strip()
-            if username:
-                smtp.login(username, settings.smtp_password or "")
-            smtp.send_message(message)
-    except (OSError, smtplib.SMTPException):
-        return False
-    return True
+    return send_staff_invitation(email, label, acceptance_url(raw_token))

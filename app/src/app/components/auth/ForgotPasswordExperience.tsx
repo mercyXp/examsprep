@@ -19,6 +19,7 @@ export default function ForgotPasswordExperience() {
   const [focused, setFocused] = useState<"email" | "password" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [sent, setSent] = useState("");
   const [shake, setShake] = useState(false);
   const shakeOff = useRef(0);
 
@@ -55,6 +56,7 @@ export default function ForgotPasswordExperience() {
     try {
       const result = await requestPasswordReset(nextEmail);
       if (!result.ok) fail(result.message);
+      else setSent(result.message);
     } catch {
       fail("Something went wrong. Please try again.");
     } finally {
@@ -81,6 +83,9 @@ export default function ForgotPasswordExperience() {
           <p className="login-lede">Enter your email and we’ll send a reset link.</p>
         </div>
 
+        {sent ? (
+          <p className="login-lede">{sent}</p>
+        ) : (
         <form className="login-form" onSubmit={onSubmit} aria-busy={submitting || undefined} noValidate>
           {error ? (
             <p className="login-error" id={errorId} role="alert">
@@ -125,6 +130,7 @@ export default function ForgotPasswordExperience() {
             )}
           </Button>
         </form>
+        )}
 
         <p className="login-foot">
           Remember it?{" "}

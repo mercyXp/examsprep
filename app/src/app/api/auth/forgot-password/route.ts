@@ -23,11 +23,15 @@ export async function POST(request: Request) {
     return NextResponse.json(unavailable("send a reset link"), { status: 503 });
   }
 
-  const payload = (await response.json().catch(() => null)) as { message?: unknown } | null;
+  const payload = (await response.json().catch(() => null)) as { ok?: unknown; message?: unknown } | null;
   const message =
     typeof payload?.message === "string" && payload.message
       ? payload.message
-      : "We couldn’t send a reset link. Email isn’t connected yet.";
+      : "If an account exists for that email, we sent a reset link. It expires in 15 minutes.";
 
-  return NextResponse.json({ ok: false, message }, { status: response.status || 503 });
+  if (response.ok && payload?.ok === true) {
+    return NextResponse.json({ ok: true, message });
+  }
+
+  return NextResponse.json({ ok: false, message }, { status: response.status || 502 });
 }

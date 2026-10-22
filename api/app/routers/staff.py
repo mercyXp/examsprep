@@ -15,6 +15,7 @@ from app.models.identity import Role, User, UserRole
 from app.models.staff import StaffInvitation
 from app.routers.auth import _auth_out
 from app.security import role_slugs
+from app.emailer import send_staff_access_notice, send_staff_role_notice
 from app.staff_invites import (
     ROLE_LABELS,
     StaffInviteError,
@@ -218,6 +219,7 @@ def update_staff_role(
         user.id,
         {"email": user.email, "role": body.role},
     )
+    send_staff_role_notice(user.email, ROLE_LABELS.get(body.role, body.role))
     return {"ok": True, "id": str(user.id), "roles": role_slugs(user)}
 
 
@@ -241,6 +243,7 @@ def update_staff_access(
         user.id,
         {"email": user.email},
     )
+    send_staff_access_notice(user.email, body.active)
     return {"ok": True, "id": str(user.id), "status": user.status.value}
 
 

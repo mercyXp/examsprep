@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Header from "@/app/components/landing/Header";
 import Footer from "@/app/components/landing/Footer";
 
-const AUTH_PATHS = new Set(["/login", "/signup", "/forgot-password"]);
+const AUTH_PATHS = new Set(["/login", "/signup", "/forgot-password", "/reset-password"]);
 
 function SiteChromeInner({ children }: { children: ReactNode }) {
   const pathname = usePathname();

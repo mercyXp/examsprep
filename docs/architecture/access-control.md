@@ -73,7 +73,7 @@ Creator C sees only those two programme–module combinations. Creator D sees on
 
 `POST /api/auth/signup` always creates a **student**. It cannot create a super administrator, program administrator, or content creator.
 
-Staff accounts are created by invitation, not by registering as a student and then upgrading the role. The super administrator opens **Staff**, enters an email, and chooses Creator or Administrator. The API stores a hashed single-use token that expires after 24 hours and emails a link when SMTP is configured. The recipient sets their own password. The invited role is taken from the invitation row. The acceptance request cannot choose a different role, and it cannot grant `super_administrator`.
+Staff accounts are created by invitation, not by registering as a student and then upgrading the role. The super administrator opens **Staff**, enters an email, and chooses Creator or Administrator. The API stores a hashed single-use token that expires after 24 hours and emails a link through Resend when `RESEND_API_KEY` and `EMAIL_FROM` are set. The recipient sets their own password. The invited role is taken from the invitation row. The acceptance request cannot choose a different role, and it cannot grant `super_administrator`.
 
 An email that already belongs to an account, including a student, is refused. Programme and module assignment screens only attach work to someone who already has the staff role.
 

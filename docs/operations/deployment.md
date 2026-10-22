@@ -61,7 +61,7 @@ If signup or sign-in says the account service isn’t running, Vercel could not 
 
 ## Production super administrator
 
-Public signup creates a student and nothing else. Staff assignments can give an existing user `administrator` or `creator`. They never grant `super_administrator`. The demo super administrator (`super@examsprep.local`) is created only when `SEED_DEMO_USERS=true`.
+Public signup creates a student and nothing else. Staff accounts are invited; assignment screens do not promote a student. They never grant `super_administrator`. The demo super administrator (`super@examsprep.local`) is created only when `SEED_DEMO_USERS=true`.
 
 Create the real super administrator once. Both ways below refuse the demo email, the demo password, an email that already belongs to someone, and a second super administrator. An existing account is not promoted. There is no public API and no website form.
 
@@ -89,7 +89,39 @@ python -m app.create_super_admin
 
 The shell command does not create the `super_administrator` role. The Render variables do, when the tables from `alembic upgrade head` exist and that role row is missing. Who may assign the other roles is described in [access-control.md](../architecture/access-control.md).
 
-Creator and administrator accounts are invited from Staff after this account exists. Set `APP_URL` to the Vercel origin with no trailing slash. To email the link, also set `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`, and, when the provider requires it, `SMTP_USERNAME`, `SMTP_PASSWORD`, and `SMTP_TLS`. Without SMTP the invitation is still saved and the Staff page shows the acceptance link once.
+Creator and administrator accounts are invited from Staff after this account exists. Password reset and those invitations are sent with Resend. See [Transactional email](#transactional-email) below.
+
+## Transactional email
+
+Mail is sent by the API through [Resend](https://resend.com). The browser never receives `RESEND_API_KEY`.
+
+On the Render API service set:
+
+```text
+RESEND_API_KEY=re_...
+EMAIL_FROM=ExamsPrep <invites@examsprep.xyz>
+FRONTEND_URL=https://www.examsprep.xyz
+```
+
+`FRONTEND_URL` has no trailing slash. Invitation and password-reset links are built from it. `APP_URL` is used only when `FRONTEND_URL` is empty, which is the local default `http://localhost:3000`.
+
+In Resend, add the domain you send from, then publish the SPF and DKIM records Resend shows for that domain. Wait until Resend marks the domain verified. `EMAIL_FROM` must use an address on that verified domain. Do not put the API key in Git, the frontend, or the Vercel project.
+
+Password reset always answers “If an account exists for that email, we sent a reset link.” It does not say whether the address is registered, and it never includes the link in the API response. Staff invitations still show the acceptance link to the signed-in super administrator only when Resend does not accept the message.
+
+A super administrator can send a fixed test message to their own sign-in address with `POST /api/admin/email/test`. A shell on the API host can do the same:
+
+```bash
+python -m app.send_test_email you@your-domain.com
+```
+
+Apply the password-reset table before relying on reset links:
+
+```bash
+alembic upgrade head
+```
+
+That migration is `20261022_0014`. It adds `password_reset_tokens` and does not change existing user rows.
 
 ## Database access from a laptop
 

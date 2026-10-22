@@ -5,10 +5,23 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_session
+from app.emailer import send_password_changed
 from app.models import AuditLog, Role, User, UserRole
+from app.password_reset import GENERIC_MESSAGE, PasswordResetError, consume_reset, request_reset
 from app.models.enums import UserStatus
 from app.profile import ensure_profile, user_out
-from app.schemas import AuthOut, ErrorOut, ForgotPasswordIn, LoginIn, PasswordIn, ProfileIn, SignupIn, UserOut
+from app.schemas import (
+    AuthOut,
+    ErrorOut,
+    ForgotPasswordIn,
+    LoginIn,
+    MessageOut,
+    PasswordIn,
+    ProfileIn,
+    ResetPasswordIn,
+    SignupIn,
+    UserOut,
+)
 from app.security import (
     create_access_token,
     hash_password,
@@ -157,6 +170,7 @@ def change_password(body: PasswordIn, user: User = Depends(require_user), sessio
         )
     )
     session.flush()
+    send_password_changed(user.email)
     loaded = load_user_by_id(session, user.id)
     assert loaded is not None
     return _auth_out(loaded)
@@ -167,8 +181,18 @@ def google() -> ErrorOut:
     return ErrorOut(message="Google sign-in isn’t connected yet.")
 
 
-@router.post("/forgot-password", response_model=ErrorOut, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-def forgot_password(body: ForgotPasswordIn) -> ErrorOut:
+@router.post("/forgot-password", response_model=MessageOut)
+def forgot_password(body: ForgotPasswordIn, session: Session = Depends(get_session)) -> MessageOut:
     if not _normalize_email(body.email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Enter your email.")
-    return ErrorOut(message="We couldn’t send a reset link. Email isn’t connected yet.")
+    request_reset(session, body.email)
+    return MessageOut(message=GENERIC_MESSAGE)
+
+
+@router.post("/reset-password", response_model=MessageOut)
+def reset_password(body: ResetPasswordIn, session: Session = Depends(get_session)) -> MessageOut:
+    try:
+        consume_reset(session, body.token, body.password)
+    except PasswordResetError as error:
+        raise HTTPException(status_code=error.status_code, detail=error.message) from error
+    return MessageOut(message="Your password has been updated. Sign in with the new one.")

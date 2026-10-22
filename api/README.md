@@ -28,7 +28,7 @@ uvicorn app.main:app --reload
 - Coming-soon programme stubs: Accounting, Law, Business, Health Sciences
 - Demo assignments: Ann Admin → Computing; Cam Creator → Computing IT212 and IT213
 
-Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`, `super@examsprep.local`. Google and password reset are still disconnected.
+Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`, `super@examsprep.local`. Google sign-in is still disconnected. Password reset and staff invitations send mail through Resend when `RESEND_API_KEY` and `EMAIL_FROM` are set. See [deployment.md](../docs/operations/deployment.md).
 
 Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md). Lesson JSON schema and studio notes: [docs/cms/lesson-studio.md](../docs/cms/lesson-studio.md).
 

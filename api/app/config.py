@@ -13,13 +13,16 @@ class Settings(BaseSettings):
     super_admin_name: str = ""
     super_admin_email: str = ""
     super_admin_password: str = ""
+    frontend_url: str = ""
     app_url: str = "http://localhost:3000"
-    smtp_host: str = ""
-    smtp_port: int = 587
-    smtp_username: str = ""
-    smtp_password: str = ""
-    smtp_from: str = ""
-    smtp_tls: bool = True
+    resend_api_key: str = ""
+    email_from: str = ""
 
 
 settings = Settings()
+
+
+def public_origin() -> str:
+    """Site origin used in emailed links. FRONTEND_URL wins; APP_URL remains for older local config."""
+    configured = (settings.frontend_url or settings.app_url).strip().rstrip("/")
+    return configured or "http://localhost:3000"

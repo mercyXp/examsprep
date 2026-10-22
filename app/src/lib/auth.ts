@@ -219,11 +219,39 @@ export async function signOut(): Promise<void> {
   await fetch("/api/auth/logout", { method: "POST" });
 }
 
-export async function requestPasswordReset(email: string): Promise<SignInResult> {
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ ok: true; message: string } | { ok: false; message: string }> {
   const response = await fetch("/api/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
-  return readResult(response);
+  const data: unknown = await response.json().catch(() => null);
+  const payload = data && typeof data === "object" ? (data as { ok?: unknown; message?: unknown }) : null;
+  const message =
+    typeof payload?.message === "string" && payload.message
+      ? payload.message
+      : "If an account exists for that email, we sent a reset link. It expires in 15 minutes.";
+  if (response.ok && payload?.ok === true) return { ok: true, message };
+  return { ok: false, message };
+}
+
+export async function resetPassword(
+  token: string,
+  password: string,
+): Promise<{ ok: true; message: string } | { ok: false; message: string }> {
+  const response = await fetch("/api/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password }),
+  });
+  const data: unknown = await response.json().catch(() => null);
+  const payload = data && typeof data === "object" ? (data as { ok?: unknown; message?: unknown }) : null;
+  const message =
+    typeof payload?.message === "string" && payload.message
+      ? payload.message
+      : "This reset link could not be used.";
+  if (response.ok && payload?.ok === true) return { ok: true, message };
+  return { ok: false, message };
 }

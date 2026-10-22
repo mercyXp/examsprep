@@ -66,7 +66,11 @@ export default function StaffPage() {
 
   function showIssued(emailed: boolean, acceptUrl: string | null) {
     setLink(acceptUrl ?? "");
-    setNotice(emailed ? "Invitation email sent." : "Invitation saved. Email is not configured, so copy the link below.");
+    setNotice(
+      emailed
+        ? "Invitation email sent."
+        : "The invitation was saved, but the email was not sent. Copy the link below.",
+    );
   }
 
   async function onInvite(event: FormEvent) {

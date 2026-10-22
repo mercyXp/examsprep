@@ -19,6 +19,16 @@ class ForgotPasswordIn(BaseModel):
     email: str = Field(min_length=3, max_length=255)
 
 
+class ResetPasswordIn(BaseModel):
+    token: str = Field(min_length=20, max_length=256)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class MessageOut(BaseModel):
+    ok: bool = True
+    message: str
+
+
 class ProfileIn(BaseModel):
     name: str = Field(min_length=1, max_length=120)
 
