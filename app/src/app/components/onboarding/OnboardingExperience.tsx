@@ -127,7 +127,11 @@ export default function OnboardingExperience() {
   );
 
   const toggleModule = (code: string) => {
-    setModules((current) => (current.includes(code) ? current.filter((item) => item !== code) : [...current, code]));
+    setModules((current) => {
+      if (current.includes(code)) return current.filter((item) => item !== code);
+      if (current.length >= 7) return current;
+      return [...current, code];
+    });
   };
 
   const toggleDay = (id: string) => {
@@ -197,7 +201,8 @@ export default function OnboardingExperience() {
     setBusy(true);
     try {
       const saved = await saveOnboarding({ onboarding_step: nextStep, ...extra });
-      if (saved) setUser(saved);
+      if (!saved) return;
+      setUser(saved);
       setStep(nextStep);
     } finally {
       setBusy(false);
@@ -343,7 +348,7 @@ export default function OnboardingExperience() {
                       onClick={() => {
                         if (year === item) return;
                         setYear(item);
-                        setModules((computingModules[`${item}-${semester}`] ?? []).map((mod) => mod.code));
+                        setModules((computingModules[`${item}-${semester}`] ?? []).map((mod) => mod.code).slice(0, 7));
                       }}
                     >
                       Year {item}
@@ -363,7 +368,7 @@ export default function OnboardingExperience() {
                       onClick={() => {
                         if (semester === item) return;
                         setSemester(item);
-                        setModules((computingModules[`${year}-${item}`] ?? []).map((mod) => mod.code));
+                        setModules((computingModules[`${year}-${item}`] ?? []).map((mod) => mod.code).slice(0, 7));
                       }}
                     >
                       Semester {item}
@@ -385,8 +390,8 @@ export default function OnboardingExperience() {
             <>
               <p className="onb-lede">
                 {publishedModules.length
-                  ? `Pick the Year ${year} Semester ${semester} modules you’re preparing for.`
-                  : `Modules for Year ${year} Semester ${semester} aren’t published yet. Computing currently has Year 2 Semester 1.`}
+                  ? `These Year ${year} Semester ${semester} modules are a starting point. You can add modules from other years later in Settings, up to seven at a time.`
+                  : `Modules for Year ${year} Semester ${semester} aren’t published yet. You can add published modules from your programme later in Settings.`}
               </p>
               <ul className="onb-modules">
                 {publishedModules.map((mod, index) => {

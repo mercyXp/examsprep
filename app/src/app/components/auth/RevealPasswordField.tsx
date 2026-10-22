@@ -8,6 +8,7 @@ type RevealPasswordFieldProps = {
   onChange: (value: string) => void;
   autoComplete: string;
   name: string;
+  minLength?: number;
 };
 
 function EyeIcon({ open }: { open: boolean }) {
@@ -37,6 +38,7 @@ export default function RevealPasswordField({
   onChange,
   autoComplete,
   name,
+  minLength = 8,
 }: RevealPasswordFieldProps) {
   const id = useId();
   const [visible, setVisible] = useState(false);
@@ -52,7 +54,7 @@ export default function RevealPasswordField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           required
-          minLength={8}
+          minLength={minLength}
           autoComplete={autoComplete}
         />
         <button

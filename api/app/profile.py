@@ -30,6 +30,7 @@ def ensure_profile(session: Session, user: User) -> StudentProfile:
         pace="balanced",
         study_days=["mon", "tue", "wed", "thu", "fri"],
         module_codes=[],
+        module_history=[],
         module_exam_plans={},
         onboarding_step=1,
         onboarding_completed=False,

@@ -12,8 +12,16 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from app.access import load_scope
 from app.announcements import load_announcement, student_can_see, student_feed
 from app.calendar import resolve_student_schedule
+from app.course_selection import (
+    ACTIVE_LIMIT,
+    CourseSelectionError,
+    deselect_module,
+    published_modules,
+    select_module,
+)
 from app.db import get_session
 from app.models import AcademicYear, Chapter, Lesson, LessonProgress, LessonVersion, Module, Semester, User
+from app.profile import ensure_profile
 from app.models.comms import AnnouncementRead
 from app.models.enums import ContentStatus
 from app.security import STAFF_ROLES, require_user, role_slugs
@@ -26,6 +34,10 @@ class ProgressIn(BaseModel):
     revealed_units: int = Field(ge=0)
     check_results: dict[str, Any] = Field(default_factory=dict)
     completed: bool = False
+
+
+class SelectionIn(BaseModel):
+    code: str = Field(min_length=2, max_length=32)
 
 
 def load_lesson(session: Session, lesson_id: uuid.UUID) -> Lesson | None:
@@ -41,7 +53,18 @@ def load_lesson(session: Session, lesson_id: uuid.UUID) -> Lesson | None:
     ).unique().one_or_none()
 
 
-def visible_module_ids(session: Session, user: User) -> set[uuid.UUID] | None:
+def _student_codes(user: User, *, include_history: bool) -> list[str]:
+    profile = user.profile
+    if profile is None:
+        return []
+    active = [item for item in (profile.module_codes or []) if isinstance(item, str)]
+    if not include_history:
+        return active
+    history = [item for item in (profile.module_history or []) if isinstance(item, str) and item not in active]
+    return [*active, *history]
+
+
+def visible_module_ids(session: Session, user: User, *, include_history: bool = False) -> set[uuid.UUID] | None:
     """None means all published modules. A set filters. Empty set means none."""
     roles = set(role_slugs(user))
     if STAFF_ROLES.intersection(roles):
@@ -49,11 +72,16 @@ def visible_module_ids(session: Session, user: User) -> set[uuid.UUID] | None:
         if scope.super_admin:
             return None
         return set(scope.module_ids or set())
-    profile = user.profile
-    codes = [item for item in (profile.module_codes or []) if isinstance(item, str)] if profile else []
+    codes = _student_codes(user, include_history=include_history)
     if codes:
         return set(session.scalars(select(Module.id).where(Module.code.in_(codes), Module.status == ContentStatus.PUBLISHED)))
     return set()
+
+
+def _require_student(user: User) -> None:
+    roles = set(role_slugs(user))
+    if "student" not in roles or STAFF_ROLES.intersection(roles):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Course selection is for students.")
 
 
 def published_lesson(session: Session, lesson_id: uuid.UUID, user: User, *, preview: bool = False) -> Lesson:
@@ -61,7 +89,7 @@ def published_lesson(session: Session, lesson_id: uuid.UUID, user: User, *, prev
     staff = bool(STAFF_ROLES.intersection(role_slugs(user)))
     if lesson is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Lesson not found.")
-    allowed = visible_module_ids(session, user)
+    allowed = visible_module_ids(session, user, include_history=True)
     if allowed is not None and lesson.module_id not in allowed:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Lesson not found.")
     if lesson.status == ContentStatus.PUBLISHED and lesson.published_version_id is not None:
@@ -104,7 +132,7 @@ def exam_schedule(user: User = Depends(require_user), session: Session = Depends
 def list_modules(user: User = Depends(require_user), session: Session = Depends(get_session)) -> dict[str, Any]:
     query = (
         select(Module)
-        .options(joinedload(Module.semester))
+        .options(joinedload(Module.semester).joinedload(Semester.academic_year))
         .where(Module.status == ContentStatus.PUBLISHED)
         .order_by(Module.code)
     )
@@ -133,6 +161,8 @@ def list_modules(user: User = Depends(require_user), session: Session = Depends(
         continue_lesson = next((lesson for lesson in lessons if lesson.id in started and lesson.id not in completed_ids), None)
         if continue_lesson is None:
             continue_lesson = next((lesson for lesson in lessons if lesson.id not in completed_ids), None)
+        semester = module.semester
+        year = semester.academic_year if semester is not None else None
         items.append(
             {
                 "id": str(module.id),
@@ -141,10 +171,114 @@ def list_modules(user: User = Depends(require_user), session: Session = Depends(
                 "description": module.description or "",
                 "objectives": module.objectives or [],
                 "coverColor": module.cover_color,
+                "yearNumber": year.year_number if year is not None else None,
+                "semesterNumber": semester.semester_number if semester is not None else None,
                 "totalLessons": total,
                 "completedLessons": done,
                 "progressPercent": int(round((done / total) * 100)) if total else 0,
                 "continueLessonId": str(continue_lesson.id) if continue_lesson else None,
+            }
+        )
+    return {"ok": True, "items": items}
+
+
+def _catalogue_payload(session: Session, user: User) -> dict[str, Any]:
+    profile = ensure_profile(session, user)
+    active = [item for item in (profile.module_codes or []) if isinstance(item, str)]
+    items = []
+    for module in published_modules(session, profile.programme):
+        semester = module.semester
+        year = semester.academic_year if semester is not None else None
+        items.append(
+            {
+                "id": str(module.id),
+                "code": module.code,
+                "name": module.name,
+                "yearNumber": year.year_number if year is not None else None,
+                "semesterNumber": semester.semester_number if semester is not None else None,
+                "selected": module.code in active,
+            }
+        )
+    return {
+        "ok": True,
+        "programme": profile.programme,
+        "yearOfStudy": profile.year_of_study,
+        "semesterOfStudy": profile.semester_of_study,
+        "limit": ACTIVE_LIMIT,
+        "activeCount": len(active),
+        "items": items,
+    }
+
+
+@router.get("/catalogue")
+def course_catalogue(user: User = Depends(require_user), session: Session = Depends(get_session)) -> dict[str, Any]:
+    _require_student(user)
+    return _catalogue_payload(session, user)
+
+
+@router.post("/selections")
+def add_course(body: SelectionIn, user: User = Depends(require_user), session: Session = Depends(get_session)) -> dict[str, Any]:
+    _require_student(user)
+    profile = ensure_profile(session, user)
+    try:
+        select_module(session, profile, body.code.strip())
+    except CourseSelectionError as error:
+        raise HTTPException(status_code=error.status_code, detail=error.message) from error
+    session.flush()
+    return _catalogue_payload(session, user)
+
+
+@router.delete("/selections/{code}")
+def remove_course(code: str, user: User = Depends(require_user), session: Session = Depends(get_session)) -> dict[str, Any]:
+    _require_student(user)
+    profile = ensure_profile(session, user)
+    try:
+        deselect_module(profile, code)
+    except CourseSelectionError as error:
+        raise HTTPException(status_code=error.status_code, detail=error.message) from error
+    session.flush()
+    return _catalogue_payload(session, user)
+
+
+@router.get("/history")
+def learning_history(user: User = Depends(require_user), session: Session = Depends(get_session)) -> dict[str, Any]:
+    _require_student(user)
+    profile = ensure_profile(session, user)
+    history = [item for item in (profile.module_history or []) if isinstance(item, str)]
+    modules = [module for module in published_modules(session, profile.programme) if module.code in history]
+    if not modules:
+        return {"ok": True, "items": []}
+    published = list(
+        session.scalars(
+            select(Lesson).where(
+                Lesson.module_id.in_([module.id for module in modules]),
+                Lesson.status == ContentStatus.PUBLISHED,
+                Lesson.published_version_id.is_not(None),
+            )
+        )
+    )
+    progress_rows = list(session.scalars(select(LessonProgress).where(LessonProgress.user_id == user.id)))
+    completed_ids = {row.lesson_id for row in progress_rows if row.completed_at}
+    by_module: dict[uuid.UUID, list[Lesson]] = {}
+    for lesson in published:
+        by_module.setdefault(lesson.module_id, []).append(lesson)
+    items = []
+    for module in modules:
+        lessons = by_module.get(module.id, [])
+        total = len(lessons)
+        done = sum(1 for lesson in lessons if lesson.id in completed_ids)
+        semester = module.semester
+        year = semester.academic_year if semester is not None else None
+        items.append(
+            {
+                "id": str(module.id),
+                "code": module.code,
+                "name": module.name,
+                "yearNumber": year.year_number if year is not None else None,
+                "semesterNumber": semester.semester_number if semester is not None else None,
+                "totalLessons": total,
+                "completedLessons": done,
+                "progressPercent": int(round((done / total) * 100)) if total else 0,
             }
         )
     return {"ok": True, "items": items}
@@ -155,7 +289,7 @@ def module_overview(module_id: uuid.UUID, user: User = Depends(require_user), se
     module = session.get(Module, module_id)
     if module is None or module.status != ContentStatus.PUBLISHED:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Course not found.")
-    allowed = visible_module_ids(session, user)
+    allowed = visible_module_ids(session, user, include_history=True)
     if allowed is not None and module.id not in allowed:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Course not found.")
     chapters = list(session.scalars(select(Chapter).where(Chapter.module_id == module.id).order_by(Chapter.position, Chapter.title)))

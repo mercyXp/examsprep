@@ -22,7 +22,7 @@ export default function CoursesPage() {
   const shown = courses.filter((item) => `${item.code} ${item.name}`.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
-    <AppShell variant="student" title="My Courses" subtitle="Open a module to see chapters and published lessons.">
+    <AppShell variant="student" title="My Courses" subtitle="These are the modules you chose to study. Manage them in Settings.">
       <div className="dash-body cms-stack">
         <label className="dash-search">
           <span className="sr-only">Search courses</span>
@@ -34,7 +34,12 @@ export default function CoursesPage() {
         <ul className="cms-grid">
           {shown.map((course) => (
             <li key={course.id} className="dash-card">
-              <p className="dash-kicker">{course.code}</p>
+              <p className="dash-kicker">
+                {course.code}
+                {course.yearNumber && course.semesterNumber
+                  ? ` · Year ${course.yearNumber} · Semester ${course.semesterNumber}`
+                  : ""}
+              </p>
               <h2>{course.name}</h2>
               <p>{course.description || "No description yet."}</p>
               <div className="dash-bar" aria-label={`${course.progressPercent} percent complete`}>

@@ -6636,6 +6636,129 @@ html[data-theme="dark"] .assign-role.is-creator {
   align-items: center;
 }
 
+.programme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+
+.programme-row strong,
+.programme-row span {
+  display: block;
+}
+
+.programme-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.programme-lock {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.course-browse-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.course-browse-head h2 {
+  margin: 0;
+}
+
+.course-browse-head span {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #efeaff;
+  color: #5b4dff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.course-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.course-filters button,
+.course-list button,
+.course-list a {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.course-filters button.is-on {
+  border-color: #5b4dff;
+  background: #5b4dff;
+  color: white;
+}
+
+.course-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.course-list strong,
+.course-list span {
+  display: block;
+}
+
+.course-list span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.course-list button.is-added {
+  border-color: transparent;
+  color: #067647;
+}
+
+.settings-fields .invite-secret input {
+  padding-right: 44px;
+}
+
+.settings-fields .invite-secret-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
 .settings-panel .dash-primary,
 .settings-panel .dash-secondary,
 .settings-actions .dash-primary,

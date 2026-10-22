@@ -4,6 +4,12 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.course_selection import (
+    CourseSelectionError,
+    accept_onboarding_codes,
+    initial_module_codes,
+    published_codes,
+)
 from app.db import get_session
 from app.models import User
 from app.profile import DEFAULT_EXAM, ensure_profile, user_out
@@ -14,7 +20,6 @@ router = APIRouter(prefix="/api/onboarding", tags=["onboarding"])
 
 ALLOWED_PACES = {"relaxed", "balanced", "intensive"}
 ALLOWED_DAYS = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"}
-ALLOWED_MODULES = {"IT211", "IT212", "IT213", "IT214", "IT215"}
 ALLOWED_PROGRAMMES = {"Bachelor of Science in Computing"}
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -70,9 +75,10 @@ def save_onboarding(
         table = dict(profile.exam_timetable or {})
         profile.exam_timetable = {code: day for code, day in table.items() if day in allowed}
     if body.exam_timetable is not None:
+        allowed_codes = published_codes(session, profile.programme)
         cleaned: dict[str, str] = {}
         for code, day in body.exam_timetable.items():
-            if code not in ALLOWED_MODULES or not DATE_RE.match(day):
+            if code not in allowed_codes or not DATE_RE.match(day):
                 continue
             cleaned[code] = day
         profile.exam_timetable = cleaned
@@ -83,11 +89,15 @@ def save_onboarding(
     if body.study_days is not None:
         profile.study_days = [day for day in body.study_days if day in ALLOWED_DAYS]
     if body.module_codes is not None:
-        profile.module_codes = [code for code in body.module_codes if code in ALLOWED_MODULES]
+        try:
+            profile.module_codes = accept_onboarding_codes(session, profile, body.module_codes)
+        except CourseSelectionError as error:
+            raise HTTPException(status_code=error.status_code, detail=error.message) from error
+    allowed_for_plans = set(profile.module_codes or []) | published_codes(session, profile.programme)
     if body.module_exam_plans is not None:
         plans: dict[str, dict] = {}
         for code, raw in body.module_exam_plans.items():
-            if code not in ALLOWED_MODULES or not isinstance(raw, dict):
+            if code not in allowed_for_plans or not isinstance(raw, dict):
                 continue
             exam_type = raw.get("examType") if isinstance(raw.get("examType"), str) else "regular"
             date_mode = raw.get("dateMode") if isinstance(raw.get("dateMode"), str) else "official"
@@ -129,7 +139,7 @@ def save_onboarding(
         profile.onboarding_completed = True
         profile.onboarding_step = 5
         if not profile.module_codes:
-            profile.module_codes = sorted(ALLOWED_MODULES)
+            profile.module_codes = initial_module_codes(session, profile)
         if not profile.study_days:
             profile.study_days = ["mon", "tue", "wed", "thu", "fri"]
         if profile.exam_date is None:

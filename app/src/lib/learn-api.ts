@@ -9,6 +9,8 @@ export type CourseSummary = {
   description: string;
   objectives: string[];
   coverColor: string | null;
+  yearNumber?: number | null;
+  semesterNumber?: number | null;
   totalLessons: number;
   completedLessons: number;
   progressPercent: number;
@@ -59,6 +61,61 @@ export type StudentLesson = {
   previousLessonId: string | null;
   progress: LessonProgress;
 };
+
+export type CatalogueCourse = {
+  id: string;
+  code: string;
+  name: string;
+  yearNumber: number | null;
+  semesterNumber: number | null;
+  selected: boolean;
+};
+
+export type CourseCatalogue = {
+  programme: string | null;
+  yearOfStudy: number | null;
+  semesterOfStudy: number | null;
+  limit: number;
+  activeCount: number;
+  items: CatalogueCourse[];
+};
+
+export type HistoryCourse = {
+  id: string;
+  code: string;
+  name: string;
+  yearNumber: number | null;
+  semesterNumber: number | null;
+  totalLessons: number;
+  completedLessons: number;
+  progressPercent: number;
+};
+
+export async function loadCatalogue() {
+  const result = await api<CourseCatalogue>("/api/learn/catalogue");
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data };
+}
+
+export async function addCourse(code: string) {
+  return loadCatalogueResult("/api/learn/selections", { method: "POST", body: JSON.stringify({ code }) });
+}
+
+export async function removeCourse(code: string) {
+  return loadCatalogueResult(`/api/learn/selections/${encodeURIComponent(code)}`, { method: "DELETE" });
+}
+
+async function loadCatalogueResult(path: string, init: RequestInit) {
+  const result = await api<CourseCatalogue>(path, init);
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data };
+}
+
+export async function loadLearningHistory() {
+  const result = await api<{ items: HistoryCourse[] }>("/api/learn/history");
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data.items ?? [] };
+}
 
 export async function loadCourses() {
   const result = await api<{ items: CourseSummary[] }>("/api/learn/modules");

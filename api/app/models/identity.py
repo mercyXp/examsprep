@@ -53,6 +53,7 @@ class StudentProfile(TimestampMixin, Base):
     pace: Mapped[str] = mapped_column(String(16), nullable=False, default="balanced", server_default="balanced")
     study_days: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
     module_codes: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
+    module_history: Mapped[list] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
     module_exam_plans: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
     revision_start: Mapped[date | None] = mapped_column(Date, nullable=True)
     onboarding_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
