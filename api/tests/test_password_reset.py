@@ -99,6 +99,8 @@ class PasswordResetTests(unittest.TestCase):
                 settings.email_from = previous_from
         payload = send.call_args.args[0]
         self.assertIn("/reset-password?token=", payload["html"])
+        self.assertIn("Reset My Password", payload["html"])
+        self.assertIn("15 minutes", payload["html"])
         self.assertIn("/reset-password?token=", payload["text"])
         stored = self.session.scalar(
             select(PasswordResetToken).where(PasswordResetToken.used_at.is_(None))

@@ -9128,7 +9128,43 @@ html[data-theme="dark"] .admin-kpis .is-blue {
   color: inherit;
 }
 
-.invite-card button {
+.invite-field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.invite-secret {
+  position: relative;
+}
+
+.invite-secret input {
+  padding-right: 44px;
+}
+
+.invite-card .invite-secret-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.invite-card .invite-secret-toggle:hover,
+.invite-card .invite-secret-toggle[aria-pressed="true"] {
+  color: var(--ink);
+}
+
+.invite-card button[type="submit"] {
   min-height: 42px;
   border: 0;
   border-radius: 12px;

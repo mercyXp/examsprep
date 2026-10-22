@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
+import RevealPasswordField from "@/app/components/auth/RevealPasswordField";
 import { afterAuthPath } from "@/lib/auth";
 
 type Preview = {
@@ -19,6 +20,7 @@ export default function InviteAccept() {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -32,8 +34,12 @@ export default function InviteAccept() {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    setBusy(true);
     setError("");
+    if (password !== confirm) {
+      setError("Those passwords don’t match.");
+      return;
+    }
+    setBusy(true);
     const response = await fetch(`/api/invitations/${encodeURIComponent(token)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -81,17 +87,20 @@ export default function InviteAccept() {
               Your name
               <input value={name} onChange={(event) => setName(event.target.value)} required autoComplete="name" />
             </label>
-            <label>
-              Password
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
-            </label>
+            <RevealPasswordField
+              label="Password"
+              name="password"
+              value={password}
+              onChange={setPassword}
+              autoComplete="new-password"
+            />
+            <RevealPasswordField
+              label="Confirm password"
+              name="confirm"
+              value={confirm}
+              onChange={setConfirm}
+              autoComplete="new-password"
+            />
             {error ? <p className="cms-error">{error}</p> : null}
             <button type="submit" disabled={busy}>
               {busy ? "Activating…" : "Activate account"}
