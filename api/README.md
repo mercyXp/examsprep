@@ -36,20 +36,8 @@ Access model: [docs/architecture/access-control.md](../docs/architecture/access-
 python -m unittest tests.test_cms_slides tests.test_media
 ```
 
-## Production super administrator
+## Production
 
-Public signup creates students only. `python -m app.seed` creates the demo super administrator only when `SEED_DEMO_USERS=true`. Production must leave that flag `false`.
+Signup creates students only. The demo super administrator is created only when `SEED_DEMO_USERS=true`. Production leaves that flag `false`.
 
-Create the real super administrator once, from the API environment that already has `DATABASE_URL` set. The command prompts for the name, email, and password. It does not print the password or the database URL.
-
-```bash
-python -m app.create_super_admin
-```
-
-The `super_administrator` role must already exist. A database restored from the local backup has it. On an empty migrated database, `SEED_DEMO_USERS=false python -m app.seed` creates roles and the course catalogue without demo accounts, and still does not create a super administrator. Run the bootstrap command after that.
-
-The command refuses demo credentials, an email that already exists, and a second super administrator. It is not available from the API or the website.
-
-## Railway
-
-Create a Postgres service and a FastAPI service in the same project. Set `DATABASE_URL` to a `postgresql+psycopg://` URL. Run `alembic upgrade head` and `python -m app.seed` on deploy before storing student records.
+Create the real super administrator once with `SUPER_ADMIN_NAME`, `SUPER_ADMIN_EMAIL`, and `SUPER_ADMIN_PASSWORD` on the API host, or with `python -m app.create_super_admin` where a shell is available. Hosting, the database URL scheme, and the one-time account steps are in [docs/operations/deployment.md](../docs/operations/deployment.md). Who can assign the other roles is in [docs/architecture/access-control.md](../docs/architecture/access-control.md).

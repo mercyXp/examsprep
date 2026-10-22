@@ -26,19 +26,19 @@ Browser
 | Layer | Choice | Host |
 | --- | --- | --- |
 | Frontend | Next.js, React, TypeScript, Tailwind | Vercel |
-| Backend | FastAPI, Pydantic, OpenAPI | Railway |
-| Database | PostgreSQL, SQLAlchemy 2.x, Alembic | Railway (managed) |
-| Auth | FastAPI sessions or tokens; roles in Postgres. Clerk is not assumed | Railway |
+| Backend | FastAPI, Pydantic, OpenAPI | Render |
+| Database | PostgreSQL, SQLAlchemy 2.x, Alembic | Render Postgres |
+| Auth | Email and password, JWT cookie `examsprep_token`, roles in Postgres. Clerk is not assumed | Render |
 | AI | Provider API behind a replaceable layer; RAG over **published** notes later | External API |
 | Files | Object storage for PDFs, images, and lecture notes | Added when needed |
 
 ```
-Browser → Next.js (Vercel) → FastAPI (Railway) → PostgreSQL (Railway, private)
+Browser → Next.js (Vercel) → FastAPI (Render) → PostgreSQL (Render, private)
                                   ├─ AI provider (explanations, quiz draft)
                                   └─ Object storage (later)
 ```
 
-Start with Vercel + Railway. Do not add extra services until the product needs them. See [operations/deployment.md](../operations/deployment.md).
+The browser never receives `DATABASE_URL`. Vercel calls Render through the server variable `API_URL`. See [operations/deployment.md](../operations/deployment.md).
 
 ## Academic hierarchy
 

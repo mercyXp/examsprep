@@ -115,4 +115,4 @@ Other years/semesters: rows can exist with no modules until the official list is
 
 ## Backup
 
-When PostgreSQL is live on Railway: use the provider’s managed backups, keep credentials out of Git, run schema changes through Alembic, and test a restore before storing real student records. Record the runbook in `docs/operations/` at that time.
+Postgres for the deployed API is on Render. Use the provider’s backups, keep credentials out of Git, run schema changes through Alembic, and test a restore before storing real student records. Connection details are in [operations/deployment.md](../operations/deployment.md).

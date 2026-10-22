@@ -1,10 +1,14 @@
 """Create one production super administrator.
 
-Run once against the target database:
+On a host with a shell:
 
     python -m app.create_super_admin
 
-This module is not imported at application startup and is not exposed as an API.
+On Render free, which has no shell, set SUPER_ADMIN_NAME, SUPER_ADMIN_EMAIL, and
+SUPER_ADMIN_PASSWORD on the API service and redeploy. Startup creates the account
+once, then those three variables should be deleted.
+
+Neither path is exposed as an API.
 """
 
 from __future__ import annotations
@@ -80,12 +84,14 @@ def _require_tables(session: Session) -> None:
         raise BootstrapError("Required tables are missing. Run alembic upgrade head before creating a super administrator.")
 
 
-def create_super_admin(session: Session, *, name: str, email: str, password: str) -> User:
+def create_super_admin(session: Session, *, name: str, email: str, password: str, ensure_role: bool = False) -> User:
     """Insert one super administrator. Does not commit. Raises BootstrapError without changing existing accounts."""
     name = name.strip()
     email = email.strip().lower()
     validate_credentials(name, email, password)
     _require_tables(session)
+    if ensure_role:
+        _ensure_super_role(session)
 
     role = session.scalar(select(Role).where(Role.slug == SUPER_ROLE))
     if role is None:
@@ -112,14 +118,64 @@ def create_super_admin(session: Session, *, name: str, email: str, password: str
     return user
 
 
-def run_bootstrap(session: Session, *, name: str, email: str, password: str) -> User:
+def run_bootstrap(session: Session, *, name: str, email: str, password: str, ensure_role: bool = False) -> User:
     try:
-        user = create_super_admin(session, name=name, email=email, password=password)
+        user = create_super_admin(session, name=name, email=email, password=password, ensure_role=ensure_role)
         session.commit()
         return user
     except Exception:
         session.rollback()
         raise
+
+
+def _environment_credentials() -> tuple[str, str, str] | None:
+    name = settings.super_admin_name.strip()
+    email = settings.super_admin_email.strip()
+    password = settings.super_admin_password
+    if not name and not email and not password:
+        return None
+    if not name or not email or not password:
+        raise BootstrapError(
+            "Set SUPER_ADMIN_NAME, SUPER_ADMIN_EMAIL, and SUPER_ADMIN_PASSWORD together, or leave all three empty."
+        )
+    return name, email, password
+
+
+def _ensure_super_role(session: Session) -> None:
+    role = session.scalar(select(Role).where(Role.slug == SUPER_ROLE))
+    if role is not None:
+        return
+    session.add(
+        Role(
+            slug=SUPER_ROLE,
+            name="Super administrator",
+            description="Assigns roles, owns platform configuration, and inspects audit logs.",
+        )
+    )
+    session.flush()
+
+
+def bootstrap_from_environment(session: Session) -> str | None:
+    """Create the super administrator from env vars. None means the variables are unset."""
+    credentials = _environment_credentials()
+    if credentials is None:
+        return None
+    name, email, password = credentials
+    validate_credentials(name, email, password)
+    user = run_bootstrap(session, name=name, email=email, password=password, ensure_role=True)
+    return f"Super administrator created for {user.email}."
+
+
+def apply_environment_bootstrap(session: Session) -> str | None:
+    """Startup wrapper. Returns a log line, or None when no bootstrap was requested."""
+    try:
+        return bootstrap_from_environment(session)
+    except BootstrapError as error:
+        session.rollback()
+        return f"Super administrator was not created: {error}"
+    except Exception:
+        session.rollback()
+        return "Super administrator was not created. Check DATABASE_URL and run alembic upgrade head."
 
 
 def main() -> int:

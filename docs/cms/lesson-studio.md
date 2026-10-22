@@ -30,11 +30,11 @@ Each block is one reveal item by default. It has `id`, `type`, type-specific fie
 
 Supported `type` values: `text`, `code`, `image`, `callout`, `check`, `video`, `audio`, `table`.
 
-Text and callout blocks can include word formatting: `**bold**`, `*italic*`, `++underline++`, and `==highlight==`. A text block can also set `font` to `sans`, `serif`, or `mono`. The editor toolbar writes these markers, and the player renders them.
+Text and callout blocks can include word formatting: `**bold**`, `*italic*`, `++underline++`, and `==highlight==`. A text block can also set `font` to `sans`, `serif`, or `mono`. The editor toolbar writes these markers, and the player renders them. **Next line**, and Enter in the text box, store a newline. The player shows that break.
 
-Text and callout blocks can include word formatting: `**bold**`, `*italic*`, `++underline++`, and `==highlight==`. A text block can also set `font` to `sans`, `serif`, or `mono`. The editor toolbar writes these markers; the player renders them.
+`revealMode: "sentence"` is optional. The default is `block`, where one block is one reveal. **+ Add sentence** inserts another text block in the reveal sequence. **Split** divides an existing text block into sentence blocks. Do not use sentence mode as the default.
 
-`revealMode: "sentence"` is optional. It splits paragraphs into sentences at play time. Do not use it as the default. Authors who want sentence-by-sentence reveals should add one text block per sentence, or use **Split sentences**.
+Authors can remove a text block, image, video, audio clip, or link from the slide. The canvas, the inspector, and the reveal list ask for confirmation. Table headers are separated with commas and cells with `|`. Spaces typed inside a cell are kept.
 
 Presentation mode and full-notes mode read the same `slides` array. There is no second copy of the notes.
 

@@ -204,6 +204,7 @@ def module_out(module: Module, *, chapter_count: int = 0, lesson_count: int = 0,
         "chapterCount": chapter_count,
         "lessonCount": lesson_count,
         "publishedLessons": published_lessons,
+        "createdAt": module.created_at.isoformat() if module.created_at else None,
         "updatedAt": module.updated_at.isoformat() if module.updated_at else None,
     }
 
@@ -323,19 +324,52 @@ def overview(scope: AccessScope = SCOPE, session: Session = Depends(get_session)
     }
 
 
+def _scoped_student_ids(session: Session, scope: AccessScope):
+    query = select(User.id).join(StudentProfile, StudentProfile.user_id == User.id)
+    if not scope.super_admin:
+        names = [item.name for item in session.scalars(select(Programme).where(Programme.id.in_(scope.programme_ids)))]
+        query = query.where(StudentProfile.programme.in_(names or ["__none__"]))
+    return query
+
+
 @router.get("/students")
 def list_students(
     q: str = "",
+    status_filter: str = Query("", alias="status"),
+    programme: str = "",
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     scope: AccessScope = SCOPE,
     session: Session = Depends(get_session),
 ) -> dict[str, Any]:
     scope.require_students()
+    scoped = _scoped_student_ids(session, scope)
+    summary = {
+        "total": session.scalar(select(func.count()).select_from(scoped.subquery())) or 0,
+        "active": session.scalar(select(func.count()).select_from(scoped.where(User.status == UserStatus.ACTIVE).subquery())) or 0,
+        "withProgress": session.scalar(
+            select(func.count(func.distinct(LessonProgress.user_id))).where(LessonProgress.user_id.in_(scoped))
+        )
+        or 0,
+        "completedLessons": session.scalar(
+            select(func.count(func.distinct(LessonProgress.user_id))).where(
+                LessonProgress.user_id.in_(scoped),
+                LessonProgress.completed_at.is_not(None),
+            )
+        )
+        or 0,
+    }
     query = select(User).options(joinedload(User.profile), joinedload(User.roles).joinedload(UserRole.role)).join(User.profile)
     if not scope.super_admin:
         names = [item.name for item in session.scalars(select(Programme).where(Programme.id.in_(scope.programme_ids)))]
         query = query.where(StudentProfile.programme.in_(names or ["__none__"]))
+    if status_filter.strip():
+        try:
+            query = query.where(User.status == UserStatus(status_filter.strip().lower()))
+        except ValueError as error:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Choose active, pending, or suspended.") from error
+    if programme.strip():
+        query = query.where(StudentProfile.programme == programme.strip())
     if q.strip():
         like = f"%{q.strip()}%"
         query = query.where(or_(User.name.ilike(like), User.email.ilike(like)))
@@ -366,7 +400,7 @@ def list_students(
                 "createdAt": user.created_at.isoformat() if user.created_at else None,
             }
         )
-    return {"ok": True, "total": total, "page": page, "pageSize": page_size, "items": items}
+    return {"ok": True, "total": total, "page": page, "pageSize": page_size, "summary": summary, "items": items}
 
 
 @router.get("/students/{student_id}")

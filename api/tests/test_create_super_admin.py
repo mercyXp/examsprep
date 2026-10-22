@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.config import settings
 from app.create_super_admin import (
     BootstrapError,
+    apply_environment_bootstrap,
     create_super_admin,
     database_configuration_error,
     prompt_super_admin,
@@ -136,6 +137,41 @@ class SuperAdminBootstrapTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             run_bootstrap(self.session, name="Mercy", email="mercy@example.com", password="a-real-secret")
         self.session.commit = real_commit  # type: ignore[method-assign]
+        self.assertIsNone(self.session.scalar(select(User).where(User.email == "mercy@example.com")))
+
+    def _use_environment(self, name: str, email: str, password: str):
+        return patch.multiple(
+            "app.create_super_admin.settings",
+            super_admin_name=name,
+            super_admin_email=email,
+            super_admin_password=password,
+        )
+
+    def test_environment_bootstrap_creates_role_and_account(self) -> None:
+        self.session.execute(delete(Role))
+        self.session.commit()
+        with self._use_environment("Mercy Phiri", "Mercy@Example.com", "a-real-secret"):
+            message = apply_environment_bootstrap(self.session)
+        self.assertEqual(message, "Super administrator created for mercy@example.com.")
+        self.assertNotIn("a-real-secret", message or "")
+        user = self.session.scalar(select(User).where(User.email == "mercy@example.com"))
+        self.assertIsNotNone(user)
+        self.assertTrue(verify_password("a-real-secret", user.password_hash or ""))
+        self.assertEqual([item.role.slug for item in user.roles if item.role is not None], ["super_administrator"])
+
+    def test_environment_bootstrap_skips_when_unset_and_refuses_a_second_account(self) -> None:
+        with self._use_environment("", "", ""):
+            self.assertIsNone(apply_environment_bootstrap(self.session))
+        with self._use_environment("Mercy", "mercy@example.com", "a-real-secret"):
+            apply_environment_bootstrap(self.session)
+            again = apply_environment_bootstrap(self.session)
+        self.assertIn("already exists", again or "")
+        self.assertEqual(set(self.session.scalars(select(User.email))), {"mercy@example.com"})
+
+    def test_environment_bootstrap_requires_all_three_values(self) -> None:
+        with self._use_environment("Mercy", "", ""):
+            message = apply_environment_bootstrap(self.session)
+        self.assertIn("together", message or "")
         self.assertIsNone(self.session.scalar(select(User).where(User.email == "mercy@example.com")))
 
     def test_invalid_database_configuration(self) -> None:

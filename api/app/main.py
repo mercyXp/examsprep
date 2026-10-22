@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,14 +8,32 @@ from sqlalchemy import text
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import settings
-from app.db import engine
+from app.create_super_admin import apply_environment_bootstrap
+from app.db import SessionLocal, engine
 from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.learn import router as learn_router
 from app.routers.media import router as media_router
 from app.routers.onboarding import router as onboarding_router
 
-app = FastAPI(title="ExamsPrep API", version="0.1.0")
+
+def _bootstrap_super_admin() -> None:
+    session = SessionLocal()
+    try:
+        message = apply_environment_bootstrap(session)
+    finally:
+        session.close()
+    if message:
+        print(message, flush=True)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    _bootstrap_super_admin()
+    yield
+
+
+app = FastAPI(title="ExamsPrep API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()],

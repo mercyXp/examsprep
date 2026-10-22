@@ -1,51 +1,92 @@
 # Hosting and deployment
 
-ExamsPrep does not need a rented machine. The frontend, API, and database are three separate services that talk over HTTPS.
+The frontend, API, and database are three separate services. The browser talks only to Next.js. Next.js calls FastAPI. FastAPI is the only process that opens PostgreSQL.
 
 ## Production shape
 
 | Component | Host | Role |
 | --- | --- | --- |
 | Next.js | Vercel | Landing, dashboard, lessons, quizzes |
-| FastAPI | Railway | Auth, business logic, AI, APIs |
-| PostgreSQL | Railway (managed) | Users, programmes, lessons, questions, results, progress |
-| Files | Object storage, later | Images, PDFs, Word documents |
+| FastAPI | Render web service | Auth, business logic, APIs |
+| PostgreSQL | Render Postgres | Users, programmes, lessons, questions, results, progress |
+| Files | On the API disk for now (`MEDIA_ROOT`) | Images, video, audio, PDFs |
 | AI | External API, later | Explanations and quiz drafts |
 
-Railway hosts FastAPI and PostgreSQL in one project. They remain separate services: FastAPI is the application server; PostgreSQL stores persistent data.
+Railway deploys are paused, so Railway is not the current host. Keep the API and the database in the same Render region so the API can use the database’s internal URL.
 
-Render is a fallback if Railway is a poor fit. Do not use Render’s free web sleep or 30-day free Postgres for student records.
-
-## Local database
-
-Use the Windows PostgreSQL installer and pgAdmin. Create a database named `examsprep`, put the postgres password in `api/.env`, then from `api/`:
-
-```bash
-python -m venv .venv
-pip install -e .
-alembic upgrade head
-python -m app.seed
-```
-
-Full local walkthrough (pgAdmin, port, PowerShell, seed, viewing tables): [SETUP.md](../SETUP.md). Keep `DATABASE_URL` out of Git.
+Do not use Render’s free web sleep, or its free Postgres that expires and is then deleted, for real student records. A paid database is a new instance. Data moves only if you export it.
 
 ## Cost
 
-While the product is still being built (no live accounts, no student data), stay as close to **K0/month** as the trial tiers allow: Vercel Hobby plus Railway’s trial.
+While there are no live student accounts, Vercel Hobby and Render’s free tiers are enough. The free web service sleeps, and the free database is temporary.
 
-Before real students use the platform, pay a **small monthly amount** for a always-on FastAPI service and a managed Postgres that does not expire. Monitor usage and upgrade when load is real.
+Before real students use the platform, pay for an always-on API and a Postgres instance that does not expire.
 
-## Communication
+## API service
 
-Example sign-in path:
+Create the Render web service from this repo with root directory `api`.
 
-1. Student or staff clicks Sign in on Next.js (Vercel).
-2. FastAPI validates credentials (Railway API).
-3. PostgreSQL returns the user, roles, and assignment rows (Railway database, private network).
-4. Students load published content they are authorised to see. Staff load only the programmes and modules in their scope.
+| Setting | Value |
+| --- | --- |
+| Build | `pip install -e . && alembic upgrade head` |
+| Start | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 
-Keep the database private. Store secrets in environment variables. Use HTTPS, Alembic migrations, and managed backups before storing academic records.
+Environment variables on the API service:
+
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | The database **internal** URL, with the scheme rewritten to `postgresql+psycopg://`. A URL that starts with `postgresql://` fails because only psycopg 3 is installed. |
+| `SECRET_KEY` | A long random string, different from the local default. |
+| `CORS_ORIGINS` | The Vercel site origin, with no trailing slash. |
+| `SEED_DEMO_USERS` | `false` before real students. `true` only while the demo accounts are intentional. |
+| `SUPER_ADMIN_NAME` | One-time. See below. |
+| `SUPER_ADMIN_EMAIL` | One-time. See below. |
+| `SUPER_ADMIN_PASSWORD` | One-time. See below. |
+
+`GET /health` means the process is up. `GET /health/db` means Postgres answered. `/` has no route and returns `{"ok": false, "message": "Not Found"}`.
+
+The free Render plan has no shell. `alembic upgrade head` runs in the build command. Catalogue and role rows come from a database restore, or from `SEED_DEMO_USERS=false python -m app.seed` on a host that has a shell.
 
 ## Frontend
 
-Keep the App Router app on Vercel. Point it at the Railway API with `NEXT_PUBLIC_API_URL` (or a server-only equivalent for privileged calls). Do not put database credentials in the Next.js app.
+Keep the App Router app on Vercel. Set one server variable, then redeploy:
+
+| Variable | Value |
+| --- | --- |
+| `API_URL` | The Render service URL, with no trailing slash. |
+
+`API_URL` is read on the Vercel server. Do not use `NEXT_PUBLIC_API_URL`. Do not put `DATABASE_URL`, the database password, or `SECRET_KEY` on Vercel.
+
+If signup or sign-in says the account service isn’t running, Vercel could not open a connection to `API_URL`. A missing value makes that call go to `http://127.0.0.1:8000` inside Vercel, where the API is not running. A database problem shows up only after `/health` succeeds and `/health/db` fails.
+
+## Production super administrator
+
+Public signup creates a student and nothing else. Staff assignments can give an existing user `administrator` or `creator`. They never grant `super_administrator`. The demo super administrator (`super@examsprep.local`) is created only when `SEED_DEMO_USERS=true`.
+
+Create the real super administrator once. Both ways below refuse the demo email, the demo password, an email that already belongs to someone, and a second super administrator. An existing account is not promoted. There is no public API and no website form.
+
+On Render, set these three variables on the API service and redeploy:
+
+```text
+SUPER_ADMIN_NAME=Your Name
+SUPER_ADMIN_EMAIL=you@your-domain.com
+SUPER_ADMIN_PASSWORD=a long password that is not the demo password
+```
+
+The deploy log prints `Super administrator created for you@your-domain.com.` It does not print the password. Delete the three variables and redeploy. Leaving them set does not create another account, but the password stays visible in the dashboard.
+
+If the log says a super administrator already exists, sign in with that account. If it says the email already exists, choose a different email.
+
+A host with a shell can prompt for the same account instead:
+
+```bash
+python -m app.create_super_admin
+```
+
+The shell command does not create the `super_administrator` role. The Render variables do, when the tables from `alembic upgrade head` exist and that role row is missing. Who may assign the other roles is described in [access-control.md](../architecture/access-control.md).
+
+## Database access from a laptop
+
+The API uses the internal `postgresql+psycopg://` URL. `pg_dump` and `pg_restore` use the database’s **external** URL, which starts with `postgresql://` and includes `sslmode=require`. Do not put either URL in Git.
+
+Local Postgres for development listens on port **5433**. The walkthrough is [SETUP.md](../SETUP.md).

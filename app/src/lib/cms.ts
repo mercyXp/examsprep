@@ -20,6 +20,7 @@ export type AdminModule = {
   chapterCount: number;
   lessonCount: number;
   publishedLessons: number;
+  createdAt: string | null;
   yearNumber: number | null;
   semesterNumber: number | null;
   programmeId: string | null;
@@ -103,6 +104,14 @@ export type AdminStudent = {
   onboardingCompleted: boolean;
   lessonsStarted: number;
   lessonsCompleted: number;
+  createdAt?: string | null;
+};
+
+export type StudentSummary = {
+  total: number;
+  active: number;
+  withProgress: number;
+  completedLessons: number;
 };
 
 function asItems<T>(data: unknown, key = "items"): T[] {
@@ -295,9 +304,21 @@ export async function reorderLessons(moduleId: string, ids: string[]) {
   });
 }
 
-export async function loadStudents(q = "", page = 1) {
-  const params = new URLSearchParams({ q, page: String(page), page_size: "20" });
-  return api<{ items: AdminStudent[]; total: number; page: number; pageSize: number }>(`/api/admin/students?${params}`);
+export async function loadStudents(
+  q = "",
+  page = 1,
+  filters: { status?: string; programme?: string; pageSize?: number } = {},
+) {
+  const params = new URLSearchParams({
+    q,
+    page: String(page),
+    page_size: String(filters.pageSize ?? 10),
+  });
+  if (filters.status) params.set("status", filters.status);
+  if (filters.programme) params.set("programme", filters.programme);
+  return api<{ items: AdminStudent[]; total: number; page: number; pageSize: number; summary?: StudentSummary }>(
+    `/api/admin/students?${params}`,
+  );
 }
 
 export async function loadStudent(id: string) {

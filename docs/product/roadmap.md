@@ -27,4 +27,4 @@ Confirm remaining Computing module lists (all years/semesters) and credits with 
 
 ## Hosting
 
-Vercel (Next.js) + Railway (FastAPI and managed Postgres). Stay near K0/month while developing; pay for always-on API and non-expiring Postgres before real student records. Details: [operations/deployment.md](../operations/deployment.md).
+Vercel (Next.js) + Render (FastAPI and Postgres). Stay near K0/month while developing; pay for an always-on API and a Postgres instance that does not expire before real student records. Details: [operations/deployment.md](../operations/deployment.md).

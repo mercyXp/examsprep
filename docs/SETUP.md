@@ -188,4 +188,4 @@ Open [http://localhost:3000/login](http://localhost:3000/login). Use `student@ex
 | `psql` is not recognized | Use `C:\Program Files\PostgreSQL\18\bin\psql.exe`, or add that `bin` folder to PATH. |
 | Sign in says the account service isn’t running | Start FastAPI with `uvicorn app.main:app --reload` from `api/`, and set `API_URL=http://127.0.0.1:8000` in `app/.env`. |
 
-Production hosting (Vercel + Railway) is described in [operations/deployment.md](operations/deployment.md). Schema details are in [database/erd.md](database/erd.md).
+Production hosting is Vercel for Next.js and Render for FastAPI and Postgres. The Vercel app gets `API_URL` only. The database URL stays on the API service. Creating the real super administrator, and the difference between the internal and external database URLs, is in [operations/deployment.md](operations/deployment.md). Schema details are in [database/erd.md](database/erd.md).

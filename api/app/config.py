@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     seed_demo_users: bool = True
     media_root: str = "var/media"
+    super_admin_name: str = ""
+    super_admin_email: str = ""
+    super_admin_password: str = ""
 
 
 settings = Settings()
