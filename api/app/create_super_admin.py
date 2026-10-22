@@ -19,7 +19,7 @@ from app.config import settings
 from app.db import SessionLocal
 from app.models import Role, User, UserRole
 from app.models.enums import UserStatus
-from app.security import hash_password, load_user_by_email
+from app.security import hash_password
 
 SUPER_ROLE = "super_administrator"
 DEMO_EMAIL = "super@examsprep.local"
@@ -82,6 +82,8 @@ def _require_tables(session: Session) -> None:
 
 def create_super_admin(session: Session, *, name: str, email: str, password: str) -> User:
     """Insert one super administrator. Does not commit. Raises BootstrapError without changing existing accounts."""
+    name = name.strip()
+    email = email.strip().lower()
     validate_credentials(name, email, password)
     _require_tables(session)
 
@@ -89,12 +91,15 @@ def create_super_admin(session: Session, *, name: str, email: str, password: str
     if role is None:
         raise BootstrapError("The super_administrator role is missing. No account was created.")
 
-    existing = load_user_by_email(session, email)
+    existing = session.scalar(select(User).where(User.email == email))
     if existing is not None:
         raise BootstrapError("An account with that email already exists. This command does not change existing accounts.")
 
     already = session.scalar(
-        select(User.id).join(UserRole, UserRole.user_id == User.id).join(Role, Role.id == UserRole.role_id).where(Role.slug == SUPER_ROLE)
+        select(User.id)
+        .join(UserRole, UserRole.user_id == User.id)
+        .join(Role, Role.id == UserRole.role_id)
+        .where(Role.slug == SUPER_ROLE)
     )
     if already is not None:
         raise BootstrapError("A super administrator already exists. This command does not create another one.")
@@ -102,7 +107,7 @@ def create_super_admin(session: Session, *, name: str, email: str, password: str
     user = User(name=name, email=email, password_hash=hash_password(password), status=UserStatus.ACTIVE)
     session.add(user)
     session.flush()
-    session.add(UserRole(user_id=user.id, role_id=role.id))
+    session.add(UserRole(user=user, role=role))
     session.flush()
     return user
 
