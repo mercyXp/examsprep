@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
 import SiteChrome from "@/app/components/SiteChrome";
 import "./globals.css";
+import "./dashboard/notifications/notifications.css";
 
 const inter = Inter({
   subsets: ["latin"],
