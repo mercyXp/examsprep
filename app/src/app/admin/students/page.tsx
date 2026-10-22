@@ -77,6 +77,13 @@ export default function AdminStudentsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, status, programme]);
 
+  useEffect(() => {
+    if (!menuId) return;
+    const close = () => setMenuId(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menuId]);
+
   async function openStudent(item: AdminStudent) {
     setMenuId(null);
     const result = await loadStudent(item.id);
@@ -114,7 +121,7 @@ export default function AdminStudentsPage() {
         <section className="admin-kpis" aria-label="Student totals">
           <article>
             <span className="is-violet" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="3" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="16" cy="10" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M4.5 18c.6-2.4 2.4-3.6 4.5-3.6s3.9 1.2 4.5 3.6M14 14.6c1.3-.4 2.6-.2 3.8.8 1 .8 1.6 1.8 1.8 2.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+              <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="9" cy="9" r="3" fill="none" stroke="currentColor" strokeWidth="1.7" /><circle cx="16" cy="10" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M4.5 18c.6-2.4 2.4-3.6 4.5-3.6s3.9 1.2 4.5 3.6M14 14.6c1.3-.4 2.6-.2 3.8.8 1 .8 1.6 1.8 1.8 2.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
             </span>
             <div>
               <strong>{summary.total}</strong>
@@ -124,7 +131,7 @@ export default function AdminStudentsPage() {
           </article>
           <article>
             <span className="is-green" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M8.5 12.2 11 14.6 15.6 9.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+              <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="1.7" /><path d="M8.5 12.2 11 14.6 15.6 9.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
             </span>
             <div>
               <strong>{summary.active}</strong>
@@ -134,7 +141,7 @@ export default function AdminStudentsPage() {
           </article>
           <article>
             <span className="is-amber" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 16.5 9 8l3 5 2-3 5 6.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 16.5 9 8l3 5 2-3 5 6.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
             <div>
               <strong>{summary.withProgress}</strong>
@@ -144,7 +151,7 @@ export default function AdminStudentsPage() {
           </article>
           <article>
             <span className="is-blue" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 10.5 12 6l7 4.5-7 4.5-7-4.5Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M8 12.2V16c1.2.8 2.6 1.2 4 1.2s2.8-.4 4-1.2v-3.8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 10.5 12 6l7 4.5-7 4.5-7-4.5Z" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" /><path d="M8 12.2V16c1.2.8 2.6 1.2 4 1.2s2.8-.4 4-1.2v-3.8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
             </span>
             <div>
               <strong>{summary.completedLessons}</strong>
@@ -158,7 +165,7 @@ export default function AdminStudentsPage() {
           <div className="admin-toolbar">
             <label className="admin-search">
               <span className="sr-only">Search students</span>
-              <svg viewBox="0 0 20 20" aria-hidden="true">
+              <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
                 <circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
                 <path d="M13.2 13.2 17 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>

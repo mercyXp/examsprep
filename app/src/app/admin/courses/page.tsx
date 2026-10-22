@@ -36,21 +36,21 @@ function glyphKind(name: string) {
 function ModuleGlyph({ kind }: { kind: string }) {
   if (kind === "math") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
         <path d="M5 16.5 9.2 7h1.7L15.2 16.5h-1.8l-.8-2.1H7.6l-.8 2.1H5Zm3.2-3.5h3.3L10 9.4 8.2 13Z" fill="currentColor" />
       </svg>
     );
   }
   if (kind === "network") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
         <path d="M12 16.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4ZM7.2 8.2a6.8 6.8 0 0 1 9.6 0M9.1 11a4 4 0 0 1 5.8 0" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     );
   }
   if (kind === "data") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
         <ellipse cx="12" cy="7" rx="6" ry="2.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path d="M6 7v5c0 1.3 2.7 2.4 6 2.4s6-1.1 6-2.4V7M6 12v5c0 1.3 2.7 2.4 6 2.4s6-1.1 6-2.4v-5" fill="none" stroke="currentColor" strokeWidth="1.8" />
       </svg>
@@ -58,7 +58,7 @@ function ModuleGlyph({ kind }: { kind: string }) {
   }
   if (kind === "screen") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
         <rect x="4" y="5" width="16" height="11" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path d="M9 19h6M12 16v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
@@ -66,7 +66,7 @@ function ModuleGlyph({ kind }: { kind: string }) {
   }
   if (kind === "nodes") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
         <circle cx="7" cy="8" r="2" fill="currentColor" />
         <circle cx="16.5" cy="7" r="2" fill="currentColor" />
         <circle cx="12" cy="16" r="2" fill="currentColor" />
@@ -75,7 +75,7 @@ function ModuleGlyph({ kind }: { kind: string }) {
     );
   }
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
       <rect x="4" y="4" width="7" height="7" rx="1.5" fill="currentColor" />
       <rect x="13" y="4" width="7" height="7" rx="1.5" fill="currentColor" />
       <rect x="4" y="13" width="7" height="7" rx="1.5" fill="currentColor" />
@@ -108,8 +108,8 @@ export default function AdminCoursesPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  function blankForm(programmeId = scope?.programmes[0]?.id ?? "") {
-    return { ...EMPTY, programmeId };
+  function blankForm() {
+    return { ...EMPTY };
   }
 
   async function refresh(q = query) {
@@ -120,11 +120,7 @@ export default function AdminCoursesPage() {
 
   useEffect(() => {
     loadScope().then((scopeResult) => {
-      if (scopeResult.ok) {
-        setScope(scopeResult.data);
-        const programmeId = scopeResult.data.programmes[0]?.id ?? "";
-        setForm((current) => (current.programmeId ? current : { ...current, programmeId }));
-      }
+      if (scopeResult.ok) setScope(scopeResult.data);
     });
   }, []);
 
@@ -135,6 +131,13 @@ export default function AdminCoursesPage() {
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
+  useEffect(() => {
+    if (!menuId) return;
+    const close = () => setMenuId(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menuId]);
 
   const visible = useMemo(() => {
     return items.filter((item) => status === "ALL" || item.status === status);
@@ -215,7 +218,7 @@ export default function AdminCoursesPage() {
           <div className="admin-toolbar">
             <label className="admin-search">
               <span className="sr-only">Search modules</span>
-              <svg viewBox="0 0 20 20" aria-hidden="true">
+              <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
                 <circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
                 <path d="M13.2 13.2 17 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
@@ -234,11 +237,11 @@ export default function AdminCoursesPage() {
             <div className="admin-view" role="group" aria-label="Layout">
               <button type="button" aria-pressed={view === "list"} className={view === "list" ? "is-on" : undefined} onClick={() => setView("list")}>
                 <span className="sr-only">List</span>
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
+                <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" /></svg>
               </button>
               <button type="button" aria-pressed={view === "grid"} className={view === "grid" ? "is-on" : undefined} onClick={() => setView("grid")}>
                 <span className="sr-only">Grid</span>
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h5v5H4zM11 4h5v5h-5zM4 11h5v5H4zM11 11h5v5h-5z" fill="currentColor" /></svg>
+                <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 4h5v5H4zM11 4h5v5h-5zM4 11h5v5H4zM11 11h5v5h-5z" fill="currentColor" /></svg>
               </button>
             </div>
           </div>
@@ -263,11 +266,11 @@ export default function AdminCoursesPage() {
                     <span className={`admin-pill is-${item.status.toLowerCase()}`}>{labelStatus(item.status)}</span>
                     <span className="admin-mod-date">Created {formatDate(item.createdAt || item.updatedAt)}</span>
                     <span className="admin-mod-stat">
-                      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5h6l3 3V16a1.5 1.5 0 0 1-1.5 1.5h-7.5A1.5 1.5 0 0 1 4.5 16V5A1.5 1.5 0 0 1 6 3.5Z" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M12 3.5V7h3.5" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
+                      <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M6 3.5h6l3 3V16a1.5 1.5 0 0 1-1.5 1.5h-7.5A1.5 1.5 0 0 1 4.5 16V5A1.5 1.5 0 0 1 6 3.5Z" fill="none" stroke="currentColor" strokeWidth="1.4" /><path d="M12 3.5V7h3.5" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
                       {item.chapterCount} {item.chapterCount === 1 ? "Chapter" : "Chapters"}
                     </span>
                     <span className="admin-mod-stat">
-                      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 10S5.2 5.5 10 5.5 17.5 10 17.5 10 14.8 14.5 10 14.5 2.5 10 2.5 10Z" fill="none" stroke="currentColor" strokeWidth="1.4" /><circle cx="10" cy="10" r="2" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
+                      <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M2.5 10S5.2 5.5 10 5.5 17.5 10 17.5 10 14.8 14.5 10 14.5 2.5 10 2.5 10Z" fill="none" stroke="currentColor" strokeWidth="1.4" /><circle cx="10" cy="10" r="2" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
                       {item.publishedLessons}/{item.lessonCount} Published lessons
                     </span>
                     <div className="admin-menu">
@@ -281,7 +284,7 @@ export default function AdminCoursesPage() {
                         }}
                       >
                         Manage
-                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
                       </button>
                       {menuId === item.id ? (
                         <div className="admin-pop" onClick={(event) => event.stopPropagation()}>
@@ -318,7 +321,7 @@ export default function AdminCoursesPage() {
           <form className="admin-create" id="module-form" onSubmit={onSubmit}>
             <header>
               <span className="admin-create-mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.6" /><rect x="13" y="4" width="7" height="7" rx="1.6" /><rect x="4" y="13" width="7" height="7" rx="1.6" /><rect x="13" y="13" width="7" height="7" rx="1.6" /></svg>
+                <svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="7" height="7" rx="1.6" /><rect x="13" y="4" width="7" height="7" rx="1.6" /><rect x="4" y="13" width="7" height="7" rx="1.6" /><rect x="13" y="13" width="7" height="7" rx="1.6" /></svg>
               </span>
               <div>
                 <h2>{editing ? "Edit module" : "Create new module"}</h2>
