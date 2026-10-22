@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import AppShell from "@/app/components/shell/AppShell";
 import { loadCourse, type CourseOverview } from "@/lib/learn-api";
 
-export default function CourseOverviewPage() {
+function CourseOverviewPage() {
   const params = useParams<{ moduleId: string }>();
   const [course, setCourse] = useState<CourseOverview | null>(null);
   const [error, setError] = useState("");
@@ -76,5 +76,13 @@ export default function CourseOverviewPage() {
         ) : null}
       </div>
     </AppShell>
+  );
+}
+
+export default function CourseOverviewRoute() {
+  return (
+    <Suspense fallback={<p className="dash-empty">Loading course…</p>}>
+      <CourseOverviewPage />
+    </Suspense>
   );
 }

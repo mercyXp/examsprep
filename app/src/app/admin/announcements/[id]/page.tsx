@@ -1,12 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import AppShell from "@/app/components/shell/AppShell";
 import AnnouncementForm from "../AnnouncementForm";
 import { loadAnnouncement, loadScope, type AdminScope, type AnnouncementRow } from "@/lib/cms";
 
-export default function EditAnnouncementPage() {
+function EditAnnouncementPage() {
   const params = useParams<{ id: string }>();
   const [scope, setScope] = useState<AdminScope | null>(null);
   const [item, setItem] = useState<AnnouncementRow | null>(null);
@@ -32,5 +32,13 @@ export default function EditAnnouncementPage() {
         </article>
       </div>
     </AppShell>
+  );
+}
+
+export default function EditAnnouncementRoute() {
+  return (
+    <Suspense fallback={<p className="dash-empty">Loading announcement…</p>}>
+      <EditAnnouncementPage />
+    </Suspense>
   );
 }

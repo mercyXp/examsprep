@@ -2,17 +2,18 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { callBackend, TOKEN_COOKIE, unavailable } from "@/lib/backend";
 
-async function withToken() {
+async function withToken(): Promise<{ token: string } | { response: NextResponse }> {
   const token = (await cookies()).get(TOKEN_COOKIE)?.value;
   if (!token) {
-    return { token: null as string | null, error: NextResponse.json({ ok: false, message: "Sign in to continue." }, { status: 401 }) };
+    return { response: NextResponse.json({ ok: false, message: "Sign in to continue." }, { status: 401 }) };
   }
-  return { token, error: null };
+  return { token };
 }
 
 export async function GET() {
-  const { token, error } = await withToken();
-  if (!token) return error;
+  const auth = await withToken();
+  if ("response" in auth) return auth.response;
+  const { token } = auth;
 
   const response = await callBackend("/api/auth/me", {
     headers: { Authorization: `Bearer ${token}` },
@@ -35,8 +36,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const { token, error } = await withToken();
-  if (!token) return error;
+  const auth = await withToken();
+  if ("response" in auth) return auth.response;
+  const { token } = auth;
 
   const body = await request.text();
   const response = await callBackend("/api/auth/me", {

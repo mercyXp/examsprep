@@ -110,7 +110,7 @@ export function StudioInspector({
               {media.map((block) => (
                 <li key={block.id}>
                   <strong>{BLOCK_TYPE_LABELS[block.type]}</strong>
-                  <span>{block.type === "image" ? block.alt || block.url : block.type === "video" || block.type === "audio" ? block.title || block.url : block.id}</span>
+                  <span>{block.type === "image" ? block.alt || block.url : block.title || block.url}</span>
                   {onRemoveBlock ? (
                     <button type="button" onClick={() => onRemoveBlock(block.id)}>
                       Remove
