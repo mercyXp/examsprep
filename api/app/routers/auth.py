@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_session
 from app.emailer import send_password_changed
+from app.google_auth import sign_in_with_google, verified_google_identity
 from app.models import AuditLog, Role, User, UserRole
 from app.password_reset import GENERIC_MESSAGE, PasswordResetError, consume_reset, request_reset
 from app.models.enums import UserStatus
@@ -14,6 +15,7 @@ from app.schemas import (
     AuthOut,
     ErrorOut,
     ForgotPasswordIn,
+    GoogleIn,
     LoginIn,
     MessageOut,
     PasswordIn,
@@ -176,9 +178,11 @@ def change_password(body: PasswordIn, user: User = Depends(require_user), sessio
     return _auth_out(loaded)
 
 
-@router.post("/google", response_model=ErrorOut, status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
-def google() -> ErrorOut:
-    return ErrorOut(message="Google sign-in isn’t connected yet.")
+@router.post("/google", response_model=AuthOut)
+def google(body: GoogleIn, session: Session = Depends(get_session)) -> AuthOut:
+    email, name = verified_google_identity(body.credential)
+    user = sign_in_with_google(session, email, name)
+    return _auth_out(user)
 
 
 @router.post("/forgot-password", response_model=MessageOut)

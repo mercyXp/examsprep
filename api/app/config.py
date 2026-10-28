@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     app_url: str = "http://localhost:3000"
     resend_api_key: str = ""
     email_from: str = ""
+    google_client_id: str = ""
 
 
 settings = Settings()

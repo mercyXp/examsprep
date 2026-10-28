@@ -134,7 +134,7 @@ uvicorn app.main:app --reload
 
 Staff sign in at [http://localhost:3000/login](http://localhost:3000/login) and land on `/admin`. Super Admin assigns program administrators and creators at `/admin/assignments`. Creators only see assigned modules and submit lessons for review instead of publishing. Details: [access-control.md](architecture/access-control.md).
 
-You can also create a new account on `/signup`. New students go through `/onboarding` before the dashboard. The demo student account already has onboarding completed. Google sign-in still returns an honest “not connected” response. Forgot-password sends a reset link when Resend is configured on the API.
+You can also create a new account on `/signup`. New students go through `/onboarding` before the dashboard. The demo student account already has onboarding completed. Google sign-in works when `NEXT_PUBLIC_GOOGLE_CLIENT_ID` and the API `GOOGLE_CLIENT_ID` are the same Web client ID. Forgot-password sends a reset link when Resend is configured on the API.
 
 ## 6. View tables in pgAdmin
 

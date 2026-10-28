@@ -7,7 +7,7 @@ import BrandLogo from "@/app/components/ui/BrandLogo";
 import Button from "@/app/components/ui/Button";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
 import LoginCast, { type CastMood } from "@/app/components/auth/LoginCast";
-import { createAccount, signInWithGoogle } from "@/lib/auth";
+import { afterAuthPath, createAccount, signInWithGoogle } from "@/lib/auth";
 
 function GoogleMark() {
   return (
@@ -147,7 +147,10 @@ export default function SignupExperience() {
       const result = await signInWithGoogle();
       if (result.ok) {
         setSuccess(true);
-        navOff.current = window.setTimeout(() => router.replace("/onboarding"), 900);
+        navOff.current = window.setTimeout(
+          () => router.replace(afterAuthPath(result.onboardingCompleted, result.roles)),
+          900,
+        );
         return;
       }
       fail(result.message);

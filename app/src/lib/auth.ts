@@ -41,7 +41,25 @@ export async function signIn(email: string, password: string): Promise<SignInRes
 }
 
 export async function signInWithGoogle(): Promise<SignInResult> {
-  const response = await fetch("/api/auth/google", { method: "POST" });
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ?? "";
+  if (!clientId) {
+    return { ok: false, message: "Google sign-in isn’t configured yet." };
+  }
+
+  const { requestGoogleCredential } = await import("@/lib/google-auth");
+  let credential = "";
+  try {
+    credential = await requestGoogleCredential(clientId);
+  } catch (error) {
+    const message = error instanceof Error && error.message ? error.message : "Google sign-in could not be completed.";
+    return { ok: false, message };
+  }
+
+  const response = await fetch("/api/auth/google", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credential }),
+  });
   return readResult(response);
 }
 
