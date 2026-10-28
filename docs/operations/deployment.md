@@ -91,7 +91,7 @@ The shell command does not create the `super_administrator` role. The Render var
 
 Creator and administrator accounts are invited from Staff after this account exists. Password reset and those invitations are sent with Resend. See [Transactional email](#transactional-email) below.
 
-Google sign-in uses the same Web client ID in two places. On Vercel set `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. On the Render API set `GOOGLE_CLIENT_ID` to that same value. Do not put a client secret in the frontend. In Google Cloud, allow JavaScript origins `http://localhost:3000` and `https://www.examsprep.xyz`. A new Google account becomes a student. An existing account signs in with the roles it already has.
+Google sign-in uses the same Web client ID in two places. On Vercel set `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. On the Render API set `GOOGLE_CLIENT_ID` to that same value. Do not put a client secret in the frontend. In Google Cloud, allow JavaScript origins `http://localhost:3000` and `https://www.examsprep.xyz`. The sign-in button opens Google’s account window, so the browser must allow pop-ups for the site. A new Google account becomes a student. An existing account signs in with the roles it already has.
 
 ## Transactional email
 

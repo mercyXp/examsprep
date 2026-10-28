@@ -3,20 +3,20 @@ import { callBackend, unavailable } from "@/lib/backend";
 import { NextResponse } from "next/server";
 
 type Body = {
-  credential?: unknown;
+  accessToken?: unknown;
 };
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as Body | null;
-  const credential = typeof body?.credential === "string" ? body.credential.trim() : "";
-  if (credential.length < 20) {
-    return NextResponse.json({ ok: false, message: "Google did not return a sign-in." }, { status: 400 });
+  const accessToken = typeof body?.accessToken === "string" ? body.accessToken.trim() : "";
+  if (accessToken.length < 20) {
+    return NextResponse.json({ ok: false, message: "Google sign-in could not be completed." }, { status: 400 });
   }
 
   const response = await callBackend("/api/auth/google", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ access_token: accessToken }),
   });
 
   if (!response) {

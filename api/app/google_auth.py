@@ -1,18 +1,21 @@
-"""Verify a Google ID token and sign in, or create a student account.
+"""Verify a Google sign-in and create a student account, or sign an existing one in.
 
-The browser sends Google's signed credential. This module checks that signature
-and the intended audience. It never trusts an email supplied beside the token.
-New accounts are students. An existing account keeps the roles it already has.
+The browser sends the access token from Google's account popup. This module asks
+Google who that token belongs to and checks that it was issued for this app.
+It never trusts an email supplied beside the token. New accounts are students.
+An existing account keeps the roles it already has.
 """
 
 from __future__ import annotations
 
+import json
 import logging
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -25,7 +28,44 @@ from app.security import load_user_by_email
 logger = logging.getLogger("app.google_auth")
 
 
-def verified_google_identity(credential: str) -> tuple[str, str]:
+def _confirmed(value: object) -> bool:
+    return value is True or value == "true"
+
+
+def _google_json(url: str, access_token: str, *, bearer: bool) -> dict[str, object]:
+    if bearer:
+        request = urllib.request.Request(url, headers={"Authorization": f"Bearer {access_token}"})
+    else:
+        quoted = urllib.parse.quote(access_token, safe="")
+        request = urllib.request.Request(f"{url}?access_token={quoted}")
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        logger.warning("google.auth.failed status=%s", exc.code)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Google sign-in could not be verified.")
+    except Exception as exc:
+        logger.warning("google.auth.failed error=%s", type(exc).__name__)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Google sign-in could not be verified.")
+    if not isinstance(payload, dict):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Google sign-in could not be verified.")
+    return payload
+
+
+def identity_from_claims(tokeninfo: dict[str, object], profile: dict[str, object], client_id: str) -> tuple[str, str]:
+    audience = tokeninfo.get("aud") or tokeninfo.get("azp")
+    if audience != client_id:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Google sign-in could not be verified.")
+    email = profile.get("email") if isinstance(profile.get("email"), str) else tokeninfo.get("email")
+    confirmed = _confirmed(profile.get("email_verified")) or _confirmed(tokeninfo.get("email_verified"))
+    if not isinstance(email, str) or "@" not in email or not confirmed:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Google did not confirm this email address.")
+    raw_name = profile.get("name") if isinstance(profile.get("name"), str) else ""
+    name = raw_name.strip()[:120] or email.split("@", 1)[0][:120]
+    return email.strip().lower(), name
+
+
+def verified_google_identity(access_token: str) -> tuple[str, str]:
     client_id = (settings.google_client_id or "").strip()
     if not client_id:
         raise HTTPException(
@@ -33,23 +73,17 @@ def verified_google_identity(credential: str) -> tuple[str, str]:
             detail="Google sign-in isn’t configured yet.",
         )
     try:
-        claims = id_token.verify_oauth2_token(credential, google_requests.Request(), client_id)
+        tokeninfo = _google_json("https://www.googleapis.com/oauth2/v3/tokeninfo", access_token, bearer=False)
+        profile = _google_json("https://www.googleapis.com/oauth2/v3/userinfo", access_token, bearer=True)
+    except HTTPException:
+        raise
     except Exception as exc:
         logger.warning("google.auth.failed error=%s", type(exc).__name__)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Google sign-in could not be verified.",
-        ) from exc
-
-    email = claims.get("email")
-    if not isinstance(email, str) or "@" not in email or claims.get("email_verified") is not True:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Google did not confirm this email address.",
-        )
-    raw_name = claims.get("name") if isinstance(claims.get("name"), str) else ""
-    name = raw_name.strip()[:120] or email.split("@", 1)[0][:120]
-    return email.strip().lower(), name
+        ) from None
+    return identity_from_claims(tokeninfo, profile, client_id)
 
 
 def sign_in_with_google(session: Session, email: str, name: str) -> User:

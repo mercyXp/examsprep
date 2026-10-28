@@ -8,6 +8,7 @@ import Button from "@/app/components/ui/Button";
 import ThemeToggle from "@/app/components/ui/ThemeToggle";
 import LoginCast, { type CastMood } from "@/app/components/auth/LoginCast";
 import { afterAuthPath, signIn, signInWithGoogle } from "@/lib/auth";
+import { preloadGoogleSignIn } from "@/lib/google-auth";
 
 function GoogleMark() {
   return (
@@ -82,6 +83,7 @@ export default function LoginExperience() {
   else if (focused === "email") mood = "watch";
 
   useEffect(() => {
+    preloadGoogleSignIn();
     const shakeId = shakeOff;
     const navId = navOff;
     return () => {

@@ -180,7 +180,7 @@ def change_password(body: PasswordIn, user: User = Depends(require_user), sessio
 
 @router.post("/google", response_model=AuthOut)
 def google(body: GoogleIn, session: Session = Depends(get_session)) -> AuthOut:
-    email, name = verified_google_identity(body.credential)
+    email, name = verified_google_identity(body.access_token)
     user = sign_in_with_google(session, email, name)
     return _auth_out(user)
 

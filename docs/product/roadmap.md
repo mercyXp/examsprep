@@ -4,7 +4,7 @@
 
 - Landing page and visual system.
 - Programme catalogue on the homepage; Computing programme explorer.
-- Email/password auth against FastAPI and Postgres. Google sign-in verifies an ID token and creates a student account when the email is new. Password reset emails go out through Resend when the API is configured.
+- Email/password auth against FastAPI and Postgres. Google sign-in checks the Google token with Google and creates a student account when the email is new. Password reset emails go out through Resend when the API is configured.
 - Student dashboard, My Courses, and the lesson player (published content only).
 - Admin CMS: modules, chapters, typed lesson editor, drafts, preview, publish.
 - Scoped staff roles: Super Admin, program administrator, content creator. Assignments name a programme and a module. Backend enforcement, no URL bypass. See [access-control.md](../architecture/access-control.md).

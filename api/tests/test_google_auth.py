@@ -10,25 +10,52 @@ from app.models.identity import Role, User, UserRole
 from app.security import role_slugs
 
 
+CLIENT = "client.apps.googleusercontent.com"
+
+
+def _google_payload(url: str, _token: str, *, bearer: bool) -> dict[str, object]:
+    del bearer
+    if url.endswith("/tokeninfo"):
+        return {"aud": CLIENT, "email": "ada@example.com", "email_verified": "true"}
+    return {"email": "ada@example.com", "email_verified": True, "name": "Ada"}
+
+
 class GoogleAuthTests(unittest.TestCase):
     def test_unverified_email_is_rejected(self) -> None:
+        def claims(url: str, _token: str, *, bearer: bool) -> dict[str, object]:
+            del bearer
+            if url.endswith("/tokeninfo"):
+                return {"aud": CLIENT, "email": "ada@example.com", "email_verified": "false"}
+            return {"email": "ada@example.com", "email_verified": False, "name": "Ada"}
+
         with patch("app.google_auth.settings") as settings:
-            settings.google_client_id = "client.apps.googleusercontent.com"
-            with patch(
-                "app.google_auth.id_token.verify_oauth2_token",
-                return_value={"email": "ada@example.com", "email_verified": False},
-            ):
+            settings.google_client_id = CLIENT
+            with patch("app.google_auth._google_json", side_effect=claims):
                 with self.assertRaises(HTTPException) as caught:
-                    verified_google_identity("header.payload.signature-value")
+                    verified_google_identity("ya29.google-access-token-value")
+        self.assertEqual(caught.exception.status_code, 401)
+
+    def test_token_for_another_app_is_rejected(self) -> None:
+        def claims(url: str, _token: str, *, bearer: bool) -> dict[str, object]:
+            payload = _google_payload(url, _token, bearer=bearer)
+            if url.endswith("/tokeninfo"):
+                return {**payload, "aud": "other.apps.googleusercontent.com"}
+            return payload
+
+        with patch("app.google_auth.settings") as settings:
+            settings.google_client_id = CLIENT
+            with patch("app.google_auth._google_json", side_effect=claims):
+                with self.assertRaises(HTTPException) as caught:
+                    verified_google_identity("ya29.google-access-token-value")
         self.assertEqual(caught.exception.status_code, 401)
 
     def test_missing_client_id_does_not_call_google(self) -> None:
         with patch("app.google_auth.settings") as settings:
             settings.google_client_id = ""
-            with patch("app.google_auth.id_token.verify_oauth2_token") as verify:
+            with patch("app.google_auth._google_json") as fetch:
                 with self.assertRaises(HTTPException) as caught:
-                    verified_google_identity("header.payload.signature-value")
-        verify.assert_not_called()
+                    verified_google_identity("ya29.google-access-token-value")
+        fetch.assert_not_called()
         self.assertEqual(caught.exception.status_code, 503)
 
     def test_new_google_account_is_a_student_without_a_password(self) -> None:
@@ -90,7 +117,7 @@ class GoogleAuthTests(unittest.TestCase):
         secret = "google-credential-must-stay-out-of-logs"
         with patch("app.google_auth.settings") as settings:
             settings.google_client_id = "client.apps.googleusercontent.com"
-            with patch("app.google_auth.id_token.verify_oauth2_token", side_effect=ValueError(secret)):
+            with patch("app.google_auth._google_json", side_effect=ValueError(secret)):
                 with self.assertLogs("app.google_auth", level="WARNING") as captured:
                     with self.assertRaises(HTTPException):
                         verified_google_identity(secret)

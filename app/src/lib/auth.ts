@@ -58,7 +58,7 @@ export async function signInWithGoogle(): Promise<SignInResult> {
   const response = await fetch("/api/auth/google", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ credential }),
+    body: JSON.stringify({ accessToken: credential }),
   });
   return readResult(response);
 }

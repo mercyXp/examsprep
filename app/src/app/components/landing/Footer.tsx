@@ -6,6 +6,7 @@ const NAV = [
   { href: "/#programmes", label: "Programmes" },
   { href: "/#about", label: "About" },
   { href: "/signup", label: "Get started" },
+  { href: "/privacy", label: "Privacy policy" },
 ];
 
 export default function Footer() {
