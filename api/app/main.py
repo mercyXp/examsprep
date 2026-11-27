@@ -11,6 +11,7 @@ from app.config import settings
 from app.create_super_admin import apply_environment_bootstrap
 from app.db import SessionLocal, engine
 from app.routers.admin import router as admin_router
+from app.routers.authoring import router as authoring_router
 from app.routers.auth import router as auth_router
 from app.routers.learn import router as learn_router
 from app.routers.mail import router as mail_router
@@ -48,6 +49,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(onboarding_router)
 app.include_router(admin_router)
+app.include_router(authoring_router)
 app.include_router(staff_router)
 app.include_router(mail_router)
 app.include_router(learn_router)

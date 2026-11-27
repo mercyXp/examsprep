@@ -15,7 +15,10 @@ export async function proxyAuthed(request: Request, backendPath: string, action:
   if (contentType) headers["Content-Type"] = contentType;
 
   const method = request.method.toUpperCase();
-  const body = method === "GET" || method === "HEAD" ? undefined : await request.text();
+  let body: BodyInit | undefined;
+  if (method !== "GET" && method !== "HEAD") {
+    body = contentType && contentType.includes("multipart/form-data") ? await request.arrayBuffer() : await request.text();
+  }
   const response = await callBackend(target, { method, headers, body });
   if (!response) {
     return NextResponse.json(unavailable(action), { status: 503 });

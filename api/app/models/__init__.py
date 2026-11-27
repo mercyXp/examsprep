@@ -6,12 +6,14 @@ from app.models.content import (
     ContentReview,
     Lesson,
     LessonVersion,
+    PastPaper,
     Question,
     QuestionVersion,
     Quiz,
     QuizVersion,
     QuizVersionQuestion,
     Resource,
+    ReusableGame,
 )
 from app.models.identity import Permission, Role, RolePermission, StudentProfile, User, UserRole
 from app.models.recovery import PasswordResetToken
@@ -39,6 +41,7 @@ __all__ = [
     "LessonVersion",
     "Module",
     "ModuleExamSlot",
+    "PastPaper",
     "PasswordResetToken",
     "Permission",
     "PrizePayout",
@@ -54,6 +57,7 @@ __all__ = [
     "QuizVersion",
     "QuizVersionQuestion",
     "Resource",
+    "ReusableGame",
     "Role",
     "RolePermission",
     "Semester",

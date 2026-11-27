@@ -28,7 +28,9 @@ Each block is one reveal item by default. It has `id`, `type`, type-specific fie
 - `animation`: `fade` | `none` | `up` | `left` | `right` | `zoom`
 - `notesOnly`: hidden in presentation, shown in **Read Full Notes**
 
-Supported `type` values: `text`, `code`, `image`, `callout`, `check`, `video`, `audio`, `table`.
+Supported `type` values: `text`, `code`, `image`, `callout`, `check`, `video`, `audio`, `table`, `math`, `flashcard`, `quiz`, `game`.
+
+`math` stores `latex` and an optional `caption`. `flashcard` stores `front` and `back`. `quiz` is `kind: "mcq"` (options plus `correctId`) or `kind: "blank"` (an `answer` string). `game` is `kind: "matching"` (`pairs` of `left` and `right`) or `kind: "drag"` (`bins` and `items` with a `bin`). Older lessons that only use the original types still render. A missing `correctId` is kept empty so the studio can warn before submit; it is not treated as option A.
 
 Text and callout blocks can include word formatting: `**bold**`, `*italic*`, `++underline++`, and `==highlight==`. A text block can also set `font` to `sans`, `serif`, or `mono`. The editor toolbar writes these markers, and the player renders them. **Next line**, and Enter in the text box, store a newline. The player shows that break.
 
@@ -47,6 +49,20 @@ Presentation mode and full-notes mode read the same `slides` array. There is no 
 5. Next slide runs only after every presentation item on the current slide has been revealed.
 
 Student progress (`current_slide_index`, `revealed_units`, `check_results`) is stored separately from editable content.
+
+## Block editor
+
+Open **Block editor** in the studio. Type `/` to insert a heading, text, image, code, math formula, table, flashcard, quiz, or game. Drag the handle to reorder. Undo, redo, and autosave use the same lesson JSON as presentation mode. Phone and desktop preview sit beside the editor and use the student renderer.
+
+## Import, templates, and drafts
+
+Paste notes or upload `.pptx`, `.pdf`, or `.docx`. Headings become slides, bullets become reveal items, and tables, code, and supported images are kept. Templates are lecture notes, topic + quiz, revision sheet, and mock exam.
+
+Summarise, flashcards, quiz, game, and mock exam call the swappable AI provider when `AI_API_KEY` is set. With no key, or if the provider fails, the API writes a local draft and says so. Generated lessons and question-bank rows are saved as `DRAFT`. Nothing in these actions publishes.
+
+The question bank at `/admin/questions` accepts a past-paper PDF (split into questions), CSV or XLSX, topic tags, and model answers. A spreadsheet needs a header row. Use `prompt`, `kind` (`mcq`, `blank`, or `short`), `option_a` through `option_e`, `correct` (a letter or the option text), `explanation`, `model_answer`, and `topic`. A `status` column is ignored. Games can be saved and dropped into another lesson. Copy a lesson or a chapter only into a module the editor can already access. The copy is a new draft.
+
+Before submit or publish, the studio warns about empty slides, quizzes with no correct answer, and images that have no file or a missing upload. The warning does not publish the lesson. A reviewer still uses the existing approve and publish actions.
 
 ## Adding a content type
 
@@ -69,8 +85,19 @@ Unchanged: FastAPI `AccessScope` on every create, update, submit, review, and pu
 
 ## Later phases
 
-Question bank builder, drag-and-drop questions, essay rubrics, AI authoring/grading, cloud object storage, templates library, revision diff UI, and scheduled publish.
+Essay rubrics, AI grading, cloud object storage, a revision diff, and scheduled publish. Student quiz attempts outside a lesson are still the empty quizzes page. Quiz, flashcard, and game blocks inside a published lesson play in the lesson player.
 
 ## Environment
 
-Existing `DATABASE_URL` and `examsprep_token` auth are required. Optional `MEDIA_ROOT` (default `var/media` under `api/`) stores uploaded images, video, audio, and PDFs on disk. An AI provider is not required for authoring.
+Existing `DATABASE_URL` and `examsprep_token` auth are required. Optional `MEDIA_ROOT` (default `var/media` under `api/`) stores uploaded images, video, audio, and PDFs on disk.
+
+AI authoring is optional:
+
+```
+AI_PROVIDER=auto
+AI_API_KEY=
+AI_BASE_URL=https://api.openai.com/v1
+AI_MODEL=gpt-4o-mini
+```
+
+`auto` calls `AI_BASE_URL/chat/completions` when `AI_API_KEY` is set, and writes a local draft otherwise. `heuristic` always stays local. Any OpenAI-compatible base URL can replace the provider without changing the studio.

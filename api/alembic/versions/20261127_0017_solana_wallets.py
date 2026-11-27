@@ -1,8 +1,12 @@
 """Wallet links, badge receipts, and leaderboard prize pools.
 
-Revision ID: 20261127_0016
-Revises: 20261022_0015
+Revision ID: 20261127_0017
+Revises: 20261127_0016
 Create Date: 2026-11-27
+
+Production is already stamped at 20261127_0016 (the authoring-bank migration).
+This revision keeps that id and follows it, so a database at 20261127_0016
+upgrades by adding only the Solana tables.
 
 """
 
@@ -11,8 +15,8 @@ from collections.abc import Sequence
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = "20261127_0016"
-down_revision: str | None = "20261022_0015"
+revision: str = "20261127_0017"
+down_revision: str | None = "20261127_0016"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

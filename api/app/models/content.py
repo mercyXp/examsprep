@@ -140,6 +140,12 @@ class Question(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         foreign_keys="QuestionVersion.question_id",
         order_by="QuestionVersion.version_number",
     )
+    topic_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("topics.id", ondelete="SET NULL"), nullable=True)
+    past_paper_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("past_papers.id", ondelete="SET NULL"), nullable=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False, default="mcq", server_default="mcq")
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="manual", server_default="manual")
+    paper_label: Mapped[str] = mapped_column(String(80), nullable=False, default="", server_default="")
+
     published_version: Mapped[QuestionVersion | None] = relationship(
         foreign_keys=[published_version_id],
         post_update=True,
@@ -166,6 +172,13 @@ class QuestionVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         server_default=text("'[]'::jsonb"),
     )
     explanation: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    model_answer: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    accepted_answers: Mapped[list] = mapped_column(
+        JSONB,
+        nullable=False,
+        default=list,
+        server_default=text("'[]'::jsonb"),
+    )
     checksum: Mapped[str | None] = mapped_column(String(64), nullable=True)
     author_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
     status: Mapped[VersionStatus] = mapped_column(
@@ -181,6 +194,48 @@ class QuestionVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         back_populates="question_version",
         cascade="all, delete-orphan",
     )
+
+
+class PastPaper(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """An uploaded exam paper. Questions split out of it stay in the question bank as drafts."""
+
+    __tablename__ = "past_papers"
+
+    module_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("modules.id", ondelete="CASCADE"), nullable=False)
+    uploaded_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    storage_key: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    status: Mapped[ContentStatus] = mapped_column(
+        content_status_enum,
+        nullable=False,
+        default=ContentStatus.DRAFT,
+        server_default=ContentStatus.DRAFT.value,
+    )
+
+    module: Mapped[Module] = relationship()
+    uploaded_by: Mapped[User] = relationship(foreign_keys=[uploaded_by_id])
+
+
+class ReusableGame(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """A matching or drag-and-drop game an editor can drop into another lesson."""
+
+    __tablename__ = "reusable_games"
+
+    module_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("modules.id", ondelete="CASCADE"), nullable=False)
+    creator_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb"))
+    status: Mapped[ContentStatus] = mapped_column(
+        content_status_enum,
+        nullable=False,
+        default=ContentStatus.DRAFT,
+        server_default=ContentStatus.DRAFT.value,
+    )
+
+    module: Mapped[Module] = relationship()
+    creator: Mapped[User] = relationship(foreign_keys=[creator_id])
 
 
 class Quiz(UUIDPrimaryKeyMixin, TimestampMixin, Base):

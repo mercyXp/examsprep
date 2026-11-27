@@ -123,7 +123,7 @@ The phone:
 
 ## Database
 
-Alembic revision `20261127_0016` adds `wallet_links`, `badge_awards`, `prize_pools`, and `prize_payouts`. It does not change users, lessons, or roles. Run `alembic upgrade head` as the API already does on deploy.
+Alembic revision `20261127_0017` adds `wallet_links`, `badge_awards`, `prize_pools`, and `prize_payouts`. It follows `20261127_0016`, which production already has for the authoring bank. It does not change users, lessons, or roles. Run `alembic upgrade head` as the API already does on deploy.
 
 ## Phone
 

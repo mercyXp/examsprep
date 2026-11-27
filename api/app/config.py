@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = ""
     google_client_id: str = ""
+    # auto uses the provider when AI_API_KEY is set, and a local draft otherwise.
+    ai_provider: str = "auto"
+    ai_api_key: str = ""
+    ai_base_url: str = "https://api.openai.com/v1"
+    ai_model: str = "gpt-4o-mini"
     # Solana hackathon phase 1. Leave the keypairs empty until you deploy.
     # See docs/architecture/solana.md. Secrets stay on the API, never on Vercel.
     solana_rpc_url: str = "https://api.devnet.solana.com"

@@ -19,6 +19,10 @@ dependencies = [
   "google-auth>=2.40",
   "PyNaCl>=1.5",
   "solders>=0.26",
+  "python-pptx>=1.0",
+  "python-docx>=1.1",
+  "pypdf>=5.1",
+  "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
