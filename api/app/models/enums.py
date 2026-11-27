@@ -13,6 +13,7 @@ class ProgrammeStatus(StrEnum):
     AVAILABLE = "available"
     COMING_SOON = "coming_soon"
     PREVIEW = "preview"
+    ARCHIVED = "archived"
 
 
 class ContentStatus(StrEnum):

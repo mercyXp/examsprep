@@ -291,7 +291,7 @@ export default function AdminCoursesPage() {
                           {scope?.canManageCatalogue ? (
                             <button type="button" onClick={() => openEditor(item)}>Edit module</button>
                           ) : null}
-                          <Link href={`/admin/lessons?module=${item.id}`}>Chapters & lessons</Link>
+                          <Link href={`/admin/lessons?module=${item.id}`}>Lessons</Link>
                         </div>
                       ) : null}
                     </div>
@@ -328,15 +328,27 @@ export default function AdminCoursesPage() {
                 <p>{editing ? "Update this module’s catalogue details." : "Add a new module to a program."}</p>
               </div>
             </header>
-            <label>
-              Program <span>*</span>
-              <select required value={form.programmeId} onChange={(event) => setForm({ ...form, programmeId: event.target.value })} disabled={Boolean(editing)}>
-                <option value="">Select a program</option>
-                {(scope.programmes ?? []).map((item) => (
-                  <option key={item.id} value={item.id}>{item.name}</option>
-                ))}
-              </select>
-            </label>
+            {(scope.programmes ?? []).length === 0 ? (
+              <p className="admin-note">
+                There are no programs to attach this module to.
+                {scope.canManageProgrammes ? (
+                  <>
+                    {" "}
+                    <Link href="/admin/programs">Create a program first</Link>.
+                  </>
+                ) : null}
+              </p>
+            ) : (
+              <label>
+                Program <span>*</span>
+                <select required value={form.programmeId} onChange={(event) => setForm({ ...form, programmeId: event.target.value })} disabled={Boolean(editing)}>
+                  <option value="">Select a program</option>
+                  {(scope.programmes ?? []).map((item) => (
+                    <option key={item.id} value={item.id}>{item.name}</option>
+                  ))}
+                </select>
+              </label>
+            )}
             <label>
               Module Code <span>*</span>
               <input id="module-code" required value={form.code} placeholder="e.g. IT300" onChange={(event) => setForm({ ...form, code: event.target.value })} />
@@ -374,7 +386,7 @@ export default function AdminCoursesPage() {
                 <option value="ARCHIVED">Archived</option>
               </select>
             </label>
-            <button type="submit" className="admin-create-btn is-wide">
+            <button type="submit" className="admin-create-btn is-wide" disabled={!editing && !(scope.programmes ?? []).length}>
               {editing ? "Save module" : "Create module"}
             </button>
             {editing ? (

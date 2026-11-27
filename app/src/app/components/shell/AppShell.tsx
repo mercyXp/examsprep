@@ -23,28 +23,65 @@ const STUDENT_NAV: { href: string; label: string; icon: NavIconName }[] = [
   { href: "/dashboard/settings", label: "Settings", icon: "gear" },
 ];
 
-const ADMIN_NAV: { href: string; label: string; icon: NavIconName; show?: (scope: AdminScope | null) => boolean }[] = [
-  { href: "/admin", label: "Dashboard", icon: "home" },
-  { href: "/admin/students", label: "Students", icon: "people", show: (scope) => Boolean(scope?.canManageStudents) },
-  { href: "/admin/courses", label: "Courses & Modules", icon: "book" },
-  { href: "/admin/lessons", label: "Chapters & Lessons", icon: "lessons" },
+type NavLink = {
+  href: string;
+  label: string;
+  icon: NavIconName;
+  show?: (scope: AdminScope | null) => boolean;
+};
+
+const ADMIN_SECTIONS: { label: string; items: NavLink[] }[] = [
   {
-    href: "/admin/staff",
-    label: "Staff",
-    icon: "people",
-    show: (scope) => Boolean(scope?.role === "super_administrator" || scope?.roles?.includes("super_administrator")),
+    label: "Overview",
+    items: [{ href: "/admin", label: "Dashboard", icon: "home" }],
   },
   {
-    href: "/admin/assignments",
-    label: "Assignments",
-    icon: "people",
-    show: (scope) => Boolean(scope?.canAssignAdmins || scope?.canAssignCreators),
+    label: "Content",
+    items: [
+      {
+        href: "/admin/programs",
+        label: "Programs",
+        icon: "programs",
+        show: (scope) => Boolean(scope?.canManageCatalogue),
+      },
+      { href: "/admin/courses", label: "Courses & Modules", icon: "book" },
+      { href: "/admin/lessons", label: "Lessons", icon: "lessons" },
+      { href: "/admin/questions", label: "Question Bank", icon: "bank" },
+      { href: "/admin/quizzes", label: "Quizzes & Mock Exams", icon: "quiz" },
+    ],
   },
-  { href: "/admin/questions", label: "Question Bank", icon: "bank" },
-  { href: "/admin/quizzes", label: "Quizzes & Mock Exams", icon: "quiz" },
-  { href: "/admin/analytics", label: "Analytics & Reports", icon: "chart" },
-  { href: "/admin/announcements", label: "Announcements", icon: "megaphone", show: (scope) => Boolean(scope?.canAnnounce) },
-  { href: "/admin/settings", label: "Settings", icon: "gear" },
+  {
+    label: "People",
+    items: [
+      {
+        href: "/admin/people",
+        label: "People",
+        icon: "people",
+        show: (scope) => Boolean(scope?.canManageStudents),
+      },
+    ],
+  },
+  {
+    label: "Engage",
+    items: [
+      {
+        href: "/admin/announcements",
+        label: "Announcements",
+        icon: "megaphone",
+        show: (scope) => Boolean(scope?.canAnnounce),
+      },
+      {
+        href: "/admin/rewards",
+        label: "Rewards",
+        icon: "award",
+        show: (scope) => Boolean(scope?.canViewRewards),
+      },
+    ],
+  },
+  {
+    label: "Settings",
+    items: [{ href: "/admin/settings", label: "Settings", icon: "gear" }],
+  },
 ];
 
 function initials(user: SessionUser | null) {
@@ -63,6 +100,16 @@ function roleLabel(user: SessionUser | null) {
 
 function navActive(href: string, pathname: string) {
   if (href === "/dashboard" || href === "/admin") return pathname === href;
+  if (href === "/admin/people") {
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`) ||
+      pathname === "/admin/students" ||
+      pathname.startsWith("/admin/students/") ||
+      pathname === "/admin/staff" ||
+      pathname.startsWith("/admin/staff/")
+    );
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -120,8 +167,13 @@ export default function AppShell({
     };
   }, [router, variant]);
 
-  const items =
-    variant === "admin" ? ADMIN_NAV.filter((item) => !item.show || item.show(scope)) : STUDENT_NAV;
+  const sections =
+    variant === "admin"
+      ? ADMIN_SECTIONS.map((section) => ({
+          ...section,
+          items: section.items.filter((item) => !item.show || item.show(scope)),
+        })).filter((section) => section.items.length > 0)
+      : [{ label: "", items: STUDENT_NAV }];
 
   const home = variant === "admin" ? "/admin" : "/dashboard";
 
@@ -145,16 +197,21 @@ export default function AppShell({
       <aside className="dash-sidebar" id="dash-nav">
         <BrandLogo href={home} className="dash-brand" />
         <nav className="dash-nav" aria-label={variant === "admin" ? "Administrator" : "Student"}>
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={navActive(item.href, pathname) ? "is-active" : undefined}
-              onClick={() => setMenuOpen(false)}
-            >
-              <NavIcon name={item.icon} />
-              {item.label}
-            </Link>
+          {sections.map((section) => (
+            <div key={section.label || "student"} className="dash-nav-group">
+              {section.label ? <p className="dash-nav-label">{section.label}</p> : null}
+              {section.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={navActive(item.href, pathname) ? "is-active" : undefined}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <NavIcon name={item.icon} />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="dash-account">

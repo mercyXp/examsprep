@@ -8,15 +8,6 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.cms import (
-    DIFFICULTIES,
-    PUBLISH_STATUSES,
-    clean_objectives,
-    clean_slides,
-    duplicate_slides,
-    lesson_is_complete,
-    slides_plain_text,
-)
 from app.access import (
     AccessScope,
     ensure_program_module,
@@ -45,21 +36,30 @@ from app.calendar import (
     schedule_payload,
     set_current_period,
 )
+from app.cms import (
+    DIFFICULTIES,
+    PUBLISH_STATUSES,
+    clean_objectives,
+    clean_slides,
+    duplicate_slides,
+    lesson_is_complete,
+    slides_plain_text,
+)
 from app.db import get_session
 from app.media import store_upload
 from app.models import (
     AcademicPeriod,
     AcademicYear,
     Announcement,
-    ExamType,
     Chapter,
+    ExamType,
     Lesson,
     LessonProgress,
     LessonVersion,
     Module,
     ModuleExamSlot,
-    Programme,
     ProgramExamSchedule,
+    Programme,
     Quiz,
     Role,
     Semester,
@@ -68,7 +68,15 @@ from app.models import (
     UserRole,
 )
 from app.models.access import ContentCreatorAssignment, ProgramAdminAssignment, ProgramModule
-from app.models.enums import ContentStatus, UserStatus, VersionStatus
+from app.models.enums import ContentStatus, ProgrammeStatus, UserStatus, VersionStatus
+from app.programmes import (
+    archive_programme,
+    create_programme,
+    programme_out,
+    programmes_for,
+    reject_if_archived,
+    update_programme,
+)
 from app.security import role_slugs
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -125,6 +133,15 @@ class CreatorAssignIn(BaseModel):
     user_id: uuid.UUID
     programme_id: uuid.UUID
     module_id: uuid.UUID
+
+
+class ProgrammeIn(BaseModel):
+    name: str = Field(min_length=1, max_length=180)
+    slug: str | None = Field(default=None, max_length=80)
+    category: str = Field(default="General", max_length=120)
+    status: str = ProgrammeStatus.AVAILABLE.value
+    duration_years: int = Field(default=4, ge=1, le=4)
+    blurb: str = Field(default="", max_length=4000)
 
 
 class ReviewIn(BaseModel):
@@ -515,6 +532,7 @@ def create_module(body: ModuleIn, scope: AccessScope = SCOPE, session: Session =
         if programme_id is None:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Choose a programme for this module.")
         scope.require_programme(programme_id)
+        reject_if_archived(session.get(Programme, programme_id))
         semester = first_semester_for_programme(session, programme_id)
         if semester is None:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Create a semester before adding modules.")
@@ -527,6 +545,7 @@ def create_module(body: ModuleIn, scope: AccessScope = SCOPE, session: Session =
         if year:
             scope.require_programme(year.programme_id)
             programme_id = year.programme_id
+            reject_if_archived(session.get(Programme, programme_id))
     clash = session.scalar(
         select(Module)
         .join(Semester, Module.semester_id == Semester.id)
@@ -996,16 +1015,57 @@ def _staff_users(session: Session, slug: str) -> list[User]:
 
 @router.get("/programmes")
 def list_programmes(scope: AccessScope = SCOPE, session: Session = Depends(get_session)) -> dict[str, Any]:
-    query = select(Programme).order_by(Programme.name)
-    if not scope.super_admin:
-        if not scope.programme_ids:
-            return {"ok": True, "items": []}
-        query = query.where(Programme.id.in_(scope.programme_ids))
-    items = [
-        {"id": str(item.id), "name": item.name, "slug": item.slug, "status": item.status.value}
-        for item in session.scalars(query)
-    ]
-    return {"ok": True, "items": items}
+    items = [programme_out(session, item) for item in programmes_for(session, scope)]
+    return {"ok": True, "items": items, "canManage": scope.super_admin}
+
+
+@router.post("/programmes")
+def create_programme_route(
+    body: ProgrammeIn,
+    scope: AccessScope = SCOPE,
+    session: Session = Depends(get_session),
+) -> dict[str, Any]:
+    row = create_programme(
+        session,
+        scope,
+        name=body.name,
+        slug=body.slug,
+        category=body.category,
+        status_value=body.status,
+        duration_years=body.duration_years,
+        blurb=body.blurb,
+    )
+    return {"ok": True, "item": programme_out(session, row)}
+
+
+@router.patch("/programmes/{programme_id}")
+def update_programme_route(
+    programme_id: uuid.UUID,
+    body: ProgrammeIn,
+    scope: AccessScope = SCOPE,
+    session: Session = Depends(get_session),
+) -> dict[str, Any]:
+    row = update_programme(
+        session,
+        scope,
+        programme_id,
+        name=body.name,
+        category=body.category,
+        status_value=body.status,
+        duration_years=body.duration_years,
+        blurb=body.blurb,
+    )
+    return {"ok": True, "item": programme_out(session, row)}
+
+
+@router.post("/programmes/{programme_id}/archive")
+def archive_programme_route(
+    programme_id: uuid.UUID,
+    scope: AccessScope = SCOPE,
+    session: Session = Depends(get_session),
+) -> dict[str, Any]:
+    row = archive_programme(session, scope, programme_id)
+    return {"ok": True, "item": programme_out(session, row)}
 
 
 @router.get("/assignments")

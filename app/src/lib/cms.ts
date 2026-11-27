@@ -67,6 +67,8 @@ export type AdminScope = {
   canViewAcademic?: boolean;
   canManageAcademic?: boolean;
   canAnnounce?: boolean;
+  canManageProgrammes?: boolean;
+  canViewRewards?: boolean;
   programmes: { id: string; name: string; slug: string }[];
   modules: { id: string; code: string; name: string; programmeId: string | null; programmeName: string | null }[];
 };
@@ -517,10 +519,44 @@ export async function createExamType(name: string) {
   });
 }
 
+export type AdminProgramme = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  status: string;
+  durationYears: number | null;
+  blurb: string;
+  moduleCount: number;
+};
+
 export async function loadProgrammes() {
-  const result = await api<{ items: Array<{ id: string; name: string; slug: string }> }>("/api/admin/programmes");
+  const result = await api<{ items: AdminProgramme[]; canManage?: boolean }>("/api/admin/programmes");
   if (!result.ok) return result;
-  return { ok: true as const, data: result.data.items ?? [] };
+  return {
+    ok: true as const,
+    data: { items: result.data.items ?? [], canManage: Boolean(result.data.canManage) },
+  };
+}
+
+export async function saveProgramme(
+  body: { name: string; category: string; status: string; durationYears: number; blurb: string },
+  id?: string,
+) {
+  return api<{ item: AdminProgramme }>(id ? `/api/admin/programmes/${id}` : "/api/admin/programmes", {
+    method: id ? "PATCH" : "POST",
+    body: JSON.stringify({
+      name: body.name,
+      category: body.category,
+      status: body.status,
+      duration_years: body.durationYears,
+      blurb: body.blurb,
+    }),
+  });
+}
+
+export async function archiveProgramme(id: string) {
+  return api<{ item: AdminProgramme }>(`/api/admin/programmes/${id}/archive`, { method: "POST" });
 }
 
 export type AnnouncementKind = "examination" | "academic" | "course" | "reminder" | "general";

@@ -69,6 +69,24 @@ export default function AdminHomePage() {
         </section>
         <article className="dash-card">
           <header className="dash-card-head">
+            <h2>Analytics & Reports</h2>
+          </header>
+          {stats ? (
+            <ul className="cms-list">
+              <li>{stats.totalStudents} registered students</li>
+              <li>{stats.activeStudents} active accounts</li>
+              <li>{stats.publishedLessons} published lessons</li>
+              <li>{stats.totalQuizzes} quizzes</li>
+            </ul>
+          ) : (
+            <p className="dash-empty">Loading analytics…</p>
+          )}
+          <p className="admin-note">
+            <Link href="/admin/analytics">Open the analytics page</Link>
+          </p>
+        </article>
+        <article className="dash-card">
+          <header className="dash-card-head">
             <h2>Quick actions</h2>
           </header>
           <div className="cms-actions">
@@ -81,7 +99,7 @@ export default function AdminHomePage() {
                 Create a lesson
               </Link>
             )}
-            <Link href="/admin/lessons">Manage chapters</Link>
+            <Link href="/admin/lessons">Lessons</Link>
             {scope?.canAssignCreators || scope?.canAssignAdmins ? <Link href="/admin/assignments">Assignments</Link> : null}
             <Link href="/admin/quizzes">Quizzes</Link>
           </div>
