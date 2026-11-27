@@ -2,6 +2,7 @@
 
 import type { ContentBlock, TextFont } from "@/lib/content";
 import { mediaEmbed } from "@/lib/content";
+import { ActivityBlock } from "./ActivityBlock";
 import { FormattedText } from "./FormattedText";
 
 const SQL_WORDS = /\b(SELECT|FROM|WHERE|AND|OR|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|JOIN|ON|AS|NOT|NULL|PRIMARY|KEY)\b/gi;
@@ -147,6 +148,9 @@ export function BlockView({
         {block.transcript ? <p className="lp-transcript">{block.transcript}</p> : null}
       </figure>
     );
+  }
+  if (block.type === "math" || block.type === "flashcard" || block.type === "quiz" || block.type === "game") {
+    return <ActivityBlock block={block} />;
   }
   const selected = check?.selectedId;
   return (

@@ -6,7 +6,9 @@ from typing import Any
 
 from fastapi import HTTPException, status
 
-BLOCK_TYPES = {"text", "code", "image", "callout", "check", "video", "audio", "table"}
+BLOCK_TYPES = {"text", "code", "image", "callout", "check", "video", "audio", "table", "math", "flashcard", "quiz", "game"}
+QUIZ_KINDS = {"mcq", "blank"}
+GAME_KINDS = {"matching", "drag"}
 TEXT_VARIANTS = {"heading", "paragraph", "list", "definition", "quote"}
 TEXT_FONTS = {"sans", "serif", "mono"}
 CALLOUT_TONES = {"note", "tip", "warning", "important"}
@@ -137,6 +139,34 @@ def clean_resource(raw: Any) -> dict[str, Any] | None:
     }
 
 
+def clean_options(raw_options: Any, *, minimum: int) -> list[dict[str, str]]:
+    options: list[dict[str, str]] = []
+    for option in as_list(raw_options):
+        if not isinstance(option, dict):
+            continue
+        options.append(
+            {
+                "id": as_str(option.get("id"), "option id", required=False, max_len=64) or new_id(),
+                "label": as_str(option.get("label"), "option label", required=False, max_len=400) or "Option",
+            }
+        )
+    while len(options) < minimum:
+        letter = chr(ord("A") + len(options))
+        options.append({"id": new_id(), "label": f"Option {letter}"})
+    return options[:8]
+
+
+def chosen_correct_id(raw: dict[str, Any], options: list[dict[str, str]]) -> str:
+    """Keep an explicit empty answer so a draft can warn. Omitted answers still default to the first option."""
+    known = {item["id"] for item in options}
+    provided = "correctId" in raw or "correct_id" in raw
+    if not provided:
+        return options[0]["id"] if options else ""
+    value = raw.get("correctId") if "correctId" in raw else raw.get("correct_id")
+    correct_id = as_str(value, "correct option", required=False, max_len=64)
+    return correct_id if correct_id in known else ""
+
+
 def clean_block(raw: Any) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Each content block must be an object.")
@@ -223,29 +253,84 @@ def clean_block(raw: Any) -> dict[str, Any]:
             "rows": rows[:30],
             **extra,
         }
-    options = []
-    for option in as_list(raw.get("options")):
-        if not isinstance(option, dict):
-            continue
-        options.append(
-            {
-                "id": as_str(option.get("id"), "option id", required=False, max_len=64) or new_id(),
-                "label": as_str(option.get("label"), "option label", required=False, max_len=400) or "Option",
-            }
-        )
-    if len(options) < 2:
-        first = new_id()
-        second = new_id()
-        options = [{"id": first, "label": "Option A"}, {"id": second, "label": "Option B"}]
-    correct_id = as_str(raw.get("correctId") or raw.get("correct_id"), "correct option", required=False, max_len=64)
-    if correct_id not in {item["id"] for item in options}:
-        correct_id = options[0]["id"]
+    if block_type == "math":
+        return {
+            "id": block_id,
+            "type": "math",
+            "latex": as_str(raw.get("latex"), "formula", required=False, max_len=4000),
+            "caption": as_str(raw.get("caption"), "formula caption", required=False, max_len=400),
+            **extra,
+        }
+    if block_type == "flashcard":
+        return {
+            "id": block_id,
+            "type": "flashcard",
+            "front": as_str(raw.get("front"), "flashcard front", required=False, max_len=2000),
+            "back": as_str(raw.get("back"), "flashcard back", required=False, max_len=4000),
+            **extra,
+        }
+    if block_type == "quiz":
+        kind = as_choice(raw.get("kind"), "quiz kind", QUIZ_KINDS, "mcq")
+        options = clean_options(raw.get("options"), minimum=0 if kind == "blank" else 2)
+        return {
+            "id": block_id,
+            "type": "quiz",
+            "kind": kind,
+            "prompt": as_str(raw.get("prompt"), "question", required=False, max_len=2000),
+            "options": options,
+            "correctId": chosen_correct_id(raw, options) if kind == "mcq" else "",
+            "answer": as_str(raw.get("answer"), "answer", required=False, max_len=400),
+            "explanation": as_str(raw.get("explanation"), "explanation", required=False, max_len=4000),
+            **extra,
+        }
+    if block_type == "game":
+        kind = as_choice(raw.get("kind"), "game kind", GAME_KINDS, "matching")
+        pairs = []
+        for item in as_list(raw.get("pairs")):
+            if not isinstance(item, dict):
+                continue
+            pairs.append(
+                {
+                    "id": as_str(item.get("id"), "pair id", required=False, max_len=64) or new_id(),
+                    "left": as_str(item.get("left"), "pair term", required=False, max_len=400),
+                    "right": as_str(item.get("right"), "pair match", required=False, max_len=400),
+                }
+            )
+        bins = [as_str(item, "bin", required=False, max_len=80) for item in as_list(raw.get("bins"))]
+        bins = [item for item in bins if item][:6] or ["Concept", "Example"]
+        items = []
+        for item in as_list(raw.get("items")):
+            if not isinstance(item, dict):
+                continue
+            label = as_str(item.get("label"), "game item", required=False, max_len=400)
+            bin_name = as_str(item.get("bin"), "game bin", required=False, max_len=80)
+            if bin_name not in bins:
+                bin_name = ""
+            items.append(
+                {
+                    "id": as_str(item.get("id"), "item id", required=False, max_len=64) or new_id(),
+                    "label": label,
+                    "bin": bin_name,
+                }
+            )
+        return {
+            "id": block_id,
+            "type": "game",
+            "kind": kind,
+            "title": as_str(raw.get("title"), "game title", required=False, max_len=180),
+            "prompt": as_str(raw.get("prompt"), "game prompt", required=False, max_len=800),
+            "pairs": pairs[:12],
+            "bins": bins,
+            "items": items[:16],
+            **extra,
+        }
+    options = clean_options(raw.get("options"), minimum=2)
     return {
         "id": block_id,
         "type": "check",
         "prompt": as_str(raw.get("prompt"), "question", required=False, max_len=2000),
         "options": options,
-        "correctId": correct_id,
+        "correctId": chosen_correct_id(raw, options),
         "explanation": as_str(raw.get("explanation"), "explanation", required=False, max_len=4000),
         "feedbackCorrect": as_str(raw.get("feedbackCorrect") or raw.get("feedback_correct"), "feedback", required=False),
         "feedbackWrong": as_str(raw.get("feedbackWrong") or raw.get("feedback_wrong"), "feedback", required=False),
@@ -310,6 +395,18 @@ def slides_plain_text(slides: list[dict[str, Any]]) -> str:
                 lines.append(str(block.get("title") or block.get("transcript") or ""))
             elif kind == "table":
                 lines.append(str(block.get("caption") or " ".join(block.get("headers") or [])))
+            elif kind == "math":
+                lines.append(str(block.get("latex") or ""))
+            elif kind == "flashcard":
+                lines.append(str(block.get("front") or ""))
+                lines.append(str(block.get("back") or ""))
+            elif kind == "quiz":
+                lines.append(str(block.get("prompt") or ""))
+                lines.append(str(block.get("answer") or ""))
+            elif kind == "game":
+                lines.append(str(block.get("title") or block.get("prompt") or ""))
+                for pair in block.get("pairs") or []:
+                    lines.append(f"{pair.get('left') or ''} {pair.get('right') or ''}")
         for resource in slide.get("resources") or []:
             lines.append(str(resource.get("title") or resource.get("url") or ""))
     return "\n".join(part for part in lines if part).strip()
@@ -321,7 +418,7 @@ def duplicate_slides(slides: list[dict[str, Any]]) -> list[dict[str, Any]]:
         slide["id"] = new_id()
         for block in slide.get("blocks") or []:
             block["id"] = new_id()
-            if block.get("type") == "check":
+            if block.get("type") in {"check", "quiz"}:
                 mapping = {}
                 for option in block.get("options") or []:
                     fresh = new_id()
@@ -329,6 +426,11 @@ def duplicate_slides(slides: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     option["id"] = fresh
                 if block.get("correctId") in mapping:
                     block["correctId"] = mapping[block["correctId"]]
+            if block.get("type") == "game":
+                for pair in block.get("pairs") or []:
+                    pair["id"] = new_id()
+                for item in block.get("items") or []:
+                    item["id"] = new_id()
         for resource in slide.get("resources") or []:
             resource["id"] = new_id()
     return cloned
