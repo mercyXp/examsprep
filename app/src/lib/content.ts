@@ -3,7 +3,9 @@ import { stripRichText } from "@/lib/rich-text";
 export type TextVariant = "heading" | "paragraph" | "list" | "definition" | "quote";
 export type TextFont = "sans" | "serif" | "mono";
 export type CalloutTone = "note" | "tip" | "warning" | "important";
-export type BlockType = "text" | "code" | "image" | "callout" | "check" | "video" | "audio" | "table";
+export type BlockType = "text" | "code" | "image" | "callout" | "check" | "video" | "audio" | "table" | "math" | "flashcard" | "quiz" | "game";
+export type QuizKind = "mcq" | "blank";
+export type GameKind = "matching" | "drag";
 export type AppearMode = "click" | "immediate";
 export type RevealAnimation = "fade" | "none" | "up" | "left" | "right" | "zoom";
 export type RevealMode = "block" | "sentence";
@@ -99,7 +101,58 @@ export type TableBlock = RevealSettings & {
   rows: string[][];
 };
 
-export type ContentBlock = TextBlock | CodeBlock | ImageBlock | CalloutBlock | CheckBlock | VideoBlock | AudioBlock | TableBlock;
+export type MathBlock = RevealSettings & {
+  id: string;
+  type: "math";
+  latex: string;
+  caption: string;
+};
+
+export type FlashcardBlock = RevealSettings & {
+  id: string;
+  type: "flashcard";
+  front: string;
+  back: string;
+};
+
+export type QuizBlock = RevealSettings & {
+  id: string;
+  type: "quiz";
+  kind: QuizKind;
+  prompt: string;
+  options: CheckOption[];
+  correctId: string;
+  answer: string;
+  explanation: string;
+};
+
+export type GamePair = { id: string; left: string; right: string };
+export type GameItem = { id: string; label: string; bin: string };
+
+export type GameBlock = RevealSettings & {
+  id: string;
+  type: "game";
+  kind: GameKind;
+  title: string;
+  prompt: string;
+  pairs: GamePair[];
+  bins: string[];
+  items: GameItem[];
+};
+
+export type ContentBlock =
+  | TextBlock
+  | CodeBlock
+  | ImageBlock
+  | CalloutBlock
+  | CheckBlock
+  | VideoBlock
+  | AudioBlock
+  | TableBlock
+  | MathBlock
+  | FlashcardBlock
+  | QuizBlock
+  | GameBlock;
 
 export type LessonResource = {
   id: string;
@@ -149,6 +202,10 @@ export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   video: "Video",
   audio: "Audio note",
   table: "Table",
+  math: "Math formula",
+  flashcard: "Flashcard",
+  quiz: "Quiz",
+  game: "Game",
 };
 
 export function newId() {
@@ -205,7 +262,52 @@ export function emptyBlock(type: BlockType): ContentBlock {
       ...reveal,
     };
   }
+  if (type === "math") return { id, type, latex: "", caption: "", ...reveal };
+  if (type === "flashcard") return { id, type, front: "", back: "", ...reveal };
+  if (type === "quiz") {
+    const a = newId();
+    const b = newId();
+    return {
+      id,
+      type,
+      kind: "mcq",
+      prompt: "",
+      options: [
+        { id: a, label: "Option A" },
+        { id: b, label: "Option B" },
+      ],
+      correctId: "",
+      answer: "",
+      explanation: "",
+      ...reveal,
+    };
+  }
+  if (type === "game") {
+    return {
+      id,
+      type,
+      kind: "matching",
+      title: "",
+      prompt: "",
+      pairs: [
+        { id: newId(), left: "", right: "" },
+        { id: newId(), left: "", right: "" },
+      ],
+      bins: ["Concept", "Example"],
+      items: [],
+      ...reveal,
+    };
+  }
   return { id, type: "text", variant: "paragraph", text: "", items: [], ...reveal };
+}
+
+export function blockFromMenu(kind: "heading" | BlockType): ContentBlock {
+  if (kind === "heading") {
+    const block = emptyBlock("text");
+    if (block.type === "text") block.variant = "heading";
+    return block;
+  }
+  return emptyBlock(kind);
 }
 
 export function splitUnits(text: string): string[] {
@@ -388,6 +490,10 @@ export function blockPreview(block: ContentBlock) {
   if (block.type === "check") return clip(block.prompt || "Knowledge check");
   if (block.type === "video") return clip(block.title || "Video");
   if (block.type === "table") return clip(block.caption || block.headers.join(" · ") || "Table");
+  if (block.type === "math") return clip(block.latex || block.caption || "Formula");
+  if (block.type === "flashcard") return clip(block.front || "Flashcard");
+  if (block.type === "quiz") return clip(block.prompt || (block.kind === "blank" ? "Fill in the blank" : "Quiz"));
+  if (block.type === "game") return clip(block.title || block.prompt || "Game");
   return clip(block.title || "Audio note");
 }
 
@@ -403,14 +509,18 @@ export function duplicateSlide(slide: Slide): Slide {
 export function duplicateBlock(block: ContentBlock): ContentBlock {
   const copy = structuredClone(block) as ContentBlock;
   copy.id = newId();
-  if (copy.type === "check") {
+  if (copy.type === "check" || copy.type === "quiz") {
     const mapping: Record<string, string> = {};
     copy.options = copy.options.map((option) => {
       const id = newId();
       mapping[option.id] = id;
       return { ...option, id };
     });
-    copy.correctId = mapping[copy.correctId] ?? copy.options[0]?.id ?? "";
+    copy.correctId = mapping[copy.correctId] ?? (copy.type === "check" ? copy.options[0]?.id ?? "" : "");
+  }
+  if (copy.type === "game") {
+    copy.pairs = copy.pairs.map((pair) => ({ ...pair, id: newId() }));
+    copy.items = copy.items.map((item) => ({ ...item, id: newId() }));
   }
   return copy;
 }
@@ -499,15 +609,7 @@ function parseBlock(raw: unknown): ContentBlock | null {
     };
   }
   if (type === "check") {
-    const options = Array.isArray(row.options)
-      ? row.options
-          .map((option) => {
-            if (!option || typeof option !== "object") return null;
-            const item = option as Record<string, unknown>;
-            return { id: asText(item.id) || newId(), label: asText(item.label) };
-          })
-          .filter((option): option is CheckOption => Boolean(option))
-      : [];
+    const options = parseOptions(row.options);
     return {
       id,
       type,
@@ -535,6 +637,58 @@ function parseBlock(raw: unknown): ContentBlock | null {
       : [];
     return { id, type, caption: asText(row.caption), headers, rows, ...reveal };
   }
+  if (type === "math") {
+    return { id, type, latex: asText(row.latex), caption: asText(row.caption), ...reveal };
+  }
+  if (type === "flashcard") {
+    return { id, type, front: asText(row.front), back: asText(row.back), ...reveal };
+  }
+  if (type === "quiz") {
+    const options = parseOptions(row.options);
+    return {
+      id,
+      type,
+      kind: row.kind === "blank" ? "blank" : "mcq",
+      prompt: asText(row.prompt),
+      options,
+      correctId: asText(row.correctId) || asText(row.correct_id),
+      answer: asText(row.answer),
+      explanation: asText(row.explanation),
+      ...reveal,
+    };
+  }
+  if (type === "game") {
+    const pairs = Array.isArray(row.pairs)
+      ? row.pairs
+          .map((pair) => {
+            if (!pair || typeof pair !== "object") return null;
+            const item = pair as Record<string, unknown>;
+            return { id: asText(item.id) || newId(), left: asText(item.left), right: asText(item.right) };
+          })
+          .filter((pair): pair is { id: string; left: string; right: string } => Boolean(pair))
+      : [];
+    const bins = Array.isArray(row.bins) ? row.bins.map((item) => asText(item)).filter(Boolean) : ["Concept", "Example"];
+    const items = Array.isArray(row.items)
+      ? row.items
+          .map((entry) => {
+            if (!entry || typeof entry !== "object") return null;
+            const item = entry as Record<string, unknown>;
+            return { id: asText(item.id) || newId(), label: asText(item.label), bin: asText(item.bin) };
+          })
+          .filter((item): item is { id: string; label: string; bin: string } => Boolean(item))
+      : [];
+    return {
+      id,
+      type,
+      kind: row.kind === "drag" ? "drag" : "matching",
+      title: asText(row.title),
+      prompt: asText(row.prompt),
+      pairs,
+      bins: bins.length ? bins : ["Concept", "Example"],
+      items,
+      ...reveal,
+    };
+  }
   if (type === "text") {
     const variant = row.variant;
     return {
@@ -551,6 +705,17 @@ function parseBlock(raw: unknown): ContentBlock | null {
     };
   }
   return null;
+}
+
+function parseOptions(raw: unknown): CheckOption[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((option) => {
+      if (!option || typeof option !== "object") return null;
+      const item = option as Record<string, unknown>;
+      return { id: asText(item.id) || newId(), label: asText(item.label) };
+    })
+    .filter((option): option is CheckOption => Boolean(option));
 }
 
 function parseReveal(row: Record<string, unknown>): RevealSettings {

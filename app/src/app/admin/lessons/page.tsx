@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import AppShell from "@/app/components/shell/AppShell";
 import { LessonWorkflowButtons } from "@/app/components/cms/LessonWorkflow";
+import { copyChapterTo, copyLessonTo, createFromTemplate, loadTemplates, type LessonTemplate } from "@/lib/authoring";
 import {
   createLesson,
   deleteChapter,
@@ -39,6 +40,8 @@ function LessonsManager() {
   const [message, setMessage] = useState("");
   const [canPublish, setCanPublish] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "drafts" | "review" | "published">("all");
+  const [copyModule, setCopyModule] = useState("");
+  const [templates, setTemplates] = useState<LessonTemplate[]>([]);
 
   const selectedModule = modules.find((item) => item.id === moduleId);
 
@@ -66,6 +69,9 @@ function LessonsManager() {
       }
       setModules(result.data);
       if (scopeResult.ok) setCanPublish(scopeResult.data.canPublish);
+      loadTemplates().then((templatesResult) => {
+        if (templatesResult.ok) setTemplates(templatesResult.data);
+      });
       const initial = search.get("module") || result.data[0]?.id || "";
       setModuleId(initial);
     });
@@ -261,6 +267,18 @@ function LessonsManager() {
                     </button>
                     <button
                       type="button"
+                      disabled={!copyModule}
+                      onClick={async () => {
+                        if (!copyModule) return;
+                        const result = await copyChapterTo(chapter.id, copyModule);
+                        if (!result.ok) setError(result.message);
+                        else setMessage(`“${chapter.title}” was copied as a draft. Open the other module to edit it.`);
+                      }}
+                    >
+                      Copy chapter
+                    </button>
+                    <button
+                      type="button"
                       onClick={async () => {
                         if (!confirm(`Delete chapter “${chapter.title}”? Lessons stay in the module, unassigned.`)) return;
                         const result = await deleteChapter(chapter.id);
@@ -305,6 +323,45 @@ function LessonsManager() {
                 Create lesson
               </button>
             </form>
+            <div className="cms-inline">
+              <label>
+                Copy into
+                <select value={copyModule} onChange={(event) => setCopyModule(event.target.value)}>
+                  <option value="">Another module in your scope</option>
+                  {modules
+                    .filter((item) => item.id !== moduleId)
+                    .map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {moduleLabel(item)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label>
+                New from template
+                <select
+                  defaultValue=""
+                  onChange={async (event) => {
+                    const template = event.target.value;
+                    event.target.value = "";
+                    if (!template || !moduleId) return;
+                    const result = await createFromTemplate(moduleId, template, "", chapterId);
+                    if (!result.ok) {
+                      setError(result.message);
+                      return;
+                    }
+                    router.push(`/admin/lessons/${result.data.item.id}/edit`);
+                  }}
+                >
+                  <option value="">Choose a template</option>
+                  {templates.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <ul className="cms-lessons">
               {visibleLessons.map((lesson) => (
                 <li key={lesson.id}>
@@ -327,6 +384,18 @@ function LessonsManager() {
                       {lesson.status === "PUBLISHED" ? "Edit" : "Edit draft"}
                     </Link>
                     <Link href={`/learn/lessons/${lesson.id}?preview=1`}>Preview</Link>
+                    <button
+                      type="button"
+                      disabled={!copyModule}
+                      onClick={async () => {
+                        if (!copyModule) return;
+                        const result = await copyLessonTo(lesson.id, copyModule);
+                        if (!result.ok) setError(result.message);
+                        else setMessage(`“${lesson.title}” was copied as a draft into the module you chose.`);
+                      }}
+                    >
+                      Copy lesson
+                    </button>
                     <LessonWorkflowButtons
                       lessonId={lesson.id}
                       status={lesson.status}

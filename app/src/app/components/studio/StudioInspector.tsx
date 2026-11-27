@@ -519,6 +519,63 @@ function BlockFields({
           </label>
         </>
       ) : null}
+      {block.type === "math" ? (
+        <label>
+          Formula
+          <textarea value={block.latex} onChange={(event) => onChange({ ...block, latex: event.target.value })} />
+        </label>
+      ) : null}
+      {block.type === "flashcard" ? (
+        <>
+          <label>
+            Front
+            <input value={block.front} onChange={(event) => onChange({ ...block, front: event.target.value })} />
+          </label>
+          <label>
+            Back
+            <textarea value={block.back} onChange={(event) => onChange({ ...block, back: event.target.value })} />
+          </label>
+        </>
+      ) : null}
+      {block.type === "quiz" ? (
+        <>
+          <label>
+            Kind
+            <select value={block.kind} onChange={(event) => onChange({ ...block, kind: event.target.value === "blank" ? "blank" : "mcq" })}>
+              <option value="mcq">Multiple choice</option>
+              <option value="blank">Fill in the blank</option>
+            </select>
+          </label>
+          <label>
+            Question
+            <textarea value={block.prompt} onChange={(event) => onChange({ ...block, prompt: event.target.value })} />
+          </label>
+          {block.kind === "blank" ? (
+            <label>
+              Correct answer
+              <input value={block.answer} onChange={(event) => onChange({ ...block, answer: event.target.value })} />
+            </label>
+          ) : (
+            <label>
+              Correct option
+              <select value={block.correctId} onChange={(event) => onChange({ ...block, correctId: event.target.value })}>
+                <option value="">Not set yet</option>
+                {block.options.map((option, index) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label || `Option ${index + 1}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </>
+      ) : null}
+      {block.type === "game" ? (
+        <label>
+          Title
+          <input value={block.title} onChange={(event) => onChange({ ...block, title: event.target.value })} />
+        </label>
+      ) : null}
       <p className="studio-kicker">Reveal</p>
       <label>
         Appear

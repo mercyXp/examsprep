@@ -17,6 +17,10 @@ dependencies = [
   "python-multipart>=0.0.12",
   "resend>=2.0",
   "google-auth>=2.40",
+  "python-pptx>=1.0",
+  "python-docx>=1.1",
+  "pypdf>=5.1",
+  "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]

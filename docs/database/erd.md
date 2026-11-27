@@ -79,6 +79,8 @@ Unique: programme `slug`; `program_modules (programme_id, module_id)`; module `c
 
 **questions**, **question_versions**, **quizzes**, **quiz_questions** — same versioning for stems, keys, explanations, and scoring rules so a later edit cannot rewrite a completed attempt.
 
+Question-bank extras, added without changing the lesson workflow: `questions.kind` (`mcq`, `blank`, `short`), `source` (`manual`, `import`, `past_paper`, `ai`), `topic_id`, `past_paper_id`, and `paper_label`. `question_versions.model_answer` and `accepted_answers` hold the editor’s key. **past_papers** stores an uploaded PDF for a module. **reusable_games** stores a matching or drag-and-drop block that can be copied into another lesson. Imports and generated questions are inserted as `DRAFT`.
+
 Overall lesson status and version status are separate. Example: lesson published at version 3 while version 4 is `IN_REVIEW`. Students still see version 3.
 
 Allowed transitions (validated in FastAPI, not by writing a status column from the client):

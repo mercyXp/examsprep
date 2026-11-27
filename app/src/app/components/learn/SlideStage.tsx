@@ -16,7 +16,7 @@ export type CheckState = Record<string, { selectedId?: string; correct?: boolean
 function isInteractiveTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
   return Boolean(
-    target.closest("button, a, input, label, textarea, select, audio, video, iframe, .lp-check, .lp-embed"),
+    target.closest("button, a, input, label, textarea, select, audio, video, iframe, .lp-check, .lp-embed, .lp-quiz, .lp-game, .lp-flashcard, .be-block"),
   );
 }
 

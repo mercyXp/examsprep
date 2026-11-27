@@ -93,6 +93,8 @@ DATABASE_URL=postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5433/examspre
 
 Do not commit `.env`.
 
+Lesson import and the question bank do not need extra environment variables. Optional AI drafts use `AI_PROVIDER`, `AI_API_KEY`, `AI_BASE_URL`, and `AI_MODEL`. Leave `AI_API_KEY` empty and the studio still writes a local draft. The commented block is in `api/.env.example`.
+
 ## 5. Create tables and seed data
 
 Do not paste the schema into pgAdmin. Alembic creates the tables.
@@ -105,6 +107,8 @@ pip install -e .
 alembic upgrade head
 python -m app.seed
 ```
+
+`pip install -e .` also installs the lecture import libraries: `python-pptx`, `python-docx`, `pypdf`, and `openpyxl`. `alembic upgrade head` adds the question-bank columns, past papers, and reusable games.
 
 Then start the API:
 

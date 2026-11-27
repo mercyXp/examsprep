@@ -37,6 +37,10 @@ import {
   type AdminLesson,
   type AdminModule,
 } from "@/lib/cms";
+import { checkLessonQuality } from "@/lib/authoring";
+import { AuthoringTools } from "./AuthoringTools";
+import { BlockEditor } from "./BlockEditor";
+import { StudentPreview } from "./StudentPreview";
 import { ANIMATIONS, StudioInspector } from "./StudioInspector";
 
 type Snapshot = {
@@ -59,6 +63,10 @@ const PALETTE: { id: string; label: string; action: "block" | "resource" | "acti
   { id: "diagram", label: "Diagram", action: "block", type: "image" },
   { id: "code", label: "Code", action: "block", type: "code" },
   { id: "question", label: "Question", action: "block", type: "check" },
+  { id: "math", label: "Math", action: "block", type: "math" },
+  { id: "flashcard", label: "Flashcard", action: "block", type: "flashcard" },
+  { id: "quiz", label: "Quiz", action: "block", type: "quiz" },
+  { id: "game", label: "Game", action: "block", type: "game" },
   { id: "resource", label: "Resource", action: "resource" },
   { id: "activity", label: "Activity", action: "activity" },
 ];
@@ -85,7 +93,10 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [query, setQuery] = useState("");
-  const [canvasMode, setCanvasMode] = useState<"presentation" | "notes">("presentation");
+  const [canvasMode, setCanvasMode] = useState<"presentation" | "notes" | "blocks">("presentation");
+  const [previewSize, setPreviewSize] = useState<"phone" | "desktop">("desktop");
+  const [authorBusy, setAuthorBusy] = useState(false);
+  const [notice, setNotice] = useState("");
   const [previewRevealed, setPreviewRevealed] = useState(1);
   const [panel, setPanel] = useState<null | "tree" | "props">(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -203,7 +214,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
     setSlideIndex(index);
     setBlockId(null);
     setPreviewRevealed(unitsForSlide(slides[index]).length || initialRevealCount(slides[index]));
-    setCanvasMode("presentation");
+    setCanvasMode((mode) => (mode === "blocks" ? "blocks" : "presentation"));
     setPanel(null);
   }
 
@@ -309,13 +320,24 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
     sentenceFocus.current = `${block.id}:0`;
   }
 
+  function acceptSlides(next: Slide[], nextStatus?: string) {
+    pushHistory();
+    const slidesNext = next.length ? next : [emptySlide(1)];
+    setSlides(slidesNext);
+    setDirty(false);
+    setSaveState("saved");
+    if (nextStatus) setStatus(nextStatus);
+    setSlideIndex((index) => Math.min(index, slidesNext.length - 1));
+    setPreviewRevealed(unitsForSlide(slidesNext[Math.min(slideIndex, slidesNext.length - 1)]).length || 1);
+  }
+
   function addBlock(type: BlockType, extras?: Partial<ContentBlock>) {
     if (!slide) return;
     const base = emptyBlock(type);
     const block = { ...base, ...extras, id: base.id, type: base.type } as ContentBlock;
     patchSlide({ blocks: [...slide.blocks, block] });
     setBlockId(block.id);
-    setCanvasMode("presentation");
+    setCanvasMode((mode) => (mode === "blocks" ? "blocks" : "presentation"));
     setPreviewRevealed(unitsForSlide({ ...slide, blocks: [...slide.blocks, block] }).length);
   }
 
@@ -523,7 +545,13 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
             lessonId={lessonId}
             status={status}
             canPublish={canPublish}
-            beforeAction={saveAll}
+            beforeAction={async () => {
+              const saved = await saveAll();
+              if (!saved) return false;
+              const quality = await checkLessonQuality(lessonId, slides);
+              if (!quality.ok || !quality.data.length) return true;
+              return confirm(`${quality.data.map((item) => item.message).join("\n")}\n\nContinue anyway?`);
+            }}
             onDone={setStatus}
             onError={setError}
           />
@@ -562,6 +590,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
           ) : null}
         </p>
       ) : null}
+      {notice ? <p className="cms-ok studio-banner">{notice}</p> : null}
       <LessonStatusNote status={status} />
       <div className="studio-mobile">
         <button type="button" onClick={() => setPanel(panel === "tree" ? null : "tree")}>
@@ -745,6 +774,17 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
         >
           {slide ? (
             <>
+              <AuthoringTools
+                lessonId={lessonId}
+                moduleId={moduleId}
+                modules={modules}
+                slides={slides}
+                busy={authorBusy}
+                onBusy={setAuthorBusy}
+                onSlides={acceptSlides}
+                onMessage={setNotice}
+                onError={setError}
+              />
               <div className="studio-canvas-bar">
                 <button type="button" onClick={() => slideIndex > 0 && selectSlide(slideIndex - 1)} disabled={slideIndex === 0} aria-label="Previous slide">
                   ‹
@@ -771,6 +811,9 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                   <button type="button" className={canvasMode === "notes" ? "is-on" : undefined} onClick={() => setCanvasMode("notes")}>
                     Read Full Notes
                   </button>
+                  <button type="button" className={canvasMode === "blocks" ? "is-on" : undefined} onClick={() => setCanvasMode("blocks")}>
+                    Block editor
+                  </button>
                 </div>
                 <span className="studio-etime">Estimated time: {slide.estimatedMinutes ?? duration} min</span>
                 <button type="button" onClick={() => pickUpload("image")}>
@@ -783,7 +826,13 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                   Upload audio
                 </button>
               </div>
-              <div className="studio-canvas">
+              {canvasMode === "blocks" ? (
+                <div className="studio-editor-split">
+                  <BlockEditor blocks={slide.blocks} onChange={(blocks) => patchSlide({ blocks })} />
+                  <StudentPreview slide={slide} size={previewSize} onSize={setPreviewSize} />
+                </div>
+              ) : (
+              <div className={`studio-canvas${previewSize === "phone" ? " is-phone" : ""}`}>
                 <SlideStage
                   slide={slide}
                   revealed={canvasMode === "notes" ? units.length : previewRevealed}
@@ -811,6 +860,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                 ) : null}
                 <p className="studio-brand-mark">ExamsPrep</p>
               </div>
+              )}
               {canvasMode === "presentation" ? (
                 <div className="studio-point-nav">
                   <button type="button" onClick={() => setPreviewRevealed((count) => Math.max(minRevealCount(slide), count - 1))}>
