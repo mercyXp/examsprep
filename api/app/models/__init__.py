@@ -18,6 +18,7 @@ from app.models.recovery import PasswordResetToken
 from app.models.staff import StaffInvitation
 from app.models.settings import AcademicPeriod, ExamType, ModuleExamSlot, ProgramExamSchedule
 from app.models.learning import AttemptAnswer, Bookmark, Enrolment, LessonProgress, QuizAttempt
+from app.models.solana import BadgeAward, PrizePayout, PrizePool, WalletLink
 
 __all__ = [
     "AcademicPeriod",
@@ -25,6 +26,7 @@ __all__ = [
     "Announcement",
     "AnnouncementRead",
     "AttemptAnswer",
+    "BadgeAward",
     "AuditLog",
     "Bookmark",
     "Chapter",
@@ -39,6 +41,8 @@ __all__ = [
     "ModuleExamSlot",
     "PasswordResetToken",
     "Permission",
+    "PrizePayout",
+    "PrizePool",
     "ProgramAdminAssignment",
     "ProgramExamSchedule",
     "ProgramModule",
@@ -58,4 +62,5 @@ __all__ = [
     "Topic",
     "User",
     "UserRole",
+    "WalletLink",
 ]

@@ -40,6 +40,10 @@ Browser → Next.js (Vercel) → FastAPI (Render) → PostgreSQL (Render, privat
 
 The browser never receives `DATABASE_URL`. Vercel calls Render through the server variable `API_URL`. See [operations/deployment.md](../operations/deployment.md).
 
+## Solana
+
+Badges and USDC leaderboard prize pools sit beside this. FastAPI still decides who earned a badge. A backend authority key, not the phone, writes the account on Solana. Programme administrators and the super administrator are the only people who can open or settle a prize pool. Details: [solana.md](solana.md).
+
 ## Academic hierarchy
 
 Programme data must not assume Computing:

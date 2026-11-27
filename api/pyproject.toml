@@ -17,6 +17,8 @@ dependencies = [
   "python-multipart>=0.0.12",
   "resend>=2.0",
   "google-auth>=2.40",
+  "PyNaCl>=1.5",
+  "solders>=0.26",
 ]
 
 [project.optional-dependencies]

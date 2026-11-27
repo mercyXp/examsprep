@@ -14,9 +14,11 @@ from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.learn import router as learn_router
 from app.routers.mail import router as mail_router
-from app.routers.staff import router as staff_router
 from app.routers.media import router as media_router
 from app.routers.onboarding import router as onboarding_router
+from app.routers.quizzes import router as quizzes_router
+from app.routers.rewards import router as rewards_router
+from app.routers.staff import router as staff_router
 
 
 def _bootstrap_super_admin() -> None:
@@ -49,6 +51,8 @@ app.include_router(admin_router)
 app.include_router(staff_router)
 app.include_router(mail_router)
 app.include_router(learn_router)
+app.include_router(quizzes_router)
+app.include_router(rewards_router)
 app.include_router(media_router)
 
 

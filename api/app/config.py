@@ -18,6 +18,16 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = ""
     google_client_id: str = ""
+    # Solana hackathon phase 1. Leave the keypairs empty until you deploy.
+    # See docs/architecture/solana.md. Secrets stay on the API, never on Vercel.
+    solana_rpc_url: str = "https://api.devnet.solana.com"
+    solana_program_id: str = "Ebo9c8SiwLx37wXejAwQmx1vLv1YtR8kYVb2Lb6V8FVH"
+    solana_authority_keypair: str = ""
+    solana_sponsor_keypair: str = ""
+    solana_usdc_mint: str = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+    # "live" talks to SOLANA_RPC_URL. "record" stores the calls and does not
+    # send them (local demos and tests). "off" refuses chain actions.
+    solana_chain_mode: str = ""
 
 
 settings = Settings()

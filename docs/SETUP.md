@@ -189,3 +189,21 @@ Open [http://localhost:3000/login](http://localhost:3000/login). Use `student@ex
 | Sign in says the account service isn’t running | Start FastAPI with `uvicorn app.main:app --reload` from `api/`, and set `API_URL=http://127.0.0.1:8000` in `app/.env`. |
 
 Production hosting is Vercel for Next.js and Render for FastAPI and Postgres. The Vercel app gets `API_URL` only. The database URL stays on the API service. Creating the real super administrator, and the difference between the internal and external database URLs, is in [operations/deployment.md](operations/deployment.md). Schema details are in [database/erd.md](database/erd.md).
+
+## Solana (optional)
+
+Badges and prize pools need the program in `solana/` and a few API variables. Leave them unset and the rest of the API still runs. Chain calls then answer 503.
+
+```text
+SOLANA_RPC_URL=https://api.devnet.solana.com
+SOLANA_PROGRAM_ID=Ebo9c8SiwLx37wXejAwQmx1vLv1YtR8kYVb2Lb6V8FVH
+SOLANA_USDC_MINT=4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU
+SOLANA_AUTHORITY_KEYPAIR=
+SOLANA_SPONSOR_KEYPAIR=
+```
+
+`SOLANA_AUTHORITY_KEYPAIR` is the JSON array inside `authority.json` from `solana-keygen new`, or a path to that file. It is not `solana/keys/examsprep-program.json`. That file is the program address and is public. Generate the authority key, airdrop a little devnet SOL to it, and keep it out of git.
+
+Deploy the program with `cd solana && ./scripts/deploy-devnet.sh`. If the devnet faucet refuses the airdrop, the script prints the exact clicks. Details: [architecture/solana.md](architecture/solana.md).
+
+The Android app is in `mobile/`. Copy `mobile/.env.example` to `mobile/.env` and set `EXPO_PUBLIC_API_URL`. On the emulator that is `http://10.0.2.2:8000` when FastAPI is on your machine.

@@ -15,6 +15,7 @@ Keep product, design, and architecture notes next to the code. Write a document 
 | Database design | [database/erd.md](database/erd.md) |
 | Lesson Authoring Studio | [cms/lesson-studio.md](cms/lesson-studio.md) |
 | Hosting and deployment | [operations/deployment.md](operations/deployment.md) |
+| Solana badges and prize pools | [architecture/solana.md](architecture/solana.md) |
 
 The FastAPI package and PostgreSQL schema live in [`api/`](../api/README.md).
 
