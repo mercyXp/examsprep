@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   BLOCK_TYPE_LABELS,
   emptyBlock,
@@ -154,94 +154,96 @@ function SlideFields({
   onChange: (partial: Partial<Slide>) => void;
 }) {
   return (
-    <div className="cms-form">
-      <p className="studio-kicker">Slide</p>
-      <label>
-        Slide Title
-        <input value={slide.title} onChange={(event) => onChange({ title: event.target.value })} />
-      </label>
-      <label>
-        Slide Type
-        <select value={slide.layout || "text"} onChange={(event) => onChange({ layout: event.target.value as Slide["layout"] })}>
-          {SLIDE_LAYOUTS.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        Layout
-        <select value={slide.layout || "text"} onChange={(event) => onChange({ layout: event.target.value as Slide["layout"] })}>
-          <option value="text">Text</option>
-          <option value="text_image">Text & Image (Right)</option>
-          <option value="image_text">Image & Text (Left)</option>
-          <option value="image">Full-width image</option>
-          <option value="two_column">Two column</option>
-          <option value="video">Video</option>
-          <option value="code">Code</option>
-          <option value="assessment">Assessment</option>
-          <option value="case">Case study</option>
-          <option value="summary">Summary</option>
-          <option value="custom">Custom</option>
-        </select>
-      </label>
-      <label>
-        Background
-        <input type="color" value={isHex(slide.background) ? slide.background : "#ffffff"} onChange={(event) => onChange({ background: event.target.value })} />
-      </label>
-      <label>
-        Transition
-        <select value={slide.transition || "fade"} onChange={(event) => onChange({ transition: event.target.value as RevealAnimation })}>
-          {ANIMATIONS.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <p className="studio-kicker">Reveal Settings</p>
-      <label className="studio-switch">
-        <span>Show title on load</span>
-        <input type="checkbox" checked={slide.titleImmediate !== false} onChange={(event) => onChange({ titleImmediate: event.target.checked })} />
-      </label>
-      <label className="studio-switch">
-        <span>Advance on click / key</span>
-        <input type="checkbox" checked={slide.clickToAdvance !== false} onChange={(event) => onChange({ clickToAdvance: event.target.checked })} />
-      </label>
-      <label>
-        Key for next
-        <input value="Right Arrow / Space" readOnly />
-      </label>
-      <label>
-        Reveal mode
-        <select value={slide.revealMode || "block"} onChange={(event) => onChange({ revealMode: event.target.value as Slide["revealMode"] })}>
-          <option value="block">One item per content block</option>
-          <option value="sentence">Split paragraphs into sentences</option>
-        </select>
-      </label>
-      <p className="studio-kicker">Accessibility</p>
-      <label>
-        Alternative text for slide
-        <textarea value={slide.altText ?? ""} onChange={(event) => onChange({ altText: event.target.value })} placeholder="Describe the slide for screen readers" />
-      </label>
-      <p className="studio-kicker">Estimated Reading Time</p>
-      <label>
-        Minutes
-        <input
-          type="number"
-          min={1}
-          max={120}
-          value={slide.estimatedMinutes ?? duration ?? 5}
-          onChange={(event) => onChange({ estimatedMinutes: Number(event.target.value) || 1 })}
+    <div className="cms-form studio-fields">
+      <Fold title="Content">
+        <label>
+          Slide title
+          <input value={slide.title} onChange={(event) => onChange({ title: event.target.value })} />
+        </label>
+        <label>
+          Slide type
+          <select value={slide.layout || "text"} onChange={(event) => onChange({ layout: event.target.value as Slide["layout"] })}>
+            {SLIDE_LAYOUTS.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Layout
+          <select value={slide.layout || "text"} onChange={(event) => onChange({ layout: event.target.value as Slide["layout"] })}>
+            <option value="text">Text</option>
+            <option value="text_image">Text and image (right)</option>
+            <option value="image_text">Image and text (left)</option>
+            <option value="image">Full-width image</option>
+            <option value="two_column">Two column</option>
+            <option value="video">Video</option>
+            <option value="code">Code</option>
+            <option value="assessment">Assessment</option>
+            <option value="case">Case study</option>
+            <option value="summary">Summary</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+      </Fold>
+      <Fold title="Appearance">
+        <label>
+          Background
+          <input type="color" value={isHex(slide.background) ? slide.background : "#ffffff"} onChange={(event) => onChange({ background: event.target.value })} />
+        </label>
+        <label>
+          Transition
+          <select value={slide.transition || "fade"} onChange={(event) => onChange({ transition: event.target.value as RevealAnimation })}>
+            {ANIMATIONS.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </Fold>
+      <Fold title="Reveal settings">
+        <Toggle label="Show title on load" checked={slide.titleImmediate !== false} onChange={(checked) => onChange({ titleImmediate: checked })} />
+        <Toggle label="Advance on click or key" checked={slide.clickToAdvance !== false} onChange={(checked) => onChange({ clickToAdvance: checked })} />
+        <label>
+          Key for next
+          <input value="Right Arrow / Space" readOnly />
+        </label>
+        <label>
+          Reveal mode
+          <select value={slide.revealMode || "block"} onChange={(event) => onChange({ revealMode: event.target.value as Slide["revealMode"] })}>
+            <option value="block">One item per content block</option>
+            <option value="sentence">Split paragraphs into sentences</option>
+          </select>
+        </label>
+      </Fold>
+      <Fold title="Accessibility">
+        <label>
+          Alternative text for slide
+          <textarea value={slide.altText ?? ""} onChange={(event) => onChange({ altText: event.target.value })} placeholder="Describe the slide for screen readers" />
+        </label>
+      </Fold>
+      <Fold title="Estimated reading time">
+        <label>
+          Minutes
+          <input
+            type="number"
+            min={1}
+            max={120}
+            value={slide.estimatedMinutes ?? duration ?? 5}
+            onChange={(event) => onChange({ estimatedMinutes: Number(event.target.value) || 1 })}
+          />
+        </label>
+      </Fold>
+      <Fold title="Completion">
+        <Toggle
+          label="Student must view all items"
+          checked={slide.requireAllItems !== false}
+          onChange={(checked) => onChange({ requireAllItems: checked })}
         />
-      </label>
-      <p className="studio-kicker">Completion</p>
-      <label className="studio-switch">
-        <span>Student must view all items</span>
-        <input type="checkbox" checked={slide.requireAllItems !== false} onChange={(event) => onChange({ requireAllItems: event.target.checked })} />
-      </label>
-      <p className="studio-kicker">Resources</p>
+      </Fold>
+      <Fold title="Resources">
       {(slide.resources ?? []).map((resource, index) => (
         <div key={resource.id} className="studio-resource">
           <input
@@ -277,9 +279,10 @@ function SlideFields({
           </button>
         </div>
       ))}
-      <button type="button" onClick={() => onChange({ resources: [...(slide.resources ?? []), emptyResource()] })}>
+      <button type="button" className="studio-text-btn" onClick={() => onChange({ resources: [...(slide.resources ?? []), emptyResource()] })}>
         Add resource
       </button>
+      </Fold>
     </div>
   );
 }
@@ -300,8 +303,8 @@ function BlockFields({
   onMove: (index: number) => void;
 }) {
   return (
-    <div className="cms-form">
-      <p className="studio-kicker">{BLOCK_TYPE_LABELS[block.type]}</p>
+    <div className="cms-form studio-fields">
+      <Fold title={BLOCK_TYPE_LABELS[block.type]}>
       {block.type === "text" ? (
         <>
           <label>
@@ -576,7 +579,8 @@ function BlockFields({
           <input value={block.title} onChange={(event) => onChange({ ...block, title: event.target.value })} />
         </label>
       ) : null}
-      <p className="studio-kicker">Reveal</p>
+      </Fold>
+      <Fold title="Reveal">
       <label>
         Appear
         <select value={block.appear || "click"} onChange={(event) => onChange({ ...block, appear: event.target.value as AppearMode })}>
@@ -594,10 +598,7 @@ function BlockFields({
           ))}
         </select>
       </label>
-      <label className="studio-switch">
-        <span>Full-notes only</span>
-        <input type="checkbox" checked={Boolean(block.notesOnly)} onChange={(event) => onChange({ ...block, notesOnly: event.target.checked })} />
-      </label>
+      <Toggle label="Full-notes only" checked={Boolean(block.notesOnly)} onChange={(checked) => onChange({ ...block, notesOnly: checked })} />
       <label>
         Move to slide
         <select value={String(slideIndex)} onChange={(event) => onMove(Number(event.target.value))}>
@@ -608,6 +609,7 @@ function BlockFields({
           ))}
         </select>
       </label>
+      </Fold>
     </div>
   );
 }
@@ -628,4 +630,23 @@ function removeName(type: string) {
 
 function isHex(value?: string) {
   return Boolean(value && /^#[0-9a-fA-F]{6}$/.test(value));
+}
+
+function Fold({ title, children }: { title: string; children: ReactNode }) {
+  const [open, setOpen] = useState(true);
+  return (
+    <details className="studio-fold" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
+      <summary>{title}</summary>
+      <div className="studio-fold-body">{children}</div>
+    </details>
+  );
+}
+
+function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <label className="studio-toggle">
+      <span>{label}</span>
+      <input type="checkbox" role="switch" aria-checked={checked} checked={checked} onChange={(event) => onChange(event.target.checked)} />
+    </label>
+  );
 }

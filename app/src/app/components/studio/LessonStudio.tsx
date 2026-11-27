@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { ChevronDown, Redo2, Undo2 } from "lucide-react";
 import { SlideStage } from "@/app/components/learn/SlideStage";
 import { LessonStatusNote, LessonWorkflowButtons } from "@/app/components/cms/LessonWorkflow";
 import BrandLogo from "@/app/components/ui/BrandLogo";
 import {
   BLOCK_TYPE_LABELS,
   duplicateBlock,
+  duplicateSlide,
   emptyBlock,
   emptyResource,
   emptySlide,
@@ -32,15 +34,20 @@ import {
   loadScope,
   saveLessonContent,
   saveLessonMeta,
+  statusLabel,
   uploadLessonMedia,
   type AdminChapter,
   type AdminLesson,
   type AdminModule,
 } from "@/lib/cms";
 import { checkLessonQuality } from "@/lib/authoring";
+import { qualityWarnings } from "@/lib/quality";
 import { AuthoringTools } from "./AuthoringTools";
 import { BlockEditor } from "./BlockEditor";
+import { BlockPalette, type PalettePick } from "./BlockPalette";
+import { SlideNavigator } from "./SlideNavigator";
 import { StudentPreview } from "./StudentPreview";
+import { SubmitChecklist } from "./SubmitChecklist";
 import { ANIMATIONS, StudioInspector } from "./StudioInspector";
 
 type Snapshot = {
@@ -54,22 +61,11 @@ type Snapshot = {
   slides: Slide[];
 };
 
-const PALETTE: { id: string; label: string; action: "block" | "resource" | "activity"; type?: BlockType }[] = [
-  { id: "text", label: "Text", action: "block", type: "text" },
-  { id: "image", label: "Image", action: "block", type: "image" },
-  { id: "video", label: "Video", action: "block", type: "video" },
-  { id: "audio", label: "Audio", action: "block", type: "audio" },
-  { id: "table", label: "Table", action: "block", type: "table" },
-  { id: "diagram", label: "Diagram", action: "block", type: "image" },
-  { id: "code", label: "Code", action: "block", type: "code" },
-  { id: "question", label: "Question", action: "block", type: "check" },
-  { id: "math", label: "Math", action: "block", type: "math" },
-  { id: "flashcard", label: "Flashcard", action: "block", type: "flashcard" },
-  { id: "quiz", label: "Quiz", action: "block", type: "quiz" },
-  { id: "game", label: "Game", action: "block", type: "game" },
-  { id: "resource", label: "Resource", action: "resource" },
-  { id: "activity", label: "Activity", action: "activity" },
-];
+const MODES = [
+  { id: "presentation", label: "Presentation" },
+  { id: "notes", label: "Full notes" },
+  { id: "blocks", label: "Block editor" },
+] as const;
 
 export default function LessonStudio({ lessonId }: { lessonId: string }) {
   const router = useRouter();
@@ -98,8 +94,11 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
   const [authorBusy, setAuthorBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [previewRevealed, setPreviewRevealed] = useState(1);
-  const [panel, setPanel] = useState<null | "tree" | "props">(null);
+  const [panel, setPanel] = useState<null | "tree" | "props" | "blocks">(null);
   const [addOpen, setAddOpen] = useState(false);
+  const [generateOpen, setGenerateOpen] = useState(false);
+  const [dropOver, setDropOver] = useState(false);
+  const [dismissedWarnings, setDismissedWarnings] = useState("");
   const [renameTitle, setRenameTitle] = useState(false);
   const history = useRef<Snapshot[]>([]);
   const sentenceFocus = useRef<string | null>(null);
@@ -368,6 +367,78 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
     setAddOpen(false);
   }
 
+  function duplicateAt(index: number) {
+    const source = slides[index];
+    if (!source) return;
+    const copy = duplicateSlide(source);
+    const next = [...slides];
+    next.splice(index + 1, 0, copy);
+    updateSlides(next);
+    setSlideIndex(index + 1);
+    setBlockId(null);
+  }
+
+  function deleteAt(index: number) {
+    if (slides.length < 2) return;
+    const name = slides[index]?.title || `Slide ${index + 1}`;
+    if (!confirm(`Delete “${name}”? Publish a new version before students should see the shorter lesson.`)) return;
+    const next = slides.filter((_, itemIndex) => itemIndex !== index);
+    updateSlides(next);
+    setSlideIndex((current) => Math.min(current > index ? current - 1 : current, next.length - 1));
+    setBlockId(null);
+  }
+
+  function reorderSlides(from: number, to: number) {
+    if (from === to || to < 0 || to >= slides.length || from < 0 || from >= slides.length) return;
+    const next = [...slides];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    const selectedId = slides[slideIndex]?.id;
+    updateSlides(next);
+    const nextIndex = next.findIndex((entry) => entry.id === selectedId);
+    if (nextIndex >= 0) setSlideIndex(nextIndex);
+  }
+
+  function onPalette(pick: PalettePick) {
+    if (pick.action === "resource") {
+      if (!slide) return;
+      patchSlide({ resources: [...(slide.resources ?? []), emptyResource()] });
+      setBlockId(null);
+      return;
+    }
+    if (pick.action === "activity") {
+      addBlock("callout", { tone: "important", text: "Activity: ask students to apply this idea." } as Partial<ContentBlock>);
+      return;
+    }
+    addBlock(pick.type);
+  }
+
+  function allowFileDrag(event: DragEvent<HTMLElement>) {
+    if (![...event.dataTransfer.types].includes("Files")) return;
+    event.preventDefault();
+    setDropOver(true);
+  }
+
+  function leaveFileDrag(event: DragEvent<HTMLElement>) {
+    const next = event.relatedTarget;
+    if (next instanceof Node && event.currentTarget.contains(next)) return;
+    setDropOver(false);
+  }
+
+  function dropFiles(event: DragEvent<HTMLElement>) {
+    setDropOver(false);
+    onDropFiles(event);
+  }
+
+  function onModeKey(event: ReactKeyboardEvent<HTMLDivElement>) {
+    const index = MODES.findIndex((item) => item.id === canvasMode);
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const next = MODES[(index + direction + MODES.length) % MODES.length];
+    setCanvasMode(next.id);
+  }
+
   useEffect(() => {
     loadLesson(lessonId).then((result) => {
       if (!result.ok) {
@@ -501,6 +572,12 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
     return parts.join(" ").toLowerCase().includes(q);
   }
 
+  const warnings = qualityWarnings(slides);
+  const warningSig = warnings.map((item) => `${item.code}:${item.slideId}:${item.blockId}:${item.message}`).join("|");
+  const visibleSlides = slides
+    .map((entry, index) => ({ slide: entry, index }))
+    .filter(({ slide: entry }) => matchesQuery(entry.title, ...entry.blocks.map((block) => BLOCK_TYPE_LABELS[block.type])));
+
   return (
     <div className="studio">
       <header className="studio-top">
@@ -525,22 +602,32 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
             </button>
           )}
         </div>
-        <input ref={fileRef} type="file" className="studio-file-input" onChange={onPickedFile} />
+        <input ref={fileRef} type="file" className="studio-file-input" tabIndex={-1} onChange={onPickedFile} />
         <div className="studio-tools">
-          <span className={`studio-save is-${saveState}`}>{saveLabel}</span>
-          <button type="button" className="studio-icon-btn" onClick={undo} disabled={!historySize} aria-label="Undo">
-            ↺
-          </button>
-          <button type="button" className="studio-icon-btn" onClick={redo} disabled={!futureSize} aria-label="Redo">
-            ↻
-          </button>
+          <span className={`studio-status is-${status.toLowerCase()} is-save-${saveState}`} aria-live="polite">
+            <span className="studio-status-dot" aria-hidden="true" />
+            {statusLabel(status)}
+            <span className="studio-status-sep" aria-hidden="true">
+              ·
+            </span>
+            {saveLabel}
+          </span>
+          <div className="studio-history">
+            <button type="button" className="studio-icon-btn" onClick={undo} disabled={!historySize} aria-label="Undo">
+              <Undo2 size={16} aria-hidden="true" />
+            </button>
+            <button type="button" className="studio-icon-btn" onClick={redo} disabled={!futureSize} aria-label="Redo">
+              <Redo2 size={16} aria-hidden="true" />
+            </button>
+          </div>
+          {uploading ? <span className="studio-save is-saving">Uploading {uploading}…</span> : null}
+          <div className="studio-actions">
           <Link className="studio-btn-preview" href={`/learn/lessons/${lessonId}?preview=1`} target="_blank">
-            Preview as Student
+            Preview
           </Link>
           <button type="button" className="studio-btn-draft" onClick={() => void saveAll()}>
-            Save Draft
+            Save draft
           </button>
-          {uploading ? <span className="studio-save is-saving">Uploading {uploading}…</span> : null}
           <LessonWorkflowButtons
             lessonId={lessonId}
             status={status}
@@ -575,9 +662,10 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                 window.location.assign("/admin/lessons");
               }}
             >
-              Delete Draft
+              Delete draft
             </button>
           ) : null}
+          </div>
         </div>
       </header>
       {error ? (
@@ -598,6 +686,9 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
         </button>
         <button type="button" onClick={() => setPanel(panel === "props" ? null : "props")}>
           Properties
+        </button>
+        <button type="button" onClick={() => setPanel(panel === "blocks" ? null : "blocks")}>
+          Blocks
         </button>
       </div>
       <div className="studio-body">
@@ -634,23 +725,6 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                             Lesson {lessonIndex + 1}: {item.title}
                           </Link>
                         )}
-                        {item.id === lessonId
-                          ? slides
-                              .filter((entry) => matchesQuery(entry.title, ...entry.blocks.map((block) => BLOCK_TYPE_LABELS[block.type])))
-                              .map((entry) => {
-                                const index = slides.findIndex((slideItem) => slideItem.id === entry.id);
-                                return (
-                                  <button
-                                    key={entry.id}
-                                    type="button"
-                                    className={`studio-node is-${slideKind(entry)}${index === slideIndex ? " is-on" : ""}`}
-                                    onClick={() => selectSlide(index)}
-                                  >
-                                    {nodeLabel(entry, index)}
-                                  </button>
-                                );
-                              })
-                          : null}
                       </div>
                     ))}
                   </details>
@@ -670,6 +744,16 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
               ) : null}
             </details>
           </div>
+          <SlideNavigator
+            slides={visibleSlides}
+            total={slides.length}
+            slideIndex={slideIndex}
+            onSelect={selectSlide}
+            onAdd={() => addTemplatedSlide("slide")}
+            onDuplicate={duplicateAt}
+            onDelete={deleteAt}
+            onReorder={reorderSlides}
+          />
           <div className="studio-add-wrap">
             <button type="button" className="studio-add-new" onClick={() => setAddOpen((open) => !open)}>
               + Add New
@@ -765,74 +849,91 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
           </ul>
           <p className="studio-autosave">Autosave is {saveState === "saving" ? "saving" : "ON"}</p>
         </aside>
-        <section
-          className="studio-main"
-          onDragOver={(event) => {
-            event.preventDefault();
-          }}
-          onDrop={onDropFiles}
-        >
+        <section className="studio-main">
           {slide ? (
             <>
-              <AuthoringTools
-                lessonId={lessonId}
-                moduleId={moduleId}
-                modules={modules}
-                slides={slides}
-                busy={authorBusy}
-                onBusy={setAuthorBusy}
-                onSlides={acceptSlides}
-                onMessage={setNotice}
-                onError={setError}
-              />
-              <div className="studio-canvas-bar">
-                <button type="button" onClick={() => slideIndex > 0 && selectSlide(slideIndex - 1)} disabled={slideIndex === 0} aria-label="Previous slide">
-                  ‹
-                </button>
-                <span>
-                  Slide {slideIndex + 1} of {slides.length}
-                </span>
+              <div className="studio-generate">
                 <button
                   type="button"
-                  onClick={() => slideIndex < slides.length - 1 && selectSlide(slideIndex + 1)}
-                  disabled={slideIndex >= slides.length - 1}
-                  aria-label="Next slide"
+                  className="studio-generate-toggle"
+                  aria-expanded={generateOpen}
+                  onClick={() => setGenerateOpen((open) => !open)}
                 >
-                  ›
+                  <span>Generate / Import</span>
+                  <ChevronDown size={16} aria-hidden="true" className={generateOpen ? "is-open" : undefined} />
                 </button>
-                <div className="studio-mode">
+                {generateOpen ? (
+                  <AuthoringTools
+                    lessonId={lessonId}
+                    moduleId={moduleId}
+                    modules={modules}
+                    slides={slides}
+                    busy={authorBusy}
+                    onBusy={setAuthorBusy}
+                    onSlides={acceptSlides}
+                    onMessage={setNotice}
+                    onError={setError}
+                  />
+                ) : null}
+              </div>
+              {dismissedWarnings !== warningSig ? (
+                <SubmitChecklist warnings={warnings} onDismiss={() => setDismissedWarnings(warningSig)} />
+              ) : null}
+              <div className="studio-canvas-bar">
+                <div className="studio-pager">
+                  <button type="button" onClick={() => slideIndex > 0 && selectSlide(slideIndex - 1)} disabled={slideIndex === 0} aria-label="Previous slide">
+                    ‹
+                  </button>
+                  <span>
+                    Slide {slideIndex + 1} of {slides.length}
+                  </span>
                   <button
                     type="button"
-                    className={canvasMode === "presentation" ? "is-on" : undefined}
-                    onClick={() => setCanvasMode("presentation")}
+                    onClick={() => slideIndex < slides.length - 1 && selectSlide(slideIndex + 1)}
+                    disabled={slideIndex >= slides.length - 1}
+                    aria-label="Next slide"
                   >
-                    Presentation Mode
+                    ›
                   </button>
-                  <button type="button" className={canvasMode === "notes" ? "is-on" : undefined} onClick={() => setCanvasMode("notes")}>
-                    Read Full Notes
-                  </button>
-                  <button type="button" className={canvasMode === "blocks" ? "is-on" : undefined} onClick={() => setCanvasMode("blocks")}>
-                    Block editor
-                  </button>
+                </div>
+                <div className="studio-mode" role="tablist" aria-label="View mode" onKeyDown={onModeKey}>
+                  {MODES.map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      role="tab"
+                      id={`studio-mode-${mode.id}`}
+                      aria-selected={canvasMode === mode.id}
+                      tabIndex={canvasMode === mode.id ? 0 : -1}
+                      className={canvasMode === mode.id ? "is-on" : undefined}
+                      onClick={() => setCanvasMode(mode.id)}
+                    >
+                      {mode.label}
+                    </button>
+                  ))}
                 </div>
                 <span className="studio-etime">Estimated time: {slide.estimatedMinutes ?? duration} min</span>
-                <button type="button" onClick={() => pickUpload("image")}>
-                  Upload image
-                </button>
-                <button type="button" onClick={() => pickUpload("video")}>
-                  Upload video
-                </button>
-                <button type="button" onClick={() => pickUpload("audio")}>
-                  Upload audio
-                </button>
+                <div className="studio-upload-actions">
+                  <button type="button" onClick={() => pickUpload("image")}>
+                    Upload image
+                  </button>
+                  <button type="button" onClick={() => pickUpload("video")}>
+                    Upload video
+                  </button>
+                  <button type="button" onClick={() => pickUpload("audio")}>
+                    Upload audio
+                  </button>
+                </div>
               </div>
               {canvasMode === "blocks" ? (
-                <div className="studio-editor-split">
+                <div className={`studio-editor-split${dropOver ? " is-drop" : ""}`} onDragEnter={allowFileDrag} onDragOver={allowFileDrag} onDragLeave={leaveFileDrag} onDrop={dropFiles}>
                   <BlockEditor blocks={slide.blocks} onChange={(blocks) => patchSlide({ blocks })} />
                   <StudentPreview slide={slide} size={previewSize} onSize={setPreviewSize} />
+                  {dropOver ? <p className="studio-drop-banner">Drop to add this file to the slide</p> : null}
                 </div>
               ) : (
-              <div className={`studio-canvas${previewSize === "phone" ? " is-phone" : ""}`}>
+              <div className={`studio-canvas${previewSize === "phone" ? " is-phone" : ""}${dropOver ? " is-drop" : ""}`} onDragEnter={allowFileDrag} onDragOver={allowFileDrag} onDragLeave={leaveFileDrag} onDrop={dropFiles}>
+                {dropOver ? <p className="studio-drop-banner">Drop to add this file to the slide</p> : null}
                 <SlideStage
                   slide={slide}
                   revealed={canvasMode === "notes" ? units.length : previewRevealed}
@@ -1005,61 +1106,12 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
             }}
           />
         </aside>
-        <aside className="studio-palette" aria-label="Content">
-          <p>Content</p>
-          {PALETTE.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                if (item.action === "resource") {
-                  pickUpload("file");
-                  return;
-                }
-                if (item.action === "activity") {
-                  addBlock("callout", { tone: "important", text: "Activity: ask students to apply this idea." } as Partial<ContentBlock>);
-                  return;
-                }
-                if (item.id === "diagram" || item.type === "image") {
-                  pickUpload("image");
-                  return;
-                }
-                if (item.type === "video") {
-                  pickUpload("video");
-                  return;
-                }
-                if (item.type === "audio") {
-                  pickUpload("audio");
-                  return;
-                }
-                if (item.type) addBlock(item.type);
-              }}
-            >
-              <span>{glyph(item.type || "text")}</span>
-              {item.label}
-            </button>
-          ))}
+        <aside className={`studio-palette${panel === "blocks" ? " is-open" : ""}`} aria-label="Content">
+          <BlockPalette onPick={onPalette} />
         </aside>
       </div>
     </div>
   );
-}
-
-function slideKind(slide: Slide) {
-  if (slide.layout === "assessment" || slide.blocks.some((block) => block.type === "check")) return "quiz";
-  if (slide.layout === "case") return "case";
-  if (slide.layout === "summary") return "summary";
-  if (slide.blocks.length === 1 && slide.blocks[0]?.type === "audio") return "audio";
-  return "slide";
-}
-
-function nodeLabel(slide: Slide, index: number) {
-  const kind = slideKind(slide);
-  if (kind === "quiz") return `Quiz: ${slide.title}`;
-  if (kind === "case") return `Case Study: ${slide.title}`;
-  if (kind === "audio") return `Audio Note: ${slide.title}`;
-  if (kind === "summary") return "Summary";
-  return `Slide ${index + 1}: ${slide.title}`;
 }
 
 function glyph(type: BlockType | string) {
