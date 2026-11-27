@@ -115,6 +115,20 @@ Seed BSc Computing as `available`. Seed Year 2 Semester 1:
 
 Other years/semesters: rows can exist with no modules until the official list is confirmed. The listed **1,290 credits** is from the supplied programme sheet — confirm meaning (programme credits vs contact hours) before storing it as a constraint.
 
+## Solana receipts
+
+Alembic revision `20261127_0017` adds four tables. It follows `20261127_0016` (the authoring bank). They remember what the chain also stores, in words a person can read. The chain account is still the badge.
+
+**wallet_links** — one row per user. `address` is set after a signed challenge. Unique.
+
+**badge_awards** — `user_id`, `kind`, `subject_key` unique together, plus the wallet, a label, a detail number, and the transaction signature.
+
+**prize_pools** — programme (optional), period, top N, mint, on-chain pool id, pool and vault addresses, status, amount.
+
+**prize_payouts** — pool, user, rank, amount, wallet, signature. Unique per pool and user.
+
+Rules and routes: [architecture/solana.md](../architecture/solana.md).
+
 ## Backup
 
 Postgres for the deployed API is on Render. Use the provider’s backups, keep credentials out of Git, run schema changes through Alembic, and test a restore before storing real student records. Connection details are in [operations/deployment.md](../operations/deployment.md).

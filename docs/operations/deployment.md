@@ -125,6 +125,32 @@ alembic upgrade head
 
 That migration is `20261022_0014`. It adds `password_reset_tokens` and does not change existing user rows.
 
+## Solana
+
+Badge and prize-pool calls are optional. An API deploy without the variables below still starts. Those routes return 503 until the authority key is set. Do not put any `SOLANA_*` secret on Vercel. The phone only needs `EXPO_PUBLIC_API_URL`.
+
+On the Render API service:
+
+| Variable | Value |
+| --- | --- |
+| `SOLANA_RPC_URL` | `https://api.devnet.solana.com` |
+| `SOLANA_PROGRAM_ID` | `Ebo9c8SiwLx37wXejAwQmx1vLv1YtR8kYVb2Lb6V8FVH` |
+| `SOLANA_USDC_MINT` | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+| `SOLANA_AUTHORITY_KEYPAIR` | JSON array of the authority key. This key signs badges and payouts. |
+| `SOLANA_SPONSOR_KEYPAIR` | Optional JSON array of the wallet that locks USDC into a pool. |
+| `SOLANA_CHAIN_MODE` | Leave empty in production. `off` refuses chain calls. `record` does not contact a cluster and must not be used for real badges. |
+
+The program account and the config PDA:
+
+```text
+Program:    Ebo9c8SiwLx37wXejAwQmx1vLv1YtR8kYVb2Lb6V8FVH
+Config PDA: kkStmSTS4zYhJNCMj9umfUbyfAU1yUnpaWcK3ZX8EG8
+```
+
+Deploy from a laptop with `cd solana && ./scripts/deploy-devnet.sh`. The Render build does not deploy the program. `alembic upgrade head` already runs in the API build and adds `wallet_links`, `badge_awards`, `prize_pools`, and `prize_payouts`.
+
+How the rules work: [architecture/solana.md](../architecture/solana.md).
+
 ## Database access from a laptop
 
 The API uses the internal `postgresql+psycopg://` URL. `pg_dump` and `pg_restore` use the database’s **external** URL, which starts with `postgresql://` and includes `sslmode=require`. Do not put either URL in Git.
