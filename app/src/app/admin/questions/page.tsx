@@ -69,7 +69,7 @@ export default function AdminQuestionsPage() {
             ))}
           </select>
         </label>
-        <label className="studio-upload">
+        <label className="studio-upload" style={{ position: "relative", overflow: "hidden" }}>
           <span>Import CSV or Excel</span>
           <input
             type="file"
@@ -87,7 +87,7 @@ export default function AdminQuestionsPage() {
             }}
           />
         </label>
-        <label className="studio-upload">
+        <label className="studio-upload" style={{ position: "relative", overflow: "hidden" }}>
           <span>Upload past paper PDF</span>
           <input
             type="file"

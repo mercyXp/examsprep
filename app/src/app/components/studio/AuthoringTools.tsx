@@ -16,7 +16,6 @@ import {
 } from "@/lib/authoring";
 import type { AdminModule } from "@/lib/cms";
 import type { Slide } from "@/lib/content";
-import { qualityWarnings } from "@/lib/quality";
 
 const ACTIONS = [
   { id: "summarize", label: "Revision notes" },
@@ -52,7 +51,6 @@ export function AuthoringTools({
   const [games, setGames] = useState<ReusableGame[]>([]);
   const [provider, setProvider] = useState("Checking the drafting helper…");
   const [copyModule, setCopyModule] = useState("");
-  const warnings = qualityWarnings(slides);
   const targets = modules.filter((item) => item.id !== moduleId);
 
   useEffect(() => {
@@ -117,7 +115,7 @@ export function AuthoringTools({
         >
           Convert paste
         </button>
-        <label className="studio-upload">
+        <label className="studio-upload" style={{ position: "relative", overflow: "hidden" }}>
           <span>{busy ? "Working…" : "Upload .pptx, .pdf, or .docx"}</span>
           <input
             type="file"
@@ -258,18 +256,6 @@ export function AuthoringTools({
           </button>
         </div>
       ) : null}
-      {warnings.length ? (
-        <div className="studio-warnings">
-          <strong>Before you submit</strong>
-          <ul>
-            {warnings.map((warning) => (
-              <li key={`${warning.code}-${warning.slideId}-${warning.blockId}-${warning.message}`}>{warning.message}</li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p className="studio-warnings is-clear">No empty slides, missing answers, or broken images in this draft.</p>
-      )}
     </section>
   );
 }
