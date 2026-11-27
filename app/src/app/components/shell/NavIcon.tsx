@@ -14,7 +14,9 @@ export type NavIconName =
   | "lessons"
   | "bank"
   | "megaphone"
-  | "logout";
+  | "logout"
+  | "programs"
+  | "award";
 
 export function NavIcon({ name }: { name: NavIconName }) {
   if (name === "home") {
@@ -109,6 +111,22 @@ export function NavIcon({ name }: { name: NavIconName }) {
     return (
       <svg {...common}>
         <path d="M5 10v4h3l6 4V6l-6 4H5zM17 9.5v5" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (name === "programs") {
+    return (
+      <svg {...common}>
+        <path d="M4 20V9l8-5 8 5v11" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        <path d="M9 20v-6h6v6" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (name === "award") {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="9" r="5" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M9 13.5 8 21l4-2 4 2-1-7.5" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
       </svg>
     );
   }

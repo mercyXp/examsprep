@@ -249,7 +249,7 @@ export function AuthoringTools({
                 return {
                   ok: true,
                   slides,
-                  note: `Copied as a draft. Open “${result.data.item.title}” from Chapters & Lessons.`,
+                  note: `Copied as a draft. Open “${result.data.item.title}” from Lessons.`,
                 };
               });
             }}

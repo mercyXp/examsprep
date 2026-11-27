@@ -124,7 +124,7 @@ function LessonsManager() {
   return (
     <AppShell
       variant="admin"
-      title="Chapters & Lessons"
+      title="Lessons"
       subtitle={
         selectedModule
           ? moduleLabel(selectedModule)

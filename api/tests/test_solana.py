@@ -49,7 +49,7 @@ from app.solana.eligibility import (
     streak_eligibility,
     streak_length,
 )
-from app.solana.gates import assert_pool_admin
+from app.solana.gates import assert_pool_admin, assert_rewards_viewer
 from app.solana.wallet import WalletLinkError, link_message, verify_link_signature
 
 
@@ -156,6 +156,11 @@ class PoolAdminTests(unittest.TestCase):
         super_admin = _user(["super_administrator"], super_admin=True)
         assert_pool_admin(super_admin, None)
         assert_pool_admin(super_admin, business)
+        assert_rewards_viewer(super_admin)
+        assert_rewards_viewer(admin)
+        with self.assertRaises(HTTPException) as rewards:
+            assert_rewards_viewer(creator)
+        self.assertEqual(rewards.exception.status_code, 403)
 
 
 class ChainLayoutTests(unittest.TestCase):

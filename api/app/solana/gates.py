@@ -15,6 +15,15 @@ from fastapi import HTTPException, status
 from app.access import AccessScope
 
 
+def assert_rewards_viewer(scope: AccessScope) -> None:
+    if scope.super_admin or "administrator" in scope.roles:
+        return
+    raise HTTPException(
+        status.HTTP_403_FORBIDDEN,
+        "Only a super administrator or a programme administrator can view rewards.",
+    )
+
+
 def assert_pool_admin(scope: AccessScope, programme_id: uuid.UUID | None) -> None:
     if scope.super_admin:
         return

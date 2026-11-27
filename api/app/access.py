@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.db import get_session
 from app.models import AcademicYear, AuditLog, Module, Programme, Semester, User
 from app.models.access import ContentCreatorAssignment, ProgramAdminAssignment, ProgramModule
+from app.models.enums import ProgrammeStatus
 from app.security import require_staff, role_slugs
 
 FORBIDDEN = "You don’t have access to this content."
@@ -277,7 +278,13 @@ def scope_out(session: Session, scope: AccessScope) -> dict[str, Any]:
         "canViewAcademic": scope.can_view_academic(),
         "canManageAcademic": scope.super_admin,
         "canAnnounce": scope.super_admin or "administrator" in scope.roles,
-        "programmes": [{"id": str(item.id), "name": item.name, "slug": item.slug} for item in programmes],
+        "canManageProgrammes": scope.super_admin,
+        "canViewRewards": scope.super_admin or "administrator" in scope.roles,
+        "programmes": [
+            {"id": str(item.id), "name": item.name, "slug": item.slug}
+            for item in programmes
+            if item.status != ProgrammeStatus.ARCHIVED
+        ],
         "modules": [
             {
                 "id": str(item.id),

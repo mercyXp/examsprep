@@ -13,16 +13,18 @@ from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.access import AccessScope, load_scope
 from app.config import settings
 from app.db import get_session
 from app.models import User
-from app.models.solana import PrizePool
+from app.models.solana import BadgeAward, PrizePool
 from app.security import require_admin, require_user
 from app.solana.chain import chain_status, get_chain
+from app.solana.gates import assert_rewards_viewer
 from app.solana.service import (
+    badge_out,
     claim_badge,
     create_pool,
     fund_pool,
@@ -133,6 +135,53 @@ def leaderboard(
     end = datetime.now(UTC)
     start = end - timedelta(days=window)
     return leaderboard_out(session, start, end, programme_id, limit=20)
+
+
+def _badge_row(award: BadgeAward) -> dict:
+    try:
+        item = badge_out(award)
+    except ValueError:
+        item = {
+            "id": str(award.id),
+            "kind": award.kind,
+            "subjectKey": award.subject_key,
+            "label": award.subject_label,
+            "detail": award.detail,
+            "tx": award.tx_signature,
+            "awardedAt": award.created_at.isoformat() if award.created_at else None,
+        }
+    item["student"] = award.user.name if award.user else ""
+    item["email"] = award.user.email if award.user else ""
+    return item
+
+
+@router.get("/api/admin/rewards")
+def admin_rewards(
+    scope: AccessScope = Depends(_scope),
+    session: Session = Depends(get_session),
+) -> dict:
+    """Pools and badge awards for super administrators and programme administrators."""
+    assert_rewards_viewer(scope)
+    pools = list(
+        session.scalars(
+            select(PrizePool)
+            .options(selectinload(PrizePool.payouts), selectinload(PrizePool.programme))
+            .order_by(PrizePool.period_end.desc())
+        ).unique()
+    )
+    if not scope.super_admin:
+        pools = [pool for pool in pools if pool.programme_id in scope.programme_ids]
+    awards = list(
+        session.scalars(
+            select(BadgeAward).options(joinedload(BadgeAward.user)).order_by(BadgeAward.created_at.desc())
+        ).unique()
+    )
+    pool_items = []
+    for pool in pools:
+        item = pool_out(pool)
+        item["programmeName"] = pool.programme.name if pool.programme else "All programmes"
+        pool_items.append(item)
+    return {"ok": True, "pools": pool_items, "badges": [_badge_row(award) for award in awards]}
 
 
 @router.get("/api/pools")
