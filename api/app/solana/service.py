@@ -40,6 +40,7 @@ from app.solana.eligibility import (
     MockPass,
     PublishedLesson,
     ScoreRow,
+    linked_prize_shares,
     mastered_topics,
     passed_mocks,
     rank_students,
@@ -555,6 +556,13 @@ def fund_pool(
     assert_pool_admin(scope, pool.programme_id)
     if pool.status == "settled":
         raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool has already been paid.")
+    if pool.status == "closed":
+        raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool is closed.")
+    if pool.status == "claiming":
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Students have already started claiming, so this pool cannot take more funds.",
+        )
     if amount <= 0:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Enter an amount greater than zero.")
     receipt = _chain_call(lambda: chain.fund_pool(pool.onchain_pool_id, amount, pool.mint))
@@ -584,6 +592,13 @@ def settle_pool(
     assert_pool_admin(scope, pool.programme_id)
     if pool.status == "settled":
         raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool has already been paid.")
+    if pool.status == "closed":
+        raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool is closed.")
+    if pool.status == "claiming" or session.scalar(select(PrizePayout).where(PrizePayout.pool_id == pool.id)):
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Students have already claimed from this pool. Close it instead of settling.",
+        )
     ranked = leaderboard_rows(session, pool.period_start, pool.period_end, pool.programme_id)[: pool.top_n]
     if not ranked:
         raise HTTPException(status.HTTP_409_CONFLICT, "Nobody studied during this prize period, so there is nobody to pay.")
@@ -627,9 +642,16 @@ def settle_pool(
             detail=rank,
             reason=f"Finished rank {rank}.",
         )
-        receipt = _chain_call(lambda user=user, address=address, item=item: chain.award_badge(
-            address, KIND_BYTE[KIND_WEEKLY], item.subject_key, item.detail
-        ))
+        receipt = _chain_call(
+            lambda address=address, item=item, amount=amount: chain.record_achievement(
+                address,
+                KIND_BYTE[KIND_WEEKLY],
+                item.subject_key,
+                item.detail,
+                pool.onchain_pool_id,
+                amount,
+            )
+        )
         _save_award(session, user, address, item, receipt)
         session.add(
             PrizePayout(
@@ -659,6 +681,134 @@ def settle_pool(
     pool.status = "settled"
     pool.settle_tx = signature or None
     write_audit(session, scope.user, "pool.settled", "prize_pool", pool.id, {"tx": signature})
+    session.flush()
+    return pool
+
+
+def claim_pool_reward(
+    session: Session,
+    user: User,
+    pool: PrizePool,
+    chain: RecordingChain | SolanaChain,
+) -> dict[str, Any]:
+    """Pay one student's share after the API has ranked them itself.
+
+    The request body does not carry an amount. The share comes from the same
+    leaderboard rules an administrator uses when settling. The authority key
+    then signs `record_achievement` and `claim_reward`.
+    """
+    if "student" not in role_slugs(user):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Prize claims are for students.")
+    if pool.status == "settled":
+        raise HTTPException(status.HTTP_409_CONFLICT, "An administrator already paid this prize pool.")
+    if pool.status == "closed":
+        raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool is closed.")
+    if pool.status not in {"funded", "claiming"}:
+        raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool is not funded yet.")
+    if _aware(pool.period_end) > datetime.now(UTC):
+        raise HTTPException(status.HTTP_409_CONFLICT, "This prize period has not ended yet.")
+    wallet = linked_wallet(session, user.id)
+    if wallet is None or not wallet.address:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Link a Solana wallet before claiming a prize.")
+    existing = session.scalar(
+        select(PrizePayout).where(PrizePayout.pool_id == pool.id, PrizePayout.user_id == user.id)
+    )
+    if existing is not None and existing.note == "paid" and int(existing.amount or 0) > 0:
+        raise HTTPException(status.HTTP_409_CONFLICT, "You have already claimed this prize.")
+
+    ranked = leaderboard_rows(session, pool.period_start, pool.period_end, pool.programme_id)[: pool.top_n]
+    linked_ids: set[str] = set()
+    for row in ranked:
+        person = session.get(User, uuid.UUID(row.user_id))
+        link = linked_wallet(session, person.id) if person is not None else None
+        if link is not None and link.address:
+            linked_ids.add(row.user_id)
+    shares = linked_prize_shares(
+        [row.user_id for row in ranked],
+        linked_ids,
+        int(pool.total_amount or 0),
+        pool.top_n,
+    )
+    mine = next((item for item in shares if item[0] == str(user.id)), None)
+    if mine is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "You did not place in the payable top students for this prize period.",
+        )
+    _user_id, rank, amount = mine
+    subject_key = f"pool:{pool.onchain_pool_id}"
+    item = Eligibility(
+        kind=KIND_WEEKLY,
+        subject_key=subject_key,
+        subject_label=f"{pool.title} · rank {rank}",
+        detail=rank,
+        reason=f"Finished rank {rank}.",
+    )
+    receipt = _chain_call(
+        lambda: chain.claim_reward(
+            wallet.address or "",
+            KIND_BYTE[KIND_WEEKLY],
+            subject_key,
+            rank,
+            pool.onchain_pool_id,
+            amount,
+            pool.mint,
+        )
+    )
+    _save_award(session, user, wallet.address, item, receipt)
+    if existing is None:
+        session.add(
+            PrizePayout(
+                pool_id=pool.id,
+                user_id=user.id,
+                rank=rank,
+                amount=amount,
+                wallet_address=wallet.address,
+                tx_signature=receipt.signature or None,
+                note="paid",
+            )
+        )
+    else:
+        existing.rank = rank
+        existing.amount = amount
+        existing.wallet_address = wallet.address
+        existing.tx_signature = receipt.signature or existing.tx_signature
+        existing.note = "paid"
+    pool.status = "claiming"
+    write_audit(
+        session,
+        user,
+        "pool.claimed",
+        "prize_pool",
+        pool.id,
+        {"amount": amount, "rank": rank, "tx": receipt.signature},
+    )
+    session.flush()
+    return {
+        "ok": True,
+        "amount": amount,
+        "rank": rank,
+        "tx": receipt.signature,
+        "pool": pool_out(pool),
+    }
+
+
+def close_pool(
+    session: Session,
+    scope: AccessScope,
+    pool: PrizePool,
+    chain: RecordingChain | SolanaChain,
+) -> PrizePool:
+    assert_pool_admin(scope, pool.programme_id)
+    if pool.status == "closed":
+        raise HTTPException(status.HTTP_409_CONFLICT, "This prize pool is already closed.")
+    destination = pool.sponsor_wallet or ""
+    if isinstance(chain, SolanaChain) and not destination:
+        destination = str(chain.authority.pubkey())
+    receipt = _chain_call(lambda: chain.close_pool(pool.onchain_pool_id, pool.mint, destination))
+    pool.status = "closed"
+    pool.settle_tx = receipt.signature or pool.settle_tx
+    write_audit(session, scope.user, "pool.closed", "prize_pool", pool.id, {"tx": receipt.signature})
     session.flush()
     return pool
 

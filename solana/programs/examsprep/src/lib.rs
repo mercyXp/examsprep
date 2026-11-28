@@ -89,8 +89,64 @@ pub mod examsprep {
     ///
     /// `amounts[i]` is paid to `remaining_accounts[i]`. The authority chooses
     /// the winners. Anyone can read the transaction afterwards and see exactly
-    /// who was paid.
+    /// who was paid. Rejected once any student has used `claim_reward`.
     pub fn pay_winners<'a>(ctx: Context<'a, PayWinners<'a>>, amounts: Vec<u64>) -> Result<()> {
         instructions::handle_pay_winners(ctx, amounts)
+    }
+
+    /// Same as `initialize`. The name the rewards spec uses.
+    pub fn initialize_config(ctx: Context<Initialize>) -> Result<()> {
+        instructions::handle_initialize(ctx)
+    }
+
+    /// Same as `create_pool`.
+    pub fn create_reward_pool(
+        ctx: Context<CreatePool>,
+        pool_id: u64,
+        period_start: i64,
+        period_end: i64,
+        top_n: u8,
+    ) -> Result<()> {
+        instructions::handle_create_pool(ctx, pool_id, period_start, period_end, top_n)
+    }
+
+    /// Same as `fund_pool`. Moves USDC (or the pool's mint) into the vault.
+    pub fn fund_reward_pool(ctx: Context<FundPool>, amount: u64) -> Result<()> {
+        instructions::handle_fund_pool(ctx, amount)
+    }
+
+    /// Authority-only. Records that `student` may later claim `amount` from `pool_id`.
+    ///
+    /// `subject` is a 32-byte hash. The program never sees a name, an email, or an answer.
+    /// The same seeds as `award_badge` are used, so a student has one achievement per
+    /// kind and subject. `award_badge` is the zero-amount form of the same account.
+    pub fn record_achievement(
+        ctx: Context<RecordAchievement>,
+        kind: u8,
+        subject: [u8; 32],
+        detail: u32,
+        pool_id: u64,
+        amount: u64,
+    ) -> Result<()> {
+        instructions::handle_record_achievement(ctx, kind, subject, detail, pool_id, amount)
+    }
+
+    /// Pays `amount` from the vault to the student's token account and writes a receipt.
+    ///
+    /// The authority signs this. The backend checked eligibility before building it.
+    /// A second claim for the same student and pool fails because the receipt account
+    /// already exists. `amount` must match the achievement and must fit in the vault.
+    pub fn claim_reward(
+        ctx: Context<ClaimReward>,
+        kind: u8,
+        subject: [u8; 32],
+        amount: u64,
+    ) -> Result<()> {
+        instructions::handle_claim_reward(ctx, kind, subject, amount)
+    }
+
+    /// Marks the pool closed and returns any leftover tokens to the sponsor.
+    pub fn close_reward_pool(ctx: Context<CloseRewardPool>) -> Result<()> {
+        instructions::handle_close_reward_pool(ctx)
     }
 }

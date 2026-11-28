@@ -10581,3 +10581,48 @@ html[data-theme="dark"] .lesson-pill.is-muted {
 html[data-theme="dark"] .lesson-pop button.is-danger {
   color: #ffb4ab;
 }
+
+.assist-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.assist-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.assist-review,
+.assist-turns,
+.assist-choices {
+  display: grid;
+  gap: 8px;
+}
+
+.listen-player,
+.listen-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.listen-controls input[type="range"] {
+  width: 140px;
+}
+
+.math-md p,
+.math-md ul {
+  margin: 0 0 8px;
+}
+
+.snap-preview {
+  max-width: min(100%, 420px);
+  border-radius: 12px;
+}
+
+html[data-theme="dark"] .assist-panel,
+html[data-theme="dark"] .listen-player {
+  color: inherit;
+}

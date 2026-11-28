@@ -340,14 +340,14 @@ class ByteGateTests(unittest.TestCase):
         checked_in = (ROOT / "mobile-examsprint" / "BYTE_GAME.md").read_text()
         self.assertEqual(checked_in, text)
 
-    def test_revision_follows_the_programme_archive_migration(self) -> None:
-        path = ROOT / "api" / "alembic" / "versions" / "20261128_0019_sprint_game.py"
+    def test_revision_follows_the_it211_attempt_migration(self) -> None:
+        path = ROOT / "api" / "alembic" / "versions" / "20261128_0021_sprint_game.py"
         spec = importlib.util.spec_from_file_location("sprint_migration", path)
         assert spec is not None and spec.loader is not None
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        self.assertEqual(module.revision, "20261128_0019")
-        self.assertEqual(module.down_revision, "20261127_0018")
+        self.assertEqual(module.revision, "20261128_0021")
+        self.assertEqual(module.down_revision, "20261128_0020")
 
 
 if __name__ == "__main__":

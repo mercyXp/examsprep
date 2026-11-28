@@ -1,4 +1,13 @@
 from app.models.access import ContentCreatorAssignment, ProgramAdminAssignment, ProgramModule
+from app.models.assist import (
+    AudioAsset,
+    ExtractionJob,
+    PracticeAttempt,
+    PracticeQuestion,
+    SnappedQuestion,
+    TutorSession,
+    TutorTurn,
+)
 from app.models.audit import AuditLog
 from app.models.catalogue import AcademicYear, Chapter, Module, Programme, Semester, Topic
 from app.models.comms import Announcement, AnnouncementRead
@@ -29,6 +38,7 @@ __all__ = [
     "Announcement",
     "AnnouncementRead",
     "AttemptAnswer",
+    "AudioAsset",
     "AuditLog",
     "BadgeAward",
     "Bookmark",
@@ -37,6 +47,7 @@ __all__ = [
     "ContentReview",
     "Enrolment",
     "ExamType",
+    "ExtractionJob",
     "Lesson",
     "LessonProgress",
     "LessonVersion",
@@ -45,6 +56,8 @@ __all__ = [
     "PasswordResetToken",
     "PastPaper",
     "Permission",
+    "PracticeAttempt",
+    "PracticeQuestion",
     "PrizePayout",
     "PrizePool",
     "ProgramAdminAssignment",
@@ -62,11 +75,14 @@ __all__ = [
     "Role",
     "RolePermission",
     "Semester",
+    "SnappedQuestion",
     "SprintAchievement",
     "SprintSession",
     "StaffInvitation",
     "StudentProfile",
     "Topic",
+    "TutorSession",
+    "TutorTurn",
     "User",
     "UserRole",
     "WalletLink",

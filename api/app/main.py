@@ -17,10 +17,15 @@ from app.routers.learn import router as learn_router
 from app.routers.mail import router as mail_router
 from app.routers.media import router as media_router
 from app.routers.onboarding import router as onboarding_router
+from app.routers.practice import router as practice_router
 from app.routers.quizzes import router as quizzes_router
+from app.routers.research import router as research_router
+from app.routers.revision import router as revision_router
 from app.routers.rewards import router as rewards_router
+from app.routers.snap import router as snap_router
 from app.routers.sprint import router as sprint_router
 from app.routers.staff import router as staff_router
+from app.routers.voice import router as voice_router
 
 
 def _bootstrap_super_admin() -> None:
@@ -39,7 +44,16 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="ExamsPrep API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(
+    title="ExamsPrep API",
+    version="0.1.0",
+    description=(
+        "ExamsPrep backend. Research, speech, snap, practice, and revision routes "
+        "are under the research, audio, tutor, snap, practice, and revision tags. "
+        "Provider keys stay on this service. Missing keys return a not-configured error."
+    ),
+    lifespan=lifespan,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()],
@@ -51,10 +65,15 @@ app.include_router(auth_router)
 app.include_router(onboarding_router)
 app.include_router(admin_router)
 app.include_router(authoring_router)
+app.include_router(research_router)
 app.include_router(staff_router)
 app.include_router(mail_router)
 app.include_router(learn_router)
 app.include_router(quizzes_router)
+app.include_router(voice_router)
+app.include_router(snap_router)
+app.include_router(practice_router)
+app.include_router(revision_router)
 app.include_router(rewards_router)
 app.include_router(sprint_router)
 app.include_router(media_router)

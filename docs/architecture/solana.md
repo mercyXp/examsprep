@@ -34,7 +34,7 @@ The config PDA exists only after the authority key sends `initialize`. The API d
 
 ## Who is allowed to do what
 
-The program stores one authority public key. Every `award_badge`, `create_pool`, and `pay_winners` transaction must be signed by that key. A student wallet cannot mint their own badge.
+The program stores one authority public key. Every `award_badge`, `record_achievement`, `create_pool`, `claim_reward`, `pay_winners`, and `close_reward_pool` transaction must be signed by that key. A student wallet cannot mint their own badge or pay itself from the vault. Operator steps, seeds, and the deploy script are in [docs/solana.md](../solana.md).
 
 On the API, before that key is used:
 
@@ -67,7 +67,7 @@ Anyone can recompute that address and read the account. `GET /api/badges/verify/
 2. `POST /api/admin/pools/{id}/fund` with an amount in **base units** sends `fund_pool`, signed by `SOLANA_SPONSOR_KEYPAIR`. That wallet must already hold the token (devnet USDC) in its associated token account. 1 USDC is `1000000`.
 3. `POST /api/admin/pools/{id}/settle` ranks students for that period, pays the ones with linked wallets, and writes their weekly badges. The amount is split evenly. Any remainder goes to first place among the students who can actually be paid. A top student with no wallet is listed and not paid. If the pool has USDC and nobody in the top N has a wallet, settle refuses so the funds stay in escrow.
 
-`pay_winners` can run once. A second call is rejected by the program.
+`pay_winners` can run once, and only if no student has called `claim_reward` on that pool. A student claim is `POST /api/pools/{id}/claim` after the period ends. The API ranks the student again and refuses the call when they are not in the payable top N or have already been paid. The program then creates a claim receipt, so a second claim cannot pay the same wallet again. `POST /api/admin/pools/{id}/close` returns any leftover tokens to the sponsor.
 
 The program accepts any SPL token mint so the tests can use a local mint. The API defaults to devnet USDC.
 
@@ -95,6 +95,8 @@ One wallet can belong to one account. Unlink with `DELETE /api/wallet` before li
 | POST | `/api/admin/pools` | Super admin or programme admin |
 | POST | `/api/admin/pools/{id}/fund` | Same, and only inside their programmes |
 | POST | `/api/admin/pools/{id}/settle` | Same |
+| POST | `/api/pools/{id}/claim` | Student, linked wallet, period ended, in the payable top N |
+| POST | `/api/admin/pools/{id}/close` | Super admin or programme admin |
 | GET | `/api/learn/quizzes` | Signed in, published quizzes on visible modules |
 | GET | `/api/learn/quizzes/{id}` | Same. Answers are not included. |
 | POST | `/api/learn/quizzes/{id}/attempts` | Same. Score is stored on `quiz_attempts`. |

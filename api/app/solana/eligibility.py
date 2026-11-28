@@ -154,6 +154,27 @@ def rank_students(rows: list[ScoreRow]) -> list[ScoreRow]:
     )
 
 
+def linked_prize_shares(
+    ranked_ids: list[str],
+    linked_ids: set[str],
+    total: int,
+    top_n: int,
+) -> list[tuple[str, int, int]]:
+    """Return `(user_id, rank, amount)` for linked students inside the top N.
+
+    Rank is the 1-based place in `ranked_ids`, including students with no wallet.
+    The pot is split across the linked students only. The first linked student
+    receives any remainder. A zero share is omitted, matching `split_prize`.
+    """
+    top = ranked_ids[:top_n]
+    payable = [(index, user_id) for index, user_id in enumerate(top, start=1) if user_id in linked_ids]
+    amounts = split_prize(total, len(payable))
+    return [
+        (user_id, rank, amount)
+        for (rank, user_id), amount in zip(payable, amounts, strict=False)
+    ]
+
+
 def split_prize(total: int, winners: int) -> list[int]:
     """Split base units as evenly as possible. The first place gets any remainder."""
     if winners <= 0 or total <= 0:

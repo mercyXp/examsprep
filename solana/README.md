@@ -7,7 +7,7 @@ This folder is the on-chain half of the hackathon entry. It is an [Anchor](https
 Two things, and only these two:
 
 1. **Badges.** A badge is an account that says a student wallet earned something: a topic, a passed mock exam, a study streak, or a weekly leaderboard place. Students cannot create these accounts. Only the backend **authority** key can.
-2. **Prize pools.** A sponsor locks USDC in an escrow account owned by the program. Later the authority names the winners and the program pays them from that escrow.
+2. **Prize pools.** A sponsor locks USDC in an escrow account owned by the program. The authority records what each student may claim. A claim pays that amount once and writes a receipt. An administrator can also pay the top students in one batch, or close the pool and return what is left.
 
 The program id, which is the address of the code itself, is:
 
@@ -58,43 +58,31 @@ npm install
 anchor test --validator legacy
 ```
 
-That boots a local validator, deploys the program, and runs `tests/examsprep.ts`. It does not spend devnet SOL. The test mints its own 6-decimal token so it can move funds without Circle's USDC faucet.
+That boots a local validator, deploys the program, and runs `tests/examsprep.ts`. It does not spend devnet SOL. The test mints its own 6-decimal token so it can move funds without Circle's USDC faucet. The rewards cases cover init, create, fund, record achievement, claim, a duplicate claim, an unauthorised issuer, a wrong mint, a short vault, a wrong authority, and close.
 
 ## Deploy to devnet
 
-One command:
+One command, after the Solana CLI and Anchor 1.2.x are on `PATH` (Codespaces needs the two directories below):
 
 ```bash
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.cargo/bin:$PATH"
 ./scripts/deploy-devnet.sh
 ```
 
-The script points the Solana CLI at devnet, asks for an airdrop if the deployer wallet has under 1.5 SOL, builds, and deploys. The deployer wallet is `~/.config/solana/id.json`, which you create with:
+Install Solana with:
 
 ```bash
-solana-keygen new -o ~/.config/solana/id.json --no-bip39-passphrase
+curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
 ```
 
-If the airdrop is refused (the public faucet does this often), the script stops and prints these steps. Do them, then run the script again:
+The script points the CLI at devnet, creates `~/.config/solana/id.json` when you do not already have a deployer wallet, and asks for an airdrop when that wallet is under 1.5 SOL. It then builds, deploys, initializes config, and creates demo pool `20261128` for devnet USDC if needed. Authority and sponsor keys are written to `.keys/`, which is gitignored. The script prints the program id, deploy signature, config PDA, and the Render env vars, including `SOLANA_AUTHORITY_KEYPAIR`. Do not commit that key.
 
-1. `solana config set --url https://api.devnet.solana.com`
-2. `solana address` and copy the address.
-3. Open [https://faucet.solana.com](https://faucet.solana.com) and request **devnet** SOL for that address. If the site is capped, wait and retry, or run `solana airdrop 1 <address> --url https://api.devnet.solana.com`.
-4. `solana balance` should show at least 1.5 SOL. Deploying a program costs more than a transfer.
-5. `cd solana && ./scripts/deploy-devnet.sh`
+If the airdrop is refused, the script stops and prints the faucet steps. Request devnet SOL at [https://faucet.solana.com](https://faucet.solana.com), then run the script again.
 
-After a successful deploy, create a **separate** authority key and fund it with a little SOL so it can pay rent for badge accounts:
-
-```bash
-solana-keygen new -o authority.json --no-bip39-passphrase
-solana airdrop 1 "$(solana-keygen pubkey authority.json)" --url devnet
-```
-
-Put the contents of `authority.json` in `SOLANA_AUTHORITY_KEYPAIR` on the API. Do not commit that file.
-
-To print the program id and config PDA again:
+To print the program id and config PDA without deploying:
 
 ```bash
 node scripts/print-addresses.mjs
 ```
 
-The longer explanation of how the API and the phone use this program is [docs/architecture/solana.md](../docs/architecture/solana.md).
+The operator guide is [docs/solana.md](../docs/solana.md). How the API and the phone use the program is [docs/architecture/solana.md](../docs/architecture/solana.md).
