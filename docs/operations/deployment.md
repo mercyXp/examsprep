@@ -42,8 +42,16 @@ Environment variables on the API service:
 | `SUPER_ADMIN_NAME` | One-time. See below. |
 | `SUPER_ADMIN_EMAIL` | One-time. See below. |
 | `SUPER_ADMIN_PASSWORD` | One-time. See below. |
+| `AI_API_KEY` | Optional. Lesson drafts, research outlines, snap vision, practice, and the voice tutor. Missing key returns a not-configured message. |
+| `FIRECRAWL_API_KEY` | Optional. Research Assistant. Missing key does not invent extracted text. |
+| `ELEVENLABS_API_KEY` | Optional. Lesson audio, quiz audio, and speech-to-text. |
+| `ELEVENLABS_VOICE_ID` | Required with the ElevenLabs key before any audio is generated. |
+
+Generated speech and snapped photos are stored in Postgres `bytea` columns, capped at 4 MB each, because the Render disk is wiped on restart. The free Postgres plan is 1 GB and expires. Lesson uploads still use `MEDIA_ROOT` on disk. See [assist APIs](../api/assist.md).
 
 `GET /health` means the process is up. `GET /health/db` means Postgres answered. `/` has no route and returns `{"ok": false, "message": "Not Found"}`.
+
+Do not put `FIRECRAWL_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, or `AI_API_KEY` on Vercel. They belong on the API service.
 
 The free Render plan has no shell. `alembic upgrade head` runs in the build command. Catalogue and role rows come from a database restore, or from `SEED_DEMO_USERS=false python -m app.seed` on a host that has a shell.
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import urllib.error
 import urllib.request
@@ -27,6 +28,9 @@ class AIProvider:
     def complete(self, system: str, user: str) -> Completion:
         raise NotImplementedError
 
+    def complete_vision(self, system: str, user: str, images: list[tuple[str, bytes]]) -> Completion:
+        return Completion(text="", provider=self.name, degraded=True)
+
 
 class HeuristicProvider(AIProvider):
     name = "heuristic"
@@ -50,6 +54,16 @@ class OpenAICompatibleProvider(AIProvider):
         return bool(self.api_key)
 
     def complete(self, system: str, user: str) -> Completion:
+        return self._complete(system, user)
+
+    def complete_vision(self, system: str, user: str, images: list[tuple[str, bytes]]) -> Completion:
+        parts: list[dict] = [{"type": "text", "text": user}]
+        for mime, blob in images[:2]:
+            encoded = base64.b64encode(blob).decode("ascii")
+            parts.append({"type": "image_url", "image_url": {"url": f"data:{mime};base64,{encoded}"}})
+        return self._complete(system, parts)
+
+    def _complete(self, system: str, user: str | list) -> Completion:
         if not self.api_key:
             return Completion(text="", provider="heuristic", degraded=True)
         payload = {

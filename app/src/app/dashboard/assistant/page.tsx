@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { VoiceTutor } from "@/app/components/assist/VoiceTutor";
 import AppShell from "@/app/components/shell/AppShell";
 import { loadExamSchedule, type StudentExamSchedule } from "@/lib/learn-api";
 import { examSittingCaption, remainingLabel } from "@/lib/study";
@@ -27,14 +28,15 @@ export default function AssistantPage() {
       subtitle="Prioritise topics by the next actual examination sitting."
     >
       <div className="dash-body cms-stack">
+        <VoiceTutor />
         <article className="dash-card">
           <header className="dash-card-head">
             <h2>Revision order</h2>
             <span>{schedule?.period?.name || "Waiting for timetable"}</span>
           </header>
           <p>
-            Tutoring is not connected yet. Until then, revise in this order so modules with earlier sittings get time
-            first — including when those modules belong to different programs.
+            The voice tutor above uses your selected course. This list is the published examination order when a
+            timetable exists.
           </p>
           {upcoming.length ? (
             <ol className="dash-time-mods">
