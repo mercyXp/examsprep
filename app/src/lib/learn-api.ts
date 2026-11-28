@@ -34,7 +34,13 @@ export type CourseChapter = {
   lessons: CourseLesson[];
 };
 
-export type CourseOverview = CourseSummary & { chapters: CourseChapter[] };
+export type CourseQuiz = {
+  id: string;
+  title: string;
+  kind: string;
+};
+
+export type CourseOverview = CourseSummary & { chapters: CourseChapter[]; quizzes?: CourseQuiz[] };
 
 export type LessonProgress = {
   currentSlideIndex: number;
@@ -60,6 +66,7 @@ export type StudentLesson = {
   nextLessonId: string | null;
   previousLessonId: string | null;
   progress: LessonProgress;
+  plainText?: string;
 };
 
 export type CatalogueCourse = {
@@ -230,6 +237,174 @@ export async function markAnnouncementRead(id: string) {
 
 export async function loadExamSchedule() {
   const result = await api<StudentExamSchedule>("/api/learn/exam-schedule");
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data };
+}
+
+export type StudyProgramme = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  status: string;
+  durationYears: number | null;
+  blurb: string;
+  selectable: boolean;
+  selected: boolean;
+};
+
+export async function loadProgrammes() {
+  const result = await api<{ items: StudyProgramme[] }>("/api/learn/programmes");
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data.items ?? [] };
+}
+
+export async function selectProgramme(name: string) {
+  return api<{ item: StudyProgramme }>("/api/learn/programme", {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export type QuizQuestion = {
+  id: string;
+  prompt: string;
+  points: number;
+  kind: "mcq" | "true_false" | "short" | "blank" | "structured" | string;
+  choices: { id: string; label: string }[];
+};
+
+export type QuizSummary = {
+  id: string;
+  title: string;
+  kind: string;
+  moduleId: string;
+  moduleCode: string | null;
+  moduleName: string | null;
+  timeLimitSeconds: number | null;
+  passMarkPercent: number | null;
+  questionCount: number;
+  attemptCount: number;
+  bestScorePercent: number | null;
+  latestScorePercent: number | null;
+};
+
+export type QuizDetail = {
+  id: string;
+  title: string;
+  kind: string;
+  moduleId: string;
+  moduleCode: string | null;
+  timeLimitSeconds: number | null;
+  passMarkPercent: number | null;
+  questions: QuizQuestion[];
+  openAttempt: { id: string; startedAt: string; deadline: string | null } | null;
+};
+
+export type QuizAnswer = {
+  question_version_id: string;
+  selected_option_ids: string[];
+  response_text: string;
+};
+
+export type GradedQuestion = {
+  id: string;
+  prompt: string;
+  kind: string;
+  correct: boolean;
+  pointsAwarded: number;
+  points: number;
+  explanation: string;
+  correctOptionIds: string[];
+  modelAnswer: string;
+  selectedOptionIds: string[];
+  responseText: string;
+  keyPointsMatched: number;
+  keyPointsPossible: number;
+  choices: { id: string; label: string }[];
+};
+
+export type QuizResult = {
+  attemptId: string;
+  scorePercent: number;
+  passed: boolean;
+  timedOut: boolean;
+  pointsEarned: number;
+  pointsPossible: number;
+  questions: GradedQuestion[];
+};
+
+export type AttemptSummary = {
+  id: string;
+  quizId: string;
+  title?: string;
+  kind?: string;
+  moduleCode?: string | null;
+  startedAt: string;
+  submittedAt: string | null;
+  scorePercent: number | null;
+  passed: boolean | null;
+  timedOut: boolean;
+};
+
+export type TopicScore = {
+  topicId: string | null;
+  title: string;
+  moduleCode: string;
+  answered: number;
+  correct: number;
+  percent: number;
+};
+
+export type PerformanceSummary = {
+  questionsAnswered: number;
+  questionsCorrect: number;
+  attemptCount: number;
+  averageScorePercent: number | null;
+  topics: TopicScore[];
+  recentAttempts: AttemptSummary[];
+};
+
+export async function loadQuizzes() {
+  const result = await api<{ items: QuizSummary[] }>("/api/learn/quizzes");
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data.items ?? [] };
+}
+
+export async function loadQuiz(id: string) {
+  const result = await api<{ item: QuizDetail }>(`/api/learn/quizzes/${id}`);
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data.item };
+}
+
+export async function startQuiz(id: string) {
+  const result = await api<{ attemptId: string; startedAt: string; deadline: string | null; questions: QuizQuestion[] }>(
+    `/api/learn/quizzes/${id}/attempts/start`,
+    { method: "POST", body: JSON.stringify({}) },
+  );
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data };
+}
+
+export async function submitStartedQuiz(quizId: string, attemptId: string, answers: QuizAnswer[]) {
+  const result = await api<QuizResult>(`/api/learn/quizzes/${quizId}/attempts/${attemptId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ answers }),
+  });
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data };
+}
+
+export async function loadAttempt(id: string) {
+  const result = await api<{ item: QuizResult & AttemptSummary & { title: string; questions: GradedQuestion[]; submitted: boolean } }>(
+    `/api/learn/attempts/${id}`,
+  );
+  if (!result.ok) return result;
+  return { ok: true as const, data: result.data.item };
+}
+
+export async function loadPerformance() {
+  const result = await api<PerformanceSummary>("/api/learn/performance");
   if (!result.ok) return result;
   return { ok: true as const, data: result.data };
 }

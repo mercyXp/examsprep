@@ -4,7 +4,7 @@ export type TextVariant = "heading" | "paragraph" | "list" | "definition" | "quo
 export type TextFont = "sans" | "serif" | "mono";
 export type CalloutTone = "note" | "tip" | "warning" | "important";
 export type BlockType = "text" | "code" | "image" | "callout" | "check" | "video" | "audio" | "table" | "math" | "flashcard" | "quiz" | "game";
-export type QuizKind = "mcq" | "blank";
+export type QuizKind = "mcq" | "blank" | "true_false" | "structured";
 export type GameKind = "matching" | "drag";
 export type AppearMode = "click" | "immediate";
 export type RevealAnimation = "fade" | "none" | "up" | "left" | "right" | "zoom";
@@ -648,7 +648,7 @@ function parseBlock(raw: unknown): ContentBlock | null {
     return {
       id,
       type,
-      kind: row.kind === "blank" ? "blank" : "mcq",
+      kind: row.kind === "blank" || row.kind === "true_false" || row.kind === "structured" ? row.kind : "mcq",
       prompt: asText(row.prompt),
       options,
       correctId: asText(row.correctId) || asText(row.correct_id),

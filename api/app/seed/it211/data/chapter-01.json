@@ -1,0 +1,535 @@
+{
+  "position": 1,
+  "title": "Introduction to Systems Analysis and Design",
+  "description": "What an information system is, how analysis differs from design, and why a university or a public office bothers to study the current way of working before buying software.",
+  "lessons": [
+    {
+      "title": "Introduction to Information Systems",
+      "description": "How people, data, and technology combine to produce information a university can act on.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Distinguish data from information using a university example",
+        "Name the parts that make an information system more than a computer",
+        "Explain why a registration office needs information, not only stored records"
+      ],
+      "introduction": [
+        "When a student at Cavendish University Zambia asks whether a module is full, the answer is not sitting in one laptop. It is produced by people, rules, and records working together. That arrangement is an information system.",
+        "This lesson treats an information system as a human activity that uses technology, not as a piece of software on its own. The same idea applies at the Zambia Revenue Authority, a clinic in Lusaka, or a faculty office."
+      ],
+      "explanation": [
+        "Data are raw recorded facts. A row that says student number 2024-1184, module IT211, and status wait-list is data. Information is data that has been processed so a person can decide. The statement IT211 has four seats left and the wait-list is ordered by registration time is information, because the registrar can act on it.",
+        "An information system accepts inputs, processes them according to rules, stores what must be remembered, and produces outputs for particular users. Inputs at registration include a course choice and proof of fee payment. Processing checks prerequisites and seat limits. Storage keeps the enrolment. Outputs include a timetable, a class list for the lecturer, and a receipt for the student.",
+        "Technology is only one component. If the rule about prerequisites lives in a clerk's memory and nowhere else, the system still exists, but it is fragile. If the rule is written down and the software enforces it, the system is easier to audit. Analysts study both the official rule and the workaround people actually use, such as a WhatsApp list kept when the portal is down.",
+        "Information systems also have a boundary. Inside the boundary the university controls the process. Outside it, a sponsor, ZRA, or NAPSA may supply or receive data. Drawing that boundary badly is a common reason a new system disappoints: it automates the clerk's screen and forgets the student standing at the counter."
+      ],
+      "definitions": [
+        {"term": "Data", "meaning": "Raw facts recorded about something, before they have been organised for a decision."},
+        {"term": "Information", "meaning": "Data that has been processed and presented so a specific person can act."},
+        {"term": "Information system", "meaning": "People, procedures, data, hardware, and software that collect, process, store, and distribute information."},
+        {"term": "System boundary", "meaning": "The line between what the system being studied includes and what it treats as outside."}
+      ],
+      "exampleTitle": "A faculty office on results day",
+      "example": [
+        "The School of Computing publishes provisional results. The input is a mark sheet from each lecturer. Processing applies the faculty rule that a student needs 40 percent to pass a module and checks that every registered student has a mark. The stored record is the confirmed result. The output is a notice on the student portal and a printed list for the dean.",
+        "If one lecturer emails marks in a different column order, the data are still facts, but they are not yet reliable information. The system fails at the processing step until someone reconciles the sheet."
+      ],
+      "table": {
+        "caption": "From a raw mark to a decision",
+        "headers": ["Stage", "Example"],
+        "rows": [
+          ["Data", "IT211, student 2024-1184, mark 38"],
+          ["Processing", "Compare 38 with the pass mark of 40"],
+          ["Information", "The student has not passed IT211 and may sit a supplementary"],
+          ["Decision", "Exams office opens a supplementary registration"]
+        ]
+      },
+      "application": [
+        "On a placement or internship, ask what decision a report is meant to support before you ask which app produces it. A mobile-money statement is data until a treasurer uses the day's total to decide whether the canteen can restock.",
+        "When you write coursework, label the user of each output. A class list serves a lecturer. A fee balance serves a student and the bursar. They are different information even when they come from the same enrolment data."
+      ],
+      "tip": "If you cannot name the person who acts on an output, you have data, not yet an information system.",
+      "takeaways": [
+        "Data are facts; information supports a decision",
+        "An information system includes people and procedures, not only software",
+        "Inputs, processing, storage, and outputs are the basic flow",
+        "The system boundary decides which organisations are in scope"
+      ],
+      "revision": [
+        "Give one university example of data and the information a registrar could derive from it.",
+        "Why is a spreadsheet on one clerk's desktop still an information system?",
+        "What goes wrong if analysts automate a screen but ignore the queue at the counter?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which statement best describes information?",
+          "options": [
+            "Any number stored in a database",
+            "Data processed so a particular person can make a decision",
+            "The brand of software a faculty has licensed",
+            "A computer that is switched on"
+          ],
+          "correct": 1,
+          "explanation": "Information is processed data in a form that supports action. A stored mark, by itself, is still data."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "An information system must include a computer.",
+          "correct": false,
+          "explanation": "A paper register with agreed procedures is still an information system. Computers change the speed and reliability, not the definition."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name for the line between the process you are studying and the organisations outside it?",
+          "answers": ["system boundary", "boundary"],
+          "explanation": "The system boundary separates what is inside the system from external entities such as a sponsor or ZRA."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A student portal shows a fee balance. Explain, in two parts, how that screen turns data into information.",
+          "points": ["raw payment facts", "a decision the student or bursar can take"],
+          "explanation": "The balance is built from payment records (data). It becomes information when a student decides whether they may sit exams, or the bursar decides who to follow up."
+        }
+      ],
+      "summary": "An information system turns recorded facts into something a named person can use. At a university that means enrolment, fees, and results are not just files: they are inputs, rules, stored records, and outputs inside a boundary you can draw."
+    },
+    {
+      "title": "Meaning and Characteristics of a System",
+      "description": "The general idea of a system, and the characteristics analysts look for before they talk about software.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Define a system as parts working toward a purpose",
+        "Describe four characteristics that separate a system from a pile of parts",
+        "Apply those characteristics to a student registration process"
+      ],
+      "introduction": [
+        "The word system is used loosely. People say the system is down when they mean the Wi-Fi, the portal, or the whole university. Analysts need a tighter meaning, because a vague system cannot be improved.",
+        "This lesson borrows the general systems idea used across computing: a set of interrelated parts, a purpose, a boundary, and some way of controlling itself when the world changes."
+      ],
+      "explanation": [
+        "A system is a set of interrelated components that work together toward a goal. The components of registration include the student, the portal, the finance check, the timetable, and the lecturer's class limit. None of those, alone, registers a student. The purpose is a confirmed, clash-free enrolment.",
+        "Interdependence means a change in one part affects others. If finance delays a receipt, the academic office cannot confirm the module, and the lecturer's list is wrong. Holism means the system has behaviour that the parts do not have separately: a fair waiting list is a property of the whole process, not of the database table.",
+        "Every system has inputs from outside, processes inside, and outputs. It also has a boundary and an environment. The environment for registration includes the academic calendar, fee policy, and the mobile network students use to pay. Analysts do not control the environment, but they must design for it.",
+        "Control and feedback keep a system on purpose. A control is a rule or check, such as blocking enrolment when fees are unpaid. Feedback is information about results that is fed back in, such as a weekly report of modules that are over capacity. Without feedback, the office only discovers the problem when students are already in the wrong room."
+      ],
+      "definitions": [
+        {"term": "System", "meaning": "Interrelated components that cooperate toward a stated purpose inside a boundary."},
+        {"term": "Interdependence", "meaning": "A change in one component changes the behaviour of other components."},
+        {"term": "Feedback", "meaning": "Information about outputs or performance that is returned so the system can adjust."},
+        {"term": "Environment", "meaning": "Everything outside the boundary that affects the system or is affected by it."}
+      ],
+      "exampleTitle": "Registration as a system, not a form",
+      "example": [
+        "Purpose: each eligible student ends the first week with a clash-free set of modules. Inputs: programme, prior results, fee status, module choices. Processes: prerequisite check, seat check, timetable check. Outputs: confirmed registration and class lists. Control: unpaid students are blocked. Feedback: daily count of modules over 90 percent full, which lets the dean open a second stream.",
+        "If the seat check is removed to make the queue faster, the purpose fails even though every other part still runs. That is interdependence, and it is why analysts refuse to optimise one counter in isolation."
+      ],
+      "diagram": "Purpose: clash-free enrolment\n        |\nInputs --> [checks: fees, prerequisites, seats, timetable] --> Outputs\n        ^                                      |\n        |-------------- feedback: modules over capacity",
+      "application": [
+        "When a project sponsor says just put the form online, rewrite the request as a system: name the purpose, the parts, the control, and the feedback. The form is only an input component.",
+        "In a Zambian campus where fee payment often happens by mobile money after hours, the environment includes payment delays. A system with no feedback until the next morning will turn away students who have already paid."
+      ],
+      "tip": "If you cannot state the purpose in one sentence, you are not ready to list the components.",
+      "takeaways": [
+        "A system is parts plus a purpose, not a single app",
+        "Interdependence means you cannot change one counter and ignore the rest",
+        "Boundary and environment show what you do not control",
+        "Control and feedback keep the system aimed at its purpose"
+      ],
+      "revision": [
+        "Define a system in your own words and illustrate it with registration.",
+        "What is the difference between the system boundary and the environment?",
+        "Give one control and one piece of feedback in a results-processing system."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which feature means that changing the fee check will also change class lists?",
+          "options": ["Holism", "Interdependence", "The environment", "Data storage"],
+          "correct": 1,
+          "explanation": "Interdependence means components affect one another. A fee block changes who appears on the lecturer's list."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Feedback is information about results that is returned so the system can adjust.",
+          "correct": true,
+          "explanation": "Feedback closes the loop. A capacity report that leads the dean to open another stream is feedback."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the one-word name for everything outside the boundary that still affects the system?",
+          "answers": ["environment", "the environment"],
+          "explanation": "The environment sits outside the boundary. Policy, the calendar, and the mobile network are environmental for registration."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Describe registration using purpose and feedback.",
+          "points": ["clash-free enrolment", "report of modules that are nearly full"],
+          "explanation": "The purpose is a confirmed clash-free enrolment. Feedback such as a near-capacity report lets the faculty open another stream before the purpose fails."
+        }
+      ],
+      "summary": "A system is a purposeful whole. Analysts look for interrelated parts, a boundary, an environment they do not control, and feedback that shows whether the purpose is still being met. Registration is a clear campus example: fees, seats, and timetables only make sense together."
+    },
+    {
+      "title": "Components of an Information System",
+      "description": "Hardware, software, data, procedures, and people, and how a missing procedure beats a new server.",
+      "durationMinutes": 20,
+      "difficulty": "beginner",
+      "objectives": [
+        "List the five components of an information system",
+        "Explain the role of procedures and people alongside hardware and software",
+        "Spot which component is weak in a short campus scenario"
+      ],
+      "introduction": [
+        "Buying a server does not create an information system. The School of Computing can have new machines in the lab and still lose marks because nobody agreed who may edit a spreadsheet.",
+        "This lesson names five components analysts expect to find, and it shows how to talk about them in an assignment without sliding into a product brochure."
+      ],
+      "explanation": [
+        "Hardware is the physical equipment: computers, phones, printers, network gear, and sometimes a barcode scanner at the library. Software is the programs, from the student portal to the spreadsheet a clerk still trusts more than the portal. Data are the stored facts the software acts on.",
+        "Procedures are the agreed steps people follow, including what to do when the normal path fails. A procedure might say: if mobile-money confirmation has not arrived in thirty minutes, the bursar records a pending payment and the student may attend class for one day. Without that sentence, staff invent different rules.",
+        "People include everyone who builds, operates, or uses the system: students, lecturers, clerks, the analyst, and the administrator who grants access. Skills matter. A portal that assumes every lecturer will upload marks from home fails if some staff only have access on a shared office machine.",
+        "The components must fit. Fast hardware with confused procedures still produces wrong class lists. Clean data with no trained backup operator is one resignation away from a crisis. Analysts describe all five when they recommend a change, because a recommendation that only says install this package is incomplete."
+      ],
+      "definitions": [
+        {"term": "Hardware", "meaning": "Physical devices that capture, process, store, or display data."},
+        {"term": "Software", "meaning": "Programs and the instructions that tell hardware what to do with data."},
+        {"term": "Procedure", "meaning": "A documented step people follow to carry out or recover a process."},
+        {"term": "People component", "meaning": "The users, operators, and specialists whose skills make the other components useful."}
+      ],
+      "exampleTitle": "Why the new lab did not fix results",
+      "example": [
+        "A department receives ten new PCs. Marks are still wrong in week two. Hardware is fine. The software is a shared workbook with no lock. Data are retyped from paper scripts. The procedure for who may overwrite a mark is unwritten. Two assistants have never been shown the workbook. Four of the five components are weak; the new PCs addressed only one.",
+        "A useful recommendation names the missing procedure and a short training session before it asks for more equipment."
+      ],
+      "table": {
+        "caption": "Five components in a results office",
+        "headers": ["Component", "Campus example", "Typical failure"],
+        "rows": [
+          ["Hardware", "Office PCs and a printer", "One shared machine, long queue"],
+          ["Software", "Portal and a backup workbook", "Workbook trusted more than the portal"],
+          ["Data", "Marks, student numbers", "Retyped numbers, mismatched columns"],
+          ["Procedures", "Who may change a mark", "Unwritten, so staff disagree"],
+          ["People", "Assistants and lecturers", "No one trained on the backup sheet"]
+        ]
+      },
+      "application": [
+        "In coursework, a component table is stronger than a paragraph that only names a programming language. Examiners look for procedures and people because those are where real projects stall.",
+        "If you volunteer in a church office or a clinic, you will see the same five parts. A patient register on paper has procedures and people even when the hardware is a pen."
+      ],
+      "tip": "When a sponsor asks for equipment, ask which procedure the equipment is supposed to support.",
+      "takeaways": [
+        "The five components are hardware, software, data, procedures, and people",
+        "Procedures cover the normal path and the failure path",
+        "People include users, not only technical staff",
+        "A recommendation that ignores procedures is incomplete"
+      ],
+      "revision": [
+        "Name the five components and give a university example of each.",
+        "Why can new hardware fail to improve results processing?",
+        "Write one procedure sentence for a pending mobile-money payment."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which component is the written rule for who may change a published mark?",
+          "options": ["Hardware", "Software", "Procedures", "Data"],
+          "correct": 2,
+          "explanation": "A rule about who may act is a procedure. The mark itself is data. The screen is software."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "People are an information-system component only if they write code.",
+          "correct": false,
+          "explanation": "Students, clerks, and lecturers are part of the system. Their skills determine whether the other components work."
+        },
+        {
+          "kind": "short",
+          "prompt": "Which component is a barcode scanner at the library entrance?",
+          "answers": ["hardware"],
+          "explanation": "A scanner is physical equipment, so it is hardware. The loan rules are procedures and the catalogue is data."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A portal is online but class lists are still wrong. Name two components, other than hardware, that you would inspect first.",
+          "points": ["procedures", "data"],
+          "explanation": "Wrong lists often come from unclear procedures or poor data, even when the machines and the portal are up. People and training are also worth checking."
+        }
+      ],
+      "summary": "Hardware, software, data, procedures, and people all have to fit. Analysts who only specify an application miss the written steps and the training that make the application trustworthy on a real campus."
+    },
+    {
+      "title": "Systems Analysis and Systems Design",
+      "description": "The difference between understanding the problem and specifying a solution, and why doing design too early is expensive.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Define systems analysis and systems design separately",
+        "Explain what each activity produces",
+        "Recognise a design decision that was made before the problem was understood"
+      ],
+      "introduction": [
+        "Students often jump to screens. A lecturer says the registration process is painful, and the group sketches a mobile app the same afternoon. That sketch may be clever and still solve the wrong problem.",
+        "Analysis and design are different kinds of work. Analysis asks what is happening and what must change. Design asks how the new system will do it. This lesson keeps those questions apart."
+      ],
+      "explanation": [
+        "Systems analysis studies the current situation, the people involved, the problems that matter, and the requirements of a better system. The analyst watches the queue, reads the fee policy, and asks the bursar what correct means. The product of analysis is an agreed description of the problem and of what the new system must do, not a database diagram.",
+        "Systems design specifies a solution that meets those requirements. Design chooses structure: processes, data, screens, reports, and controls. It answers how a student will see a clash, how a seat count will be stored, and how an unpaid fee will be blocked. Design is allowed to propose technology. Analysis is not required to.",
+        "The order matters because design choices are sticky. If the team designs a portal login before discovering that many students share one phone and pay cash at a window, the login design is wasted. Analysis is cheaper to revise than a half-built system.",
+        "The two activities still talk to each other. A design constraint, such as the university already owning a particular database, can be noted during analysis as a limit. It should not replace the question of what the registrar needs. Good projects label every artefact as an analysis product or a design product so markers and sponsors can see the difference."
+      ],
+      "definitions": [
+        {"term": "Systems analysis", "meaning": "The study of the current system and the requirements of an improved one."},
+        {"term": "Systems design", "meaning": "The specification of how a new system will meet agreed requirements."},
+        {"term": "Requirement", "meaning": "A statement of what the system must do or how well it must do it."},
+        {"term": "Current system", "meaning": "The way work is done today, including unofficial workarounds."}
+      ],
+      "exampleTitle": "Two sentences that belong in different documents",
+      "example": [
+        "Analysis sentence: Clerks retype mobile-money references because the portal has no field for them, and students wait while the bursar searches a phone. The improved system must record a payment reference and show it to the clerk without retyping.",
+        "Design sentence: Store payment_reference as a 20-character field on the payment table, and show it in a read-only column on the clerk's queue screen. The first sentence could be true of several designs. The second is one chosen design."
+      ],
+      "table": {
+        "caption": "Analysis products and design products",
+        "headers": ["Question", "Activity", "Typical product"],
+        "rows": [
+          ["What is going wrong?", "Analysis", "Problem statement"],
+          ["What must the system do?", "Analysis", "Requirements list"],
+          ["What data will we keep?", "Design", "Entity list or table design"],
+          ["What will the user see?", "Design", "Screen or report layout"]
+        ]
+      },
+      "application": [
+        "In a group project, keep two headings in the report: Findings and Proposed design. If a paragraph names a button colour, it belongs under design. If it names a queue that students hate, it belongs under findings.",
+        "Employers interview for this distinction. A junior who says we should use this framework before describing the problem is doing design too early, and a careful interviewer will notice."
+      ],
+      "tip": "Write the requirement before you name the screen that might satisfy it.",
+      "takeaways": [
+        "Analysis describes the problem and the requirements",
+        "Design specifies one way to meet those requirements",
+        "Analysis products and design products should be labelled",
+        "Designing before the problem is agreed wastes effort"
+      ],
+      "revision": [
+        "Define systems analysis and systems design in one sentence each.",
+        "Rewrite this as an analysis statement: we will use a dropdown of modules. ",
+        "Why is a wrong design more expensive to change than a wrong finding?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which artefact is a product of systems analysis?",
+          "options": [
+            "A table with column types",
+            "An agreed list of what the new system must do",
+            "A chosen programming language",
+            "A colour palette for the portal"
+          ],
+          "correct": 1,
+          "explanation": "Requirements belong to analysis. Column types, languages, and colours are design choices."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Systems design is allowed to propose screens and data structures.",
+          "correct": true,
+          "explanation": "Design specifies how the system will work, including screens and stored data, once requirements are known."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name of the activity that studies the current situation and the needed change, before a solution is specified?",
+          "answers": ["systems analysis", "analysis"],
+          "explanation": "Systems analysis comes before design. It produces an understanding of the problem and the requirements."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A teammate says the fix is a mobile app with face login. Separate the hidden analysis question from the design claim.",
+          "points": ["what problem the queue or process actually has", "face login is a design choice"],
+          "explanation": "The analysis question is what is failing for students and staff. Face login is one design, and it may be irrelevant if the real issue is a missing payment reference."
+        }
+      ],
+      "summary": "Analysis asks what is wrong and what must be true of a better system. Design asks how this particular solution will work. Keeping the two apart stops a project from building a polished answer to a question nobody agreed."
+    },
+    {
+      "title": "Role of a Systems Analyst",
+      "description": "What the analyst actually does between users and builders, including listening, writing, and saying no to vague requests.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe the analyst as a bridge between users and builders",
+        "List the main activities in the analyst's week",
+        "Explain why communication is a technical skill in this job"
+      ],
+      "introduction": [
+        "A systems analyst is not automatically the person who writes the most code. On many projects the analyst spends the morning in the bursar's office and the afternoon turning that conversation into a requirement a developer can build without guessing.",
+        "This lesson describes that role in a university or a government office, where the analyst often has no authority to order staff around and must persuade instead."
+      ],
+      "explanation": [
+        "The analyst represents the users to the builders and the builders' constraints to the users. Users say the queue is too long. Builders say the fee service only answers every few seconds. The analyst turns both facts into a requirement and a design note, and stops either side from caricaturing the other.",
+        "Day to day, the analyst investigates the current system, runs interviews and observations, writes requirements, sketches models, checks those models with the people who do the work, and supports testing by saying what correct looks like. The analyst also prepares the organisation for the change: who will be trained, and which old workbook will be retired.",
+        "The role needs both structure and tact. Structure means every problem is traced to evidence, not to a single loud complaint. Tact means a clerk who has used a private spreadsheet for years is not treated as an obstacle. That spreadsheet is evidence. Analysts who sneer at workarounds lose the information they came to collect.",
+        "Analysts also protect scope. A dean may ask for hostel allocation, library fines, and registration in one project. The analyst helps the sponsor choose a boundary that can be delivered, and writes down what is out of scope so it is not quietly added in week ten. Saying not in this release is part of the job."
+      ],
+      "definitions": [
+        {"term": "Systems analyst", "meaning": "The person who investigates a problem, specifies requirements, and communicates them between users and builders."},
+        {"term": "Stakeholder", "meaning": "Any person or group who affects the system or is affected by it."},
+        {"term": "Scope", "meaning": "The agreed boundary of what this project will and will not change."},
+        {"term": "Workaround", "meaning": "An unofficial step people use when the official system does not fit the work."}
+      ],
+      "exampleTitle": "A morning in the registry",
+      "example": [
+        "The analyst sits with two clerks during peak registration. She notes that students with a pending mobile-money payment are told three different things. She does not propose a screen yet. She writes: clerks lack a shared rule for pending payments, and students repeat the same question at three windows.",
+        "In the afternoon she reads the note back to the supervisor and asks which rule the faculty wants. Only then does she talk to the developer about a status field. The developer is spared from inventing the rule."
+      ],
+      "table": {
+        "caption": "Analyst activities and the evidence they use",
+        "headers": ["Activity", "Evidence", "Output"],
+        "rows": [
+          ["Investigate", "Watch the queue, read the policy", "Problem notes"],
+          ["Specify", "Confirmed rule from the supervisor", "Requirement"],
+          ["Model", "Who talks to whom", "A simple diagram"],
+          ["Support change", "List of workbook owners", "Training and retirement plan"]
+        ]
+      },
+      "application": [
+        "In group coursework, appoint an analyst role even if everyone also codes. That person owns the problem statement and stops the group from adding features that were never required.",
+        "If you are the analyst, write names next to claims. Students wait is weaker than on Tuesday at 10:00, twelve students were in the queue and three had already paid."
+      ],
+      "tip": "Read your notes back to the person who does the job before you show them to a developer.",
+      "takeaways": [
+        "The analyst translates between users and builders",
+        "Investigation comes before proposing screens",
+        "Workarounds are evidence, not embarrassments",
+        "Protecting scope is part of the role"
+      ],
+      "revision": [
+        "Why is the analyst described as a bridge?",
+        "What should an analyst do with a clerk's private spreadsheet?",
+        "Give an example of a request that should be placed out of scope for a registration project."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What is the analyst's first duty when clerks give students three different answers?",
+          "options": [
+            "Choose a new database the same day",
+            "Record the inconsistency and confirm the rule with the supervisor",
+            "Blame the clerks in the project report",
+            "Skip the office and interview only the dean"
+          ],
+          "correct": 1,
+          "explanation": "The analyst gathers evidence and confirms the intended rule. Technology comes after the requirement is clear."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A workaround such as a private spreadsheet is useful evidence for the analyst.",
+          "correct": true,
+          "explanation": "Workarounds show where the official system fails. They are part of the current system."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call the agreed line around what a project will change and what it will leave alone?",
+          "answers": ["scope", "project scope"],
+          "explanation": "Scope is the agreed boundary of the project. Items outside it are deferred, not forgotten silently."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Explain two things an analyst does that a programmer who never visits the office is likely to miss.",
+          "points": ["observing the real queue or workaround", "confirming the business rule with the people who apply it"],
+          "explanation": "Visiting the work shows unofficial steps and conflicting answers. Confirming the rule stops the developer from inventing policy."
+        }
+      ],
+      "summary": "The systems analyst investigates, writes requirements, checks them with the people who do the work, and keeps the project inside an agreed scope. The role is a bridge: users should not have to speak in database terms, and builders should not have to guess the faculty's rules."
+    },
+    {
+      "title": "Importance of Systems Analysis and Design",
+      "description": "What a faculty gains from doing the work properly, and what it pays when it skips straight to a purchase.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain the cost of building the wrong system",
+        "Connect analysis and design to fewer failures at go-live",
+        "Argue for a modest study before a university buys software"
+      ],
+      "introduction": [
+        "Skipped analysis shows up as a system that is technically alive and organisationally unused. Staff keep the old workbook, students learn a second set of steps, and the sponsor asks why the invoice was paid.",
+        "This lesson makes the case for analysis and design in plain management language: risk, waste, and a system people will actually adopt."
+      ],
+      "explanation": [
+        "The expensive mistake is not a slow query. It is a system that does the wrong job. If registration software cannot record a pending mobile-money payment, clerks will bypass it on the busiest day of the year. The licence fee has been spent and the queue is unchanged. Analysis would have found that payment path before the contract was signed.",
+        "Design matters for the same reason, one step later. A correct requirement implemented as a confusing screen will also be bypassed. Input checks, clear messages, and a report the dean already knows how to read are design decisions that decide whether the requirement survives contact with Monday morning.",
+        "Good analysis and design reduce rework. Changing a sentence in a requirements list is cheap. Changing a live database with a term of enrolments in it is not. They also give testers something to test against. Without a written requirement, an argument about a bug becomes an argument about taste.",
+        "There is a wider effect on trust. Students trust a portal that explains why a module was refused. Staff trust a process that does not make them look incompetent. Those are outcomes of analysis and design, and they are part of why the work is taught in a computing degree rather than left as an optional extra."
+      ],
+      "definitions": [
+        {"term": "Rework", "meaning": "Doing a piece of the system again because the first version did not meet the real need."},
+        {"term": "Adoption", "meaning": "People actually leaving the old method and using the new system for the real work."},
+        {"term": "Go-live", "meaning": "The point at which the new system becomes the one used for live operations."},
+        {"term": "Bypass", "meaning": "Staff avoiding the official system and returning to an older method."}
+      ],
+      "exampleTitle": "A purchased portal that nobody opens",
+      "example": [
+        "A college buys a portal because a sister campus uses it. Nobody writes down the local fee rules. At go-live, sponsorship letters from a ministry cannot be recorded. Clerks reopen a workbook by the second day. The software is not broken. The fit was never checked.",
+        "A two-week study of payment types, written as requirements and checked with the bursar, would have shown the gap while the contract could still be changed. That study is systems analysis. The later decision about fields and screens is design."
+      ],
+      "table": {
+        "caption": "Cost of discovering a mistake",
+        "headers": ["When the gap is found", "What you change", "Relative pain"],
+        "rows": [
+          ["During interviews", "A sentence in the notes", "Low"],
+          ["During design review", "A screen or table sketch", "Moderate"],
+          ["During testing", "Code and sample data", "High"],
+          ["After go-live", "Live data, trust, and workarounds", "Severe"]
+        ]
+      },
+      "application": [
+        "If your project sponsor is impatient, show the table above rather than arguing in the abstract. Ask which payment types must work on day one. That single analysis question prevents a class of failed purchases.",
+        "When you evaluate a group system, award credit for evidence that users were consulted, not only for a working demo. A demo that ignores the bursar is a design without analysis."
+      ],
+      "tip": "The cheapest time to be wrong is before anyone has built anything.",
+      "takeaways": [
+        "The costly failure is a system that does the wrong job",
+        "Analysis finds the real work; design makes it usable",
+        "Written requirements give testers an independent check",
+        "Late discovery means rework, bypass, and lost trust"
+      ],
+      "revision": [
+        "Why might staff bypass a new portal within a week?",
+        "At which stage is a mistaken requirement cheapest to fix?",
+        "How do written requirements help a tester?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What is the main risk of skipping systems analysis before a purchase?",
+          "options": [
+            "The computers will be slower",
+            "The organisation may buy a system that does not fit the real work",
+            "Students will refuse to use phones",
+            "Design documents will be too short"
+          ],
+          "correct": 1,
+          "explanation": "Without analysis, the fit between the product and the local process is unknown. Staff then bypass the system."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A requirement is cheaper to change during interviews than after go-live.",
+          "correct": true,
+          "explanation": "Early changes edit words. Late changes touch live data, training, and trust."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call it when staff abandon the new system and return to the old workbook?",
+          "answers": ["bypass", "a bypass", "bypassing"],
+          "explanation": "A bypass means the official system is avoided. It is a sign the analysis or the design missed the real work."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Give two reasons a faculty should spend time on analysis and design before paying for a portal.",
+          "points": ["find local rules such as payment types before the contract", "reduce expensive rework after go-live"],
+          "explanation": "Local rules that are discovered late cannot be added cheaply. Finding them first, and designing for them, avoids a portal that staff abandon."
+        }
+      ],
+      "summary": "Analysis and design earn their time by preventing the wrong system. They surface local rules, give testers a target, and make adoption more likely. A portal that staff bypass in the first week is usually a skipped study, not a mysterious technical failure."
+    }
+  ]
+}

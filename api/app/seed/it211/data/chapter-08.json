@@ -1,0 +1,670 @@
+{
+  "position": 8,
+  "title": "Practical Case Study and Revision",
+  "description": "One coherent case, the University Student Registration System, worked from the problem through to a design, then used to revise the whole course.",
+  "lessons": [
+    {
+      "title": "Case Study: University Student Registration System",
+      "description": "The setting, the people, and the boundary of the case that the rest of this chapter will analyse.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe the university setting and the registration window",
+        "Name the stakeholders who are not all actors",
+        "State the boundary this case will respect"
+      ],
+      "introduction": [
+        "This chapter follows one system from complaint to proposed design: registration for a Zambian university that already has faculties, a finance office, and a crowded first morning each term. The School of Computing feels the pain first, but the rules are university rules.",
+        "Treat the case as if you were the analyst hired for a single release, not as a tour of every idea in the course. Later lessons will refuse scope that does not fit the release."
+      ],
+      "explanation": [
+        "The university enrols students on programmes such as the Bachelor of Science in Computing. Each term, students request modules. Clerks at faculty counters check that fees are in a fit state and that prerequisites and seats allow the choice. Finance owns the payment record, including mobile-money references, and is not being rebuilt. Lecturers need class lists of confirmed students. A dean sponsors the project and wants fewer angry visits, but will not personally use the counter screen.",
+        "Today the official tool is a workbook plus a paper note when a mobile-money payment is pending. Students repeat their story at more than one window. Refusal reasons are spoken, not stored, so the same student hears two explanations. The portal project exists to make one official channel for a limited set of decisions.",
+        "The release boundary is deliberate. In: recording a payment reference, showing fee state to the right people, confirming or refusing a module with one stored reason, and producing a confirmed class list. Out: hostel allocation, library fines, timetable construction, and any direct connection to the mobile-money provider. Those exclusions are part of the case, not an oversight.",
+        "Success, written before design, is fewer retyped references, a reason the student can read, and one class list that matches confirmations. The rest of the chapter will be judged against those three aims, not against how many diagrams were drawn."
+      ],
+      "definitions": [
+        {"term": "Case boundary", "meaning": "The decisions and neighbours included in this release, and the ones named as out."},
+        {"term": "Sponsor", "meaning": "The dean who wants the outcome and does not operate the counter."},
+        {"term": "Official channel", "meaning": "The single place where a new enrolment decision is allowed to be true."},
+        {"term": "Release", "meaning": "The limited set of behaviour this project will put live, not the whole university."}
+      ],
+      "exampleTitle": "A Monday the case must survive",
+      "example": [
+        "Banda, a first-year on Computing, paid by mobile money before lectures. The reference is on the phone. The workbook has no column for it. The clerk writes it on paper, tells Banda to try the module, and cannot later show why a classmate was refused for an unmet prerequisite. The lecturer's list that afternoon does not match the paper.",
+        "The case is finished only if a later design would give Banda one reason, the clerk one stored reference, and the lecturer one confirmed list, without taking on hostels."
+      ],
+      "table": {
+        "caption": "In this release and out of it",
+        "headers": ["In", "Out"],
+        "rows": [
+          ["Payment reference and fee state", "Talking directly to the mobile-money company"],
+          ["Confirm or refuse a module with a reason", "Hostel allocation"],
+          ["Class list of confirmed students", "Building the weekly timetable"],
+          ["Finance as an external neighbour", "Replacing the finance system"]
+        ]
+      },
+      "application": [
+        "When you write your own case study, open with a boundary table like this. Markers can then see that later features were excluded on purpose.",
+        "Keep the three success aims visible. Every later lesson in this chapter should be able to point at one of them."
+      ],
+      "tip": "A case without an out-of-scope column will grow until it cannot be designed.",
+      "takeaways": [
+        "The case is one registration release, not every campus system",
+        "Finance is a neighbour; hostels and timetables are out",
+        "The dean is a sponsor, not automatically an actor",
+        "Three aims will judge the design: references, reasons, and one class list"
+      ],
+      "revision": [
+        "Who owns payments, and why is that office not inside the build?",
+        "Name two exclusions and the harm if they are quietly added.",
+        "What would count as success for Banda, the clerk, and the lecturer?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which item is inside this case's release?",
+          "options": ["Hostel allocation", "A stored reason when a module is refused", "Building the full timetable", "Replacing Finance"],
+          "correct": 1,
+          "explanation": "Refusal reasons are one of the three aims. Hostels, timetables, and a new finance system are explicitly out."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "The dean must appear as an actor because the dean sponsors the project.",
+          "correct": false,
+          "explanation": "A sponsor is a stakeholder. An actor needs a goal achieved through the system. The dean may never use the counter screen."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the single place where a new enrolment decision is allowed to be true called in this case?",
+          "answers": ["official channel", "the official channel"],
+          "explanation": "The official channel is that one place. Two writable workbooks would mean the case has not solved the split truth."
+        },
+        {
+          "kind": "structured",
+          "prompt": "State two aims of the release and one exclusion that protects the team from a second project.",
+          "points": ["stored references or visible refusal reasons", "hostels or timetable construction stay out"],
+          "explanation": "The aims judge success. The exclusion keeps the release implementable. Both belong in the opening of a case, before any screen is drawn."
+        }
+      ],
+      "summary": "The University Student Registration System, in this release, records payment references, gives one refusal reason, and produces a confirmed class list. Finance stays a neighbour. Hostels and timetables stay out. The dean sponsors the outcome. The following lessons analyse this boundary only."
+    },
+    {
+      "title": "Problem Identification",
+      "description": "Turning the crowded counter into a problem statement with evidence, not a shopping list of software.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Write a problem statement that names who suffers and how",
+        "Separate symptoms from a proposed product",
+        "Record evidence you would actually be able to collect"
+      ],
+      "introduction": [
+        "The dean says we need a modern portal. That is a product wish. The problem is older and more specific: pending payments are stuck on paper, refusals are not remembered, and class lists disagree with what clerks told students.",
+        "Problem identification stays in analysis. It does not choose a framework. It makes the pain measurable enough that an evaluation can later say whether it eased."
+      ],
+      "explanation": [
+        "A usable problem statement names the situation, the people, the harm, and the evidence. During registration week, clerks retype or rewrite mobile-money references because the workbook has no field. Students cannot see why a module was refused. Lecturers receive lists that omit or invent names. The harm is repeated visits, inconsistent decisions, and teaching sessions that start from the wrong roster.",
+        "Symptoms are the queue and the raised voices. Causes worth stating are the missing field, the unstored reason, and the second unofficial list. A portal is not a cause and not yet a requirement. Writing the portal into the problem statement skips feasibility and hands design a conclusion.",
+        "Evidence is planned, not decorative. A two-hour observation counts retyped references and students sent to another window. A sample of ten refusals asks whether the student and the clerk state the same reason. The lecturer's list is compared with the workbook for one module. If you cannot collect a piece of evidence, say so. Invented counts do not belong in a case.",
+        "The problem statement is what feasibility will judge. If the harm is limited to one school and a handful of modules, a pilot is plausible. If the same harm covers fee balances for the whole university, the economic and schedule questions get harder. Identification that hides the size of the problem produces a dishonest plan."
+      ],
+      "definitions": [
+        {"term": "Problem statement", "meaning": "A short account of who is harmed, how, and on what evidence, without naming the solution."},
+        {"term": "Symptom", "meaning": "A visible effect, such as a long queue, which is not itself the cause."},
+        {"term": "Cause", "meaning": "A missing rule, field, or channel that produces the symptom."},
+        {"term": "Baseline count", "meaning": "A measurement taken now, so a later evaluation has something to compare."}
+      ],
+      "exampleTitle": "One paragraph the dean can sign",
+      "example": [
+        "In registration week the School of Computing has no official place to store a mobile-money reference, so clerks keep paper notes and students repeat the payment story. Refusals are explained aloud and not recorded, so two windows disagree. The IT211 class list on the first teaching day did not match the notes. This release will be judged on those three failures. It will not be judged on whether the screen looks modern.",
+        "The baseline is the two-hour count still to be taken on the next peak morning, not a guessed percentage."
+      ],
+      "application": [
+        "Draft the problem paragraph before any diagram in your own case. If the paragraph contains a product name, move that name to a later design chapter.",
+        "List the three counts you would collect. A case with only adjectives cannot be evaluated."
+      ],
+      "tip": "If the problem statement contains the solution, you have started design too early.",
+      "takeaways": [
+        "Name the harm, the people, and the evidence",
+        "Queues are symptoms; missing fields and unstored reasons are causes",
+        "Do not write the product into the problem",
+        "A baseline count is part of identification, not a later invention"
+      ],
+      "revision": [
+        "Rewrite we need a modern portal as a problem sentence with no product.",
+        "Which three failures will this case be judged on?",
+        "Why is a guessed percentage a weak baseline?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which line belongs in the problem statement?",
+          "options": [
+            "We will build the portal in a particular framework",
+            "Clerks have nowhere official to store a mobile-money reference",
+            "The buttons will be blue",
+            "Hostels will be included for completeness"
+          ],
+          "correct": 1,
+          "explanation": "The missing official field is a cause. Frameworks, colours, and hostels are design or scope, not the problem."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A long queue is a cause and does not need further explanation.",
+          "correct": false,
+          "explanation": "The queue is a symptom. The case still has to say which missing field or rule is producing the repeated visits."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a measurement taken now, so evaluation can compare later, called?",
+          "answers": ["baseline", "baseline count", "a baseline"],
+          "explanation": "The baseline is that earlier count. Identification is the right time to plan it."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Give one cause in this case and the person harmed, without naming software.",
+          "points": ["unstored refusal reason or missing payment reference", "student, clerk, or lecturer"],
+          "explanation": "A cause such as an unstored reason harms the student who hears two stories, or the lecturer whose list is wrong. The product can wait."
+        }
+      ],
+      "summary": "The case's problem is not the absence of a fashionable portal. It is paper references, forgotten refusal reasons, and class lists that do not match. Write that down with evidence you can count, and leave the product for a later decision."
+    },
+    {
+      "title": "Requirements Gathering",
+      "description": "A concrete elicitation plan for the case: who is heard, who is watched, and which document is read.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Plan interviews, observation, and document analysis for this case",
+        "Show how a conflict between clerk and policy would be recorded",
+        "Explain why the dean's interview is not sufficient alone"
+      ],
+      "introduction": [
+        "Gathering for this case has to reach the counter, the bursar, and the paper already in use. A single meeting with the dean will produce the desired story and miss the handwritten reference.",
+        "This lesson is the plan you would actually run in the week before writing the specification. It chooses techniques for this problem, not a generic list."
+      ],
+      "explanation": [
+        "Read the fee policy and a blank registration form first, so interviews do not waste time rediscovering official words. Then interview the bursar and a clerk separately. The bursar is asked what pending means and whether such a student may sit. The clerk is asked to walk through the last handwritten reference. A joint interview would hide the workaround.",
+        "Observe one peak hour and count retyped or rewritten references, students sent elsewhere, and refusals explained only aloud. Do not correct the clerk in front of the queue. Confirm the paper note afterwards. Compare one lecturer's IT211 list with the workbook the same day.",
+        "A short questionnaire to one first-year class asks where they had to repeat information, with a defined scale, plus one open line. It is a convenience sample and will be labelled as such. It is not the only evidence. A workshop is used only after the interviews disagree, for example if the bursar forbids pending attendance and the clerk allows it. The workshop's job is a yes-or-no rule, not a fresh brainstorm.",
+        "Every note is marked as quote, inference, or still to check. The specification may use only what survived that marking. A case study that says stakeholders were consulted and shows no guide, no count, and no document has not gathered requirements. It has claimed to."
+      ],
+      "definitions": [
+        {"term": "Elicitation plan", "meaning": "The chosen techniques, people, and times for this case, with a reason for each."},
+        {"term": "Separate interviews", "meaning": "Talking to roles apart so a workaround is not silenced by a senior person."},
+        {"term": "Convenience sample", "meaning": "Whoever you could reach, which must be described and not generalised carelessly."},
+        {"term": "Conflict note", "meaning": "A written record that two sources disagree, held until a workshop or sponsor resolves it."}
+      ],
+      "exampleTitle": "Five days, then a decision meeting",
+      "example": [
+        "Monday: fee policy and the form. The form has no reference field. Tuesday: bursar, then clerk. Wednesday: one hour at the Computing counter, counts written. Thursday: ten first-years, labelled as a convenience sample. Friday: only if Tuesday disagreed, a thirty-minute workshop that must leave with a rule for pending attendance.",
+        "The dean is informed of the plan but is not the source of the field-level facts. The dean will later prioritise, which is a different meeting."
+      ],
+      "table": {
+        "caption": "Technique chosen for this case",
+        "headers": ["Day", "Technique", "Fact it is there to find"],
+        "rows": [
+          ["Monday", "Documents", "The official fee rule and missing fields"],
+          ["Tuesday", "Separate interviews", "The lived pending practice"],
+          ["Wednesday", "Observation", "Counts of paper notes and repeated visits"],
+          ["Friday", "Workshop if needed", "One rule where sources disagree"]
+        ]
+      },
+      "application": [
+        "Put this kind of table in a case chapter. A paragraph that only names the word interview will not show method.",
+        "If you cannot observe, write what you would have counted and use a role-play, and say that the counts are not live."
+      ],
+      "tip": "Do not workshop a conflict you have not yet heard. Discover first, resolve second.",
+      "takeaways": [
+        "Documents, separate interviews, and observation answer different case questions",
+        "The dean does not replace the clerk or the form",
+        "A convenience sample must be named as one",
+        "A workshop resolves a known disagreement and must leave with a rule"
+      ],
+      "revision": [
+        "Why interview the bursar and the clerk separately?",
+        "What does Monday's document analysis already prove about the form?",
+        "What is the only job of Friday's workshop?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Why is the dean's interview not enough gathering for this case?",
+          "options": [
+            "The dean will not know the paper notes at the counter",
+            "Deans cannot be stakeholders",
+            "Interviews are illegal",
+            "The form is a kind of software"
+          ],
+          "correct": 0,
+          "explanation": "The handwritten reference is a counter fact. The dean can prioritise later but is not the source of that workaround."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A questionnaire of classmates can be described as the view of all Zambian students.",
+          "correct": false,
+          "explanation": "It is a convenience sample. Over-claiming who spoke makes the specification look more certain than the evidence."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the written record called when the bursar and the clerk disagree about pending attendance?",
+          "answers": ["conflict note", "a conflict note"],
+          "explanation": "The conflict note holds both views until a proper resolution. It is not smoothed away in the notebook."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Name the technique that finds the missing field on the form and the technique that counts paper notes, and say why both are required.",
+          "points": ["document analysis for the form", "observation for the paper notes"],
+          "explanation": "The form shows the official gap. Observation shows how often the workaround happens. One without the other is either a dead document or an unanchored anecdote."
+        }
+      ],
+      "summary": "Gathering for this case reads the form, hears the bursar and the clerk apart, counts the counter, and only then resolves a disagreement. The dean is not a substitute for that evidence. A workshop that has nothing to resolve is just another meeting."
+    },
+    {
+      "title": "Functional and Non-Functional Requirements",
+      "description": "The small specification this release would actually sign: behaviour, quality, and priorities.",
+      "durationMinutes": 20,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Write the must functional requirements for the case",
+        "Add measurable non-functional requirements",
+        "Mark at least one item as out of the first release"
+      ],
+      "introduction": [
+        "The case now has evidence and a boundary. The specification turns them into statements a designer can trace and a tester can fail. This lesson writes that short list, not a hundred pages.",
+        "Priorities are part of the list. A case that makes every sentence mandatory has not listened to the calendar."
+      ],
+      "explanation": [
+        "FR-01: the clerk shall store one mobile-money reference against one payment for one student. FR-02: the system shall refuse a reference that is already stored and tell the clerk, without creating a second row. FR-03: the student shall see their own fee state as cleared, pending, or unpaid. FR-04: when a module is refused, the system shall show that student one reason from an agreed list. FR-05: the lecturer shall obtain a class list of confirmed students for one module, without payment references.",
+        "FR-06, a live wall display of refusals, is recorded as could and is not in this release. It conflicts with privacy and is not one of the three aims. Leaving it on the list as could shows it was heard. Promoting it to must would blow the pilot.",
+        "NFR-01: at the pilot load, 95 percent of fee-state lookups return within three seconds. NFR-02: a student shall not open another student's fee state or reference. NFR-03: a change to a stored reference records the clerk and the time in a log that clerk cannot edit. NFR-04: five first-years can submit a module request with at most one prompt in a trial. Vague lines such as fast and secure are not added beside these.",
+        "Each must row would carry a source: the form gap, the observation count, or the bursar's rule. Verification is a named test. The case is not finished as a specification until those columns exist, even if this lesson shows only the statements."
+      ],
+      "definitions": [
+        {"term": "Must", "meaning": "A requirement this release will not ship without."},
+        {"term": "Could", "meaning": "A heard request that is recorded and deliberately deferred."},
+        {"term": "Agreed reason list", "meaning": "The small set of refusal explanations the case will store and show, such as fees or prerequisite."},
+        {"term": "Verification", "meaning": "The test or trial that will decide whether the requirement is met."}
+      ],
+      "exampleTitle": "The reason list is short on purpose",
+      "example": [
+        "Reasons in this release: fees, prerequisite, and module full. No free-text essays, because two clerks would write two novels and the student would still be confused. FR-04 shows exactly one of those words, in a full sentence. A later release could add sponsored if policy changes. That would be adaptive, not a gap in honesty now.",
+        "The lecturer's list from FR-05 has student number, name, and confirmed status. It fails NFR-02 if it also prints references. The columns are how the two requirements meet."
+      ],
+      "table": {
+        "caption": "Release priorities",
+        "headers": ["Id", "Priority", "Verification idea"],
+        "rows": [
+          ["FR-01", "Must", "Store a new reference and read it back"],
+          ["FR-02", "Must", "Second save of the same reference is refused"],
+          ["FR-04", "Must", "A refusal shows one list reason to that student"],
+          ["FR-06", "Could", "Not in this release"],
+          ["NFR-02", "Must", "Another student's number returns no fee data"]
+        ]
+      },
+      "application": [
+        "Use these identifiers again in the modelling and database lessons so the case stays traceable. New identifiers that appear from nowhere are a warning.",
+        "If you add a requirement, give it a priority and a source. Do not let the list grow by adjective."
+      ],
+      "tip": "A could item is a sign you listened. A release made only of must items you cannot test is a sign you did not choose.",
+      "takeaways": [
+        "Five must behaviours cover reference, duplicate, fee state, reason, and class list",
+        "The public display is could, not a silent must",
+        "Non-functional lines name a measure, a privacy rule, an audit, and a small usability trial",
+        "The reason list is closed so messages stay consistent"
+      ],
+      "revision": [
+        "Why is FR-06 not a must?",
+        "Which non-functional requirement stops a student reading a classmate's balance?",
+        "Why is the lecturer's list forbidden from showing payment references?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which requirement is deliberately not in this release?",
+          "options": ["FR-02, duplicate references", "FR-04, a refusal reason", "FR-06, a public wall of refusals", "FR-05, the class list"],
+          "correct": 2,
+          "explanation": "FR-06 is could. It was heard and deferred because it fights privacy and the release aims."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "The system shall be secure is an acceptable substitute for NFR-02.",
+          "correct": false,
+          "explanation": "NFR-02 names the forbidden access. The slogan cannot fail a test."
+        },
+        {
+          "kind": "short",
+          "prompt": "What priority marks a request that is recorded but deferred?",
+          "answers": ["could"],
+          "explanation": "Could means heard and not in this release. Must means the release will not ship without it."
+        },
+        {
+          "kind": "structured",
+          "prompt": "State the duplicate-reference behaviour and the privacy behaviour as two different kinds of requirement.",
+          "points": ["FR-02 is functional: refuse a repeated reference", "NFR-02 is non-functional: a student cannot see another's fee data"],
+          "explanation": "One is behaviour the clerk performs. The other is a constraint on who may see data. Both are must, and they are not the same sentence."
+        }
+      ],
+      "summary": "The case signs five must functional requirements and four measured or testable qualities. A public display is kept as could. Reasons come from a short list. Everything else in the chapter has to serve these identifiers or it does not belong in the release."
+    },
+    {
+      "title": "Use Case Modelling",
+      "description": "Actors and goals for the case, plus one narrative that carries the refusal path.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Select actors from the case boundary",
+        "Draw the use cases that match the must requirements",
+        "Write the refusal narrative for Request module"
+      ],
+      "introduction": [
+        "The specification named behaviour. The use case model shows who wants which goal, inside the boundary already agreed. It should be boringly consistent with FR-01 to FR-05.",
+        "If a goal does not trace to a must or a could, it is not drawn. Login is a step, not a goal. Hostel request is out of scope, so it is not an ellipse someone might implement by accident."
+      ],
+      "explanation": [
+        "Actors are Student, Clerk, and Lecturer. Finance is an external system actor because the fee state comes from it and this project will not replace it. The dean is omitted as an actor. There is no dean goal inside the release. Drawing the dean to be polite would invent interaction.",
+        "Use cases: Request module, View own fee state, Record payment, Review a refusal, Obtain class list. Student links to the first two. Clerk links to Record payment and Review a refusal. Lecturer links to Obtain class list. Finance links to the fee check inside Request module, which the narrative mentions even if the diagram stays uncluttered by a separate Check fees ellipse.",
+        "The narrative for Request module, main path: the student chooses a module on their programme; the system reads fee state; if the state allows enrolment, it checks the prerequisite and the seat; it confirms. Alternative: fee state is unpaid, the system stores nothing confirmed, and it shows the fees reason only to that student. A second alternative covers prerequisite and module full. The narrative cites FR-03 and FR-04.",
+        "What the diagram does not show is field length, the uniqueness constraint, and the three-second target. Those stay in the specification and the design. The model is finished when every must functional requirement is visible as a goal or a step in a narrative, and every ellipse points back to an identifier."
+      ],
+      "definitions": [
+        {"term": "Goal", "meaning": "The outcome an actor wants, named as a use case rather than as a screen."},
+        {"term": "Narrative", "meaning": "The main steps and the named alternatives for one use case."},
+        {"term": "External system actor", "meaning": "A neighbouring system, such as Finance, that the use case must talk to."},
+        {"term": "Trace", "meaning": "The identifier that links a use case step back to a requirement."}
+      ],
+      "exampleTitle": "Request module, unpaid",
+      "example": [
+        "Banda requests IT211. Finance returns unpaid. The system does not confirm a seat and shows: You were not confirmed on IT211 because your fees are not cleared. Banda cannot open another student's screen to compare. The clerk can later record a reference if Banda pays, which is Record payment, a different use case, not a hidden step that confirms the module anyway.",
+        "The lecturer never appears in this narrative. The class list is a separate goal that only sees the confirmation if it happens."
+      ],
+      "diagram": "        University registration (this release)\n   +------------------------------------------+\n   | (Request module)  (View own fee state)   |\n   | (Record payment)  (Review a refusal)     |\n   | (Obtain class list)                      |\n   +------------------------------------------+\nStudent -- Request module, View own fee state\nClerk -- Record payment, Review a refusal\nLecturer -- Obtain class list\nFinance -- supplies fee state to Request module\nNot drawn: dean, hostel, login button",
+      "application": [
+        "In a viva, walk FR-04 to the sentence in the narrative. If you cannot, the model and the specification have drifted.",
+        "Keep Finance outside the box. Putting Finance inside would claim this release rebuilds payments."
+      ],
+      "tip": "Every ellipse needs an identifier. Every must identifier needs an ellipse or a narrative step.",
+      "takeaways": [
+        "Student, Clerk, Lecturer, and Finance are the actors; the dean is not",
+        "Goals match the must requirements and exclude hostels",
+        "The unpaid alternative shows the reason and does not confirm",
+        "Field rules and timing targets are not forced onto the diagram"
+      ],
+      "revision": [
+        "Why is Finance an actor while the dean is not?",
+        "Where does FR-02 live if it is not its own ellipse?",
+        "What must the unpaid alternative refuse to do?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which actor is correctly included?",
+          "options": ["The dean, so the diagram looks senior", "Finance, because fee state comes from that neighbouring system", "Hostel office", "The mobile-money company"],
+          "correct": 1,
+          "explanation": "Finance supplies a fact the release depends on and is outside the build. The dean has no goal on the system. The other two are out of scope."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "The unpaid path may still confirm a seat if the narrative would otherwise be short.",
+          "correct": false,
+          "explanation": "FR-04 and the fee rule forbid confirmation. A short narrative that confirms anyway is a wrong model."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the step-by-step account of one use case, including alternatives, called?",
+          "answers": ["narrative", "use case narrative", "a narrative"],
+          "explanation": "The narrative carries the order and the failure path that the ellipse itself omits."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Link Obtain class list to a requirement and say which data it must not include.",
+          "points": ["FR-05", "payment references stay off the list"],
+          "explanation": "The lecturer's goal is the confirmed list from FR-05. NFR-02 and the column decision keep references out. The use case does not invent a finance report."
+        }
+      ],
+      "summary": "The case's use cases are the must goals of Student, Clerk, and Lecturer, with Finance as the external source of fee state. The dean is not drawn. The Request module narrative confirms only when checks pass and otherwise shows one reason. Every ellipse traces to the specification."
+    },
+    {
+      "title": "Database Design",
+      "description": "The entities and a normalised shape that can store a reference, a reason, and a confirmed list.",
+      "durationMinutes": 20,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Choose entities that host FR-01 to FR-05",
+        "Normalise the registration facts used in the case",
+        "State the constraints that protect duplicates and privacy"
+      ],
+      "introduction": [
+        "The use cases said what people do. The database has to remember the result: a reference that cannot be repeated, a reason on a refused enrolment, and enough structure for a confirmed list. This lesson draws that store for the case and no more.",
+        "Hostel rooms do not appear in this store. If a hostel entity appears, the release boundary has been ignored and the case has grown a second project."
+      ],
+      "explanation": [
+        "Entities: Student, Module, Enrolment, Payment. Student holds number, name, and programme code. Module holds code, title, and capacity. Enrolment holds its own id, status, and reason, and points at one student and one module. Payment holds its own id, the reference, and the state, and points at one student. Programme name, if stored, sits on a Programme entity so it is not copied onto every student as unstable text.",
+        "The unnormalised alternative is one sheet with student, a list of modules, titles repeated, and references jammed into a notes cell. That breaks first normal form and makes FR-02 unenforceable. Splitting Enrolment and Payment gives each reference and each reason a single home. Module title lives only on Module, so a rename is one update. Seats remaining are computed from capacity and confirmed enrolments, not stored as a second fact that can lie.",
+        "Constraints: module code unique, student number unique, payment reference unique when present, enrolment reason required when status is refused, and reason restricted to the agreed list. A student may have many payments and many enrolments. Deleting a module that still has enrolments is forbidden, or the class list would silently vanish.",
+        "Privacy is partly a query rule rather than a new table. The student role's read of Payment and Enrolment is filtered to their own student number. The lecturer's class-list query joins Enrolment to Student and Module where status is confirmed and does not touch Payment. The constraint and the query together are the design of NFR-02."
+      ],
+      "definitions": [
+        {"term": "Home", "meaning": "The one entity where a fact such as a reference or a reason is stored."},
+        {"term": "Uniqueness", "meaning": "The constraint that rejects a second row with the same reference or code."},
+        {"term": "Computed seat count", "meaning": "Capacity minus confirmed enrolments, calculated rather than stored."},
+        {"term": "Row filter", "meaning": "The rule that limits a role's query to the rows that role may see."}
+      ],
+      "exampleTitle": "Banda's unpaid request as rows",
+      "example": [
+        "Student 2024-1184 exists. Payment 17 stores reference ABC123 with state pending, linked only to 2024-1184. Enrolment 90 for IT211 has status refused and reason fees. Module IT211 still has its title in one place. A second payment with ABC123 is rejected by uniqueness even if a different screen is written later.",
+        "The lecturer query returns confirmed enrolments only. Enrolment 90 does not appear, and Payment 17 is not in the select list. Banda's own session can see Payment 17 and the fees reason. A changed student number in the address bar adds a filter that returns nothing."
+      ],
+      "diagram": "STUDENT 1 ---- * PAYMENT (reference unique, state)\nSTUDENT 1 ---- * ENROLMENT * ---- 1 MODULE\nENROLMENT: status, reason (required if refused)\nMODULE: code unique, title, capacity\nNo Hostel entity.\nClass list = confirmed ENROLMENT + STUDENT + MODULE, never PAYMENT.",
+      "application": [
+        "Walk each must requirement to a column or constraint in your write-up. FR-02 is the unique reference. FR-04 is the reason. FR-05 is the query, not a new table.",
+        "If you feel like storing the module title on Enrolment for convenience, write the update anomaly beside it and then remove the copy."
+      ],
+      "tip": "One fact, one home, one constraint that matches a must requirement.",
+      "takeaways": [
+        "Student, Module, Enrolment, and Payment carry this release",
+        "Normalisation gives the reference and the title a single home",
+        "Uniqueness and a required reason implement FR-02 and FR-04",
+        "The class list is a query that does not touch payments"
+      ],
+      "revision": [
+        "Why is Enrolment an entity in this case?",
+        "How is a repeated reference stopped even if a new screen forgets?",
+        "Why is seats remaining not stored?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Where does the refusal reason live?",
+          "options": ["On every Module as a single campus-wide reason", "On the Enrolment for that request", "On the dean's business card", "In the hostel table"],
+          "correct": 1,
+          "explanation": "The reason describes that student's request, so it is an enrolment attribute. A module does not have one reason for everyone."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Storing module title on every enrolment is acceptable because reports are easier.",
+          "correct": false,
+          "explanation": "The title would diverge when the module is renamed. Reports can join. The copy is an update anomaly."
+        },
+        {
+          "kind": "short",
+          "prompt": "What constraint stops two payments using the same mobile-money reference?",
+          "answers": ["uniqueness", "a unique constraint", "unique"],
+          "explanation": "A uniqueness constraint on the reference is the store's enforcement of FR-02."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Describe the lecturer's class-list query and the table it must not read.",
+          "points": ["confirmed enrolments with student and module", "it does not read Payment"],
+          "explanation": "FR-05 needs confirmed students. NFR-02 and the column design keep payment references out by not touching that entity."
+        }
+      ],
+      "summary": "The case stores students, modules, enrolments, and payments, normalised so a reference and a module title exist once. Constraints refuse duplicate references and empty refusal reasons. The class list is a confirmed-only query that never reads the payment table."
+    },
+    {
+      "title": "Proposed System Design",
+      "description": "The screens, architecture, conversion, and controls proposed for the first live slice.",
+      "durationMinutes": 20,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Propose interfaces that realise the must requirements",
+        "Place rules in one application between two clients and Finance",
+        "Choose a pilot conversion with a fallback"
+      ],
+      "introduction": [
+        "The case can now propose a design without pretending the proposal is the only one that could have existed. It has to cover the clerk's task, the student's task, the shared rules, and how the first school goes live.",
+        "Anything in this proposal that does not trace to the specification is a candidate for deletion, not a surprise feature."
+      ],
+      "explanation": [
+        "The student phone offers Request module and View own fee state. A refusal shows one full sentence using the reason list. The clerk's browser asks for the student number, shows the name, then the reference, and says whether it was stored or already used. The lecturer opens Obtain class list for one module. None of these screens writes a rule privately. All call the registration application.",
+        "The application checks the reason list, the unique reference, and the fee state from Finance. The database constraints repeat the uniqueness and the required reason. If Finance does not answer, the application does not confirm; it tells the clerk the fee state is unknown. That failure behaviour is designed, not left to the phone.",
+        "Security follows the roles already named. Students see only their rows. Clerks cannot edit the audit log written when a reference changes. Lecturers do not receive a payment query. A shared counter password is called out as unacceptable because the audit would not name a person.",
+        "Conversion is a three-day pilot for Computing first-years on IT211 and two neighbouring modules. The workbook stays the fallback and remains authoritative until three clean afternoons. Targets: references stored without paper, every refusal using the reason list, no shared login. Missing a target means fix and re-pilot, not a quiet university-wide direct cutover. Hostels remain unbuilt."
+      ],
+      "definitions": [
+        {"term": "Proposal", "meaning": "One traceable design for the release, not a claim that no other design could work."},
+        {"term": "Shared application", "meaning": "The single place where fee, reason, and reference rules run for every client."},
+        {"term": "Unknown fee state", "meaning": "The designed result when Finance does not answer: do not confirm."},
+        {"term": "Pilot target", "meaning": "A pre-written measure that decides whether the pilot widens."}
+      ],
+      "exampleTitle": "Banda on the pilot, day one",
+      "example": [
+        "Banda requests IT211. Finance returns unpaid. The phone shows the fees sentence and does not say confirmed. Later Banda pays. The clerk enters the number, sees the name, enters ABC123, and the application stores Payment with state pending. A second clerk who types ABC123 is refused by the constraint and sees the agreed message. The lecturer's list that afternoon includes only confirmations, so Banda is absent until fees clear and a new enrolment is confirmed.",
+        "If the portal cannot save references by mid-morning, the named owner returns the counter to the workbook for those modules. The pilot does not widen on hope."
+      ],
+      "diagram": "[Phone] and [Clerk browser] and [Lecturer browser]\n        |\n        v\n[Registration application] --> [Database]\n        |\n        v\n     [Finance]\nPilot: Computing, three modules, workbook is fallback.\nWiden only after the three targets.",
+      "application": [
+        "Present a proposal as decisions plus the requirement identifiers, then the pilot targets. A screenshot without a fallback is an incomplete design.",
+        "Be willing to delete a feature in review if you cannot point to FR or NFR. The case is stricter than a portfolio of widgets."
+      ],
+      "tip": "Propose the failure behaviour for Finance. A design that only describes the happy morning is not operable.",
+      "takeaways": [
+        "Three clients share one application and one database",
+        "Unknown fee state does not confirm a seat",
+        "Roles and an audit log implement the security requirements",
+        "The first live step is a pilot with numeric targets and a workbook fallback"
+      ],
+      "revision": [
+        "What does the application do if Finance is silent?",
+        "Why is a shared counter password rejected?",
+        "What three targets gate the end of the pilot?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Where do the fee and reference rules run?",
+          "options": ["Separately in each phone", "In the shared registration application, backed by database constraints", "In the lecturer's spreadsheet", "In the hostel system"],
+          "correct": 1,
+          "explanation": "One application keeps the clients consistent, and the database repeats the constraints that must hold even if another client appears."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "The pilot should widen automatically on the fourth day even if clerks used a shared password.",
+          "correct": false,
+          "explanation": "Shared logins miss a written target. The pilot stops and fixes accounts rather than widening."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the fallback channel for the Computing pilot?",
+          "answers": ["workbook", "the workbook"],
+          "explanation": "The workbook remains the fallback and stays authoritative until the pilot targets are met."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Banda's fees are unpaid. What does the phone show, and what does the class list do that afternoon?",
+          "points": ["a fees reason and no confirmation", "Banda is absent from the confirmed list"],
+          "explanation": "The proposal shows the FR-04 sentence and refuses to confirm. FR-05's list only contains confirmations, so the lecturer does not see a premature name."
+        }
+      ],
+      "summary": "The proposal puts every client on one application, refuses confirmation when Finance is silent, and enforces roles in the queries and the audit log. It goes live first as a Computing pilot with a workbook fallback and targets that are allowed to stop the rollout."
+    },
+    {
+      "title": "Complete Course Revision",
+      "description": "A guided pass over the whole module, using the registration case as the thread and a final set of checks.",
+      "durationMinutes": 22,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Retell the case in life-cycle order",
+        "Match course terms to one artefact in the case",
+        "Identify the kind of maintenance a later change would be"
+      ],
+      "introduction": [
+        "Revision is not a second copy of every definition. It is a pass through the course in the order an analyst would defend this case: problem, feasibility, requirements, models, data, interface, conversion, test, and the life after go-live.",
+        "Use the registration release as the example in your answers. A definition that cannot be pointed at Banda, the clerk, or the lecturer is not yet revised."
+      ],
+      "explanation": [
+        "The system is the people, rules, and records that enrol a student, not the phone alone. Analysis found paper references and unstored reasons. Design proposed entities, screens, and one application. That separation is the heart of the module. Mixing them is the most common exam error.",
+        "Feasibility asked whether a Computing pilot could finish before a sitting and whether clerks would use it. Waterfall would have fitted a frozen fee law. The case chose a pilot because the counter still had facts to teach. The model was a choice with evidence, not a slogan.",
+        "Models answered different questions and used one glossary. The use case showed goals. The ERD showed homes for facts. A DFD or context diagram would show Finance outside and the reference flowing in from the clerk. Contradictory names across those pictures are a revision point you should look for in your own notes.",
+        "After go-live, an apostrophe crash is corrective, a new sponsored status is adaptive, field order is perfective, and a restore drill is preventive. Evaluation counts retyped references against the baseline and does not quietly add hostels as a success measure. If you can classify those four changes, you can sit the paper."
+      ],
+      "definitions": [
+        {"term": "Life-cycle order", "meaning": "Planning through maintenance, used here as the order of a long answer."},
+        {"term": "Glossary consistency", "meaning": "The same word for module, reason, and reference on every diagram and screen."},
+        {"term": "Classification", "meaning": "Naming a later change as corrective, adaptive, perfective, or preventive."},
+        {"term": "Trace", "meaning": "The path from an aim to a requirement to a design choice to a test."}
+      ],
+      "exampleTitle": "One trace you should be able to say aloud",
+      "example": [
+        "Aim: stop retyped references. Problem: the form has no field and paper notes multiply. FR-01 and FR-02 specify store and refuse. The Payment entity and the unique constraint implement them. The clerk's message is the interface. T-02 is the test. The pilot target is references stored without paper. Evaluation compares the count with the baseline. That chain is the course.",
+        "A second chain for reasons runs FR-04, the enrolment attribute, the phone sentence, and the unpaid narrative. If either chain breaks in your notes, repair the notes before the exam."
+      ],
+      "table": {
+        "caption": "Later changes, classified",
+        "headers": ["Event after go-live", "Class", "Why"],
+        "rows": [
+          ["Search crashes on an apostrophe", "Corrective", "Names were already supposed to be searchable"],
+          ["Ministry adds status sponsored", "Adaptive", "The environment changed"],
+          ["Clerks want number before reference", "Perfective", "The rule is right; the order is awkward"],
+          ["Thursday restore drill", "Preventive", "No failure has happened yet"]
+        ]
+      },
+      "pseudocode": "to answer a long question:\n    name the life-cycle phase\n    point at one case artefact\n    say which requirement it traces to\n    stop before adding hostels",
+      "application": [
+        "Close your revision by writing the reference chain and the reason chain from memory. Then check them against this chapter. Gaps are the topics to reread.",
+        "Practise classifying a change in one sentence. Examiners use that to see whether maintenance is more than four memorised words."
+      ],
+      "tip": "Answer in traces. A pile of definitions with no case will not show judgement.",
+      "takeaways": [
+        "Keep analysis and design distinct and in order",
+        "Every model in the case should use one glossary and one boundary",
+        "The pilot was a life-cycle choice, not a decoration",
+        "Classify later changes by whether the target, the world, the ease, or the future risk changed"
+      ],
+      "revision": [
+        "Say the reference chain from aim to test in four steps.",
+        "Why was a pilot a better fit than a university-wide direct cutover?",
+        "Classify a new sponsorship status and a restore drill."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "A policy adds fee status sponsored after go-live. What is that maintenance?",
+          "options": ["Corrective", "Adaptive", "Preventive", "A new problem statement that erases the old aims"],
+          "correct": 1,
+          "explanation": "The world changed. The old system was not failing its old target. The response is adaptive, with a revised requirement."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Evaluation may replace the original aims with hostels if the hostel idea is more interesting.",
+          "correct": false,
+          "explanation": "Evaluation uses the aims that justified the release. Hostels were out of scope and cannot become the success measure afterwards."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the path from an aim to a requirement to a design choice to a test called in this revision?",
+          "answers": ["trace", "a trace", "traceability"],
+          "explanation": "A trace is that chain. The reference example in this lesson is the one to memorise."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Give the maintenance class for an apostrophe crash and for a Thursday backup restore, with a reason for each.",
+          "points": ["corrective because search already should have worked", "preventive because the drill is before a failure"],
+          "explanation": "The crash disagrees with the existing target. The drill reduces a future failure and changes no business rule. The classes are different."
+        }
+      ],
+      "summary": "The course is the chain from a real registration problem to a bounded specification, consistent models, a store, a shared application, a pilot, and tests, then honest maintenance and evaluation. If you can walk the reference chain and classify a later change, you are ready to use the same discipline on the next system you meet."
+    }
+  ]
+}

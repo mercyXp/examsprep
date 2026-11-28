@@ -1,0 +1,685 @@
+{
+  "position": 5,
+  "title": "Database and System Design",
+  "description": "From entities and relationships to a normalised set of tables, and the screens, reports, architecture, and access rules that sit on top of them.",
+  "lessons": [
+    {
+      "title": "Introduction to Database Design",
+      "description": "Why the registration system needs a designed store, and what logical design decides before anyone picks a product.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain what a database contributes to an information system",
+        "Separate logical design from a brand of software",
+        "List the facts a registration database must not contradict"
+      ],
+      "introduction": [
+        "The class diagram said what the system must remember. Database design decides how those facts are stored so that a student is not enrolled twice, a reference is not reused, and a class list matches the confirmations.",
+        "This opening lesson stays above table syntax. It fixes the purpose of the design. Later lessons draw entities, normalise them, and then design the screens and controls around the store."
+      ],
+      "explanation": [
+        "A database is an organised, shared collection of data with rules that protect consistency. Shared matters. If the clerk and the student portal keep separate workbooks, fee status will disagree by lunchtime. A shared store with one rule for a duplicate reference prevents that particular lie.",
+        "Logical design names entities, attributes, relationships, and constraints, without committing to a vendor. Student, Module, Enrolment, and Payment can be described before anyone says which product will host them. Physical design, later, chooses types, indexes, and the product. Mixing the two early produces diagrams that are really installation notes.",
+        "Constraints are part of the design, not an afterthought. A module code is unique. An enrolment refers to a student and a module that exist. A payment reference, when present, is unique. These are the same rules as the requirements, written so the store can enforce them even if a screen forgets.",
+        "Design also plans for the questions people will ask. A class list is all enrolments for one module with status confirmed. If the design cannot answer that without heroic effort, it is the wrong shape, even if every screen looks finished."
+      ],
+      "definitions": [
+        {"term": "Database", "meaning": "An organised, shared collection of data protected by consistency rules."},
+        {"term": "Logical design", "meaning": "The description of entities, relationships, and constraints before a specific product is chosen."},
+        {"term": "Constraint", "meaning": "A rule the stored data must obey, such as uniqueness of a reference."},
+        {"term": "Integrity", "meaning": "The condition in which stored data obey their relationships and constraints."}
+      ],
+      "exampleTitle": "One fact, one place",
+      "example": [
+        "Fee clearance is needed by the portal and by the clerk. If each keeps a private flag, they will diverge. The logical design puts payment state in one Payment entity linked to the student, and both screens read it. The duplicate-reference rule is a uniqueness constraint on that entity, matching FR-02.",
+        "The class list question is stated before tables are drawn: confirmed enrolments for a module code. The design is judged by whether that question is natural."
+      ],
+      "table": {
+        "caption": "Questions the store must answer",
+        "headers": ["Question", "Facts involved"],
+        "rows": [
+          ["Has this reference been used?", "Payment reference, uniqueness"],
+          ["Why was the module refused?", "Enrolment status and reason"],
+          ["Who is confirmed on IT211?", "Enrolment linked to module and student"],
+          ["Is the fee cleared, pending, or unpaid?", "Payment state for the student"]
+        ]
+      },
+      "application": [
+        "Write three questions your database must answer, taken from requirements, before you draw a table. If a question has no home, the design is early, not done.",
+        "In a viva, say which constraints are doing the work of which requirements. That sentence links this chapter to the specification."
+      ],
+      "tip": "A screen that can save a contradiction is an unfinished database design.",
+      "takeaways": [
+        "A database is a shared store with rules, not a private workbook",
+        "Logical design precedes the choice of product",
+        "Constraints restate requirements so the store can enforce them",
+        "The design is tested by the questions it must answer easily"
+      ],
+      "revision": [
+        "Why is a shared store safer than two workbooks for fee status?",
+        "What is the difference between logical and physical design?",
+        "Give one constraint that implements the duplicate-reference requirement."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What is the main purpose of logical database design in this lesson?",
+          "options": [
+            "Choosing a laptop brand",
+            "Describing entities, relationships, and constraints before a product",
+            "Painting the portal",
+            "Writing the project vision slogan"
+          ],
+          "correct": 1,
+          "explanation": "Logical design names what is stored and which rules apply. Product choice and colours come later or elsewhere."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "If two screens can show different fee statuses for the same student, the shared-store aim has failed.",
+          "correct": true,
+          "explanation": "The point of one store is one fact. Divergent screens mean the fact is still copied in more than one place or cached without care."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a rule that stored data must obey, such as a unique payment reference, called?",
+          "answers": ["constraint", "a constraint"],
+          "explanation": "A constraint is that rule. Uniqueness and required relationships are typical constraints."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Name the store that should hold a payment reference and the question a clerk asks that this design must answer quickly.",
+          "points": ["one payment store linked to the student", "whether the reference was already used"],
+          "explanation": "The reference lives once, with the payment. The clerk's question is the uniqueness check from the requirement, not a hunt through private notes."
+        }
+      ],
+      "summary": "Database design gives the information system one shared place for facts and the constraints that keep those facts consistent. Do the logical design, tied to real questions and requirements, before you fall in love with a product."
+    },
+    {
+      "title": "Entity Relationship Diagrams",
+      "description": "Entities, relationships, and cardinality drawn so a registration schema can be reviewed before it becomes tables.",
+      "durationMinutes": 20,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Draw entities and relationships for students, modules, enrolments, and payments",
+        "Read cardinality in both directions",
+        "Decide when an association needs its own entity"
+      ],
+      "introduction": [
+        "An entity relationship diagram, or ERD, is the database picture of the concepts you already met on the class diagram. The emphasis here is stored data: rectangles for entities, lines for relationships, and marks for how many.",
+        "You should be able to sketch the registration ERD by hand and read someone else's without guessing which end the star belongs to."
+      ],
+      "explanation": [
+        "An entity is a set of things the database stores, drawn as a named rectangle: Student, Module, Enrolment, Payment. Attributes can be listed inside or beside it. The primary identifier, such as student number or module code, is marked so reviewers know what makes one row that row.",
+        "A relationship is a named line. Read it in both directions, because cardinality is a pair of sentences. One student has many enrolments. One enrolment is for one student. One module has many enrolments. One enrolment is for one module. If you only read left to right you will mis-implement the rule.",
+        "Enrolment is its own entity because the link itself has attributes: status and reason. A line with nowhere to put the reason would force those facts onto Student or Module, where they do not belong. Payment is its own entity for the same reason: reference and state are facts about a payment, and a student may have several.",
+        "Do not invent entities for transient screens. Do not duplicate the same relationship under two names. After drawing, point at each must requirement and find the entity or relationship that carries it. FR-04's reason sits on Enrolment. FR-02's reference sits on Payment."
+      ],
+      "definitions": [
+        {"term": "Entity", "meaning": "A set of stored things of one kind, shown as a rectangle on an ERD."},
+        {"term": "Relationship", "meaning": "A named association between entities that the database must remember."},
+        {"term": "Cardinality", "meaning": "How many instances on one side relate to one instance on the other."},
+        {"term": "Associative entity", "meaning": "An entity that represents a relationship which itself has attributes, such as Enrolment."}
+      ],
+      "exampleTitle": "Four rectangles and the sentences they mean",
+      "example": [
+        "Student — has — Enrolment — of — Module, and Student — makes — Payment. Identifiers: student number, module code, and a payment id. Enrolment is identified by the pair of student and module for a given period, or by its own number if retakes must be kept apart. The course should state which. This lesson uses an enrolment id so a retake is a new row with its own reason.",
+        "Reading the payment line aloud: one student makes zero or more payments; each payment is made by exactly one student. A payment with no student cannot be stored."
+      ],
+      "diagram": "STUDENT                ENROLMENT               MODULE\n# studentNumber        # enrolmentId           # code\n  name                   status                  title\n  programme              reason                  capacity\n\nSTUDENT 1 ---- makes ---- * PAYMENT\n                         # paymentId\n                           reference\n                           state\n\nSTUDENT 1 ---- has ---- * ENROLMENT * ---- of ---- 1 MODULE\n\nRead every line in both directions.",
+      "application": [
+        "In the report, under the ERD, write the two sentences for each relationship. Markers use those sentences to see whether your stars are on the correct ends.",
+        "If status has nowhere to live, you need an associative entity. Do not park it on Student just because there is space in the rectangle."
+      ],
+      "tip": "Say the cardinality as two sentences before you draw the symbols.",
+      "takeaways": [
+        "Entities are stored sets; relationships are remembered links",
+        "Cardinality must be readable in both directions",
+        "A link with its own facts becomes an associative entity",
+        "Every must requirement should land on an entity or a relationship"
+      ],
+      "revision": [
+        "Why is Enrolment an entity rather than only a line?",
+        "Read the payment relationship in both directions.",
+        "Where does the refusal reason sit, and which requirement does that serve?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Why is Enrolment drawn as its own entity?",
+          "options": [
+            "Because every diagram needs four boxes",
+            "Because the link has attributes such as status and reason",
+            "Because UML forbids lines",
+            "Because students cannot relate to modules"
+          ],
+          "correct": 1,
+          "explanation": "Status and reason describe the enrolment itself, so the relationship becomes an associative entity."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Cardinality should be read in only one direction.",
+          "correct": false,
+          "explanation": "Each relationship is two sentences. Reading only one way is how stars end up on the wrong end."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the diagram of entities and their relationships called?",
+          "answers": ["entity relationship diagram", "ERD", "an entity relationship diagram"],
+          "explanation": "The ERD is that diagram. It is the logical picture of stored data before physical tables are tuned."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A student may have many payments, and each payment belongs to one student. State both sentences and name the entity that stores the reference.",
+          "points": ["one student, many payments", "Payment stores the reference"],
+          "explanation": "The pair of sentences is the cardinality. The reference is an attribute of Payment, not of Student, because there can be more than one."
+        }
+      ],
+      "summary": "An ERD shows stored entities and the relationships among them, with cardinality you can read aloud in both directions. When a relationship carries facts, it becomes an entity. The diagram is finished when each important requirement has a place to live."
+    },
+    {
+      "title": "Entities, Attributes and Relationships",
+      "description": "How to choose attributes, keys, and relationship names without duplicating facts.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Choose attributes that describe one entity only",
+        "Distinguish an identifier from an ordinary attribute",
+        "Name relationships so the business rule is obvious"
+      ],
+      "introduction": [
+        "A rectangle labelled Data is not an entity. An attribute called info is not a design. This lesson slows down the choices inside the ERD: which facts belong together, what identifies a row, and what the relationship should be called.",
+        "These choices are the difference between a diagram that becomes clean tables and one that becomes a single wide sheet with repeated names."
+      ],
+      "explanation": [
+        "An attribute should be atomic and should depend on the entity you attach it to. Module title depends on the module. Putting module title on every Enrolment copies it and invites two spellings of the same module. Student name depends on the student, not on the payment. If you feel you are copying a name so a report is easier, you are designing a report, not the stored entity. Reports can join.",
+        "An identifier uniquely picks out one instance. Student number does that for Student if the university guarantees it. A person's full name does not. Payment needs its own identifier plus the unique reference, because a reference might be absent while a row is still being drafted, depending on your rule. State the rule. Do not leave uniqueness implied.",
+        "Relationship names should be verbs you can read: makes, has, of. Avoid relates and link. If you cannot read Student makes Payment, the name is weak. Optional participation matters: a student may have zero payments, so participation of Payment is optional on the student side. An enrolment that must have a module is mandatory on that side.",
+        "Derived values are usually not stored. Seats remaining can be computed from capacity minus confirmed enrolments. Storing it as well creates a second fact that can be wrong. Store it only if you have a stated reason, and then you own the extra integrity problem."
+      ],
+      "definitions": [
+        {"term": "Attribute", "meaning": "A single fact that describes an entity and depends on that entity."},
+        {"term": "Identifier", "meaning": "An attribute or set of attributes that uniquely picks out one instance."},
+        {"term": "Optional participation", "meaning": "A side of a relationship that is allowed to have no related instance."},
+        {"term": "Derived value", "meaning": "A fact that can be calculated from other stored facts, and is often not stored."}
+      ],
+      "exampleTitle": "Where module title must not be copied",
+      "example": [
+        "Module has code IT211 and title Systems Analysis and Design. Enrolment stores enrolment id, status, and reason, and points at the module code. It does not store the title again. A class list joins Enrolment to Module to print the title. If the faculty renames the module, one row changes.",
+        "Seats remaining is derived: capacity minus enrolments with status confirmed. The design note says it is computed, not stored, so the two cannot drift."
+      ],
+      "table": {
+        "caption": "Attribute placement",
+        "headers": ["Fact", "Belongs on", "Why"],
+        "rows": [
+          ["Student name", "Student", "It describes the person, not each payment"],
+          ["Module title", "Module", "Copying it onto enrolments can diverge"],
+          ["Refusal reason", "Enrolment", "It describes that attempt, not the whole module"],
+          ["Payment reference", "Payment", "A student may have several"]
+        ]
+      },
+      "application": [
+        "When you review a classmate's ERD, point at each attribute and ask which entity it truly describes. Copied titles are the most common fault.",
+        "Write the identifier under each entity in the text, not only as a hash mark that a marker might miss."
+      ],
+      "tip": "If a fact describes the link, put it on the associative entity. If it describes the module, put it on the module once.",
+      "takeaways": [
+        "Attributes depend on one entity and are not copied for convenience",
+        "Identifiers must actually be unique; names usually are not",
+        "Relationship names should read as business sentences",
+        "Derived counts are calculated unless you deliberately accept the extra risk"
+      ],
+      "revision": [
+        "Why not store module title on every enrolment?",
+        "Give an identifier for Student and say why a name is weaker.",
+        "Is seats remaining stored or derived in the example, and why?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Where should the module title be stored?",
+          "options": ["On every enrolment row", "On the Module entity only", "On the Payment entity", "In the diagram legend only"],
+          "correct": 1,
+          "explanation": "The title describes the module. Copying it creates two sources that can disagree when the title changes."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A student's full name is a safe identifier because names are unique.",
+          "correct": false,
+          "explanation": "Names repeat and change. An issued student number is the identifier if the university keeps it unique."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call a value, such as seats remaining, that can be calculated from other stored facts?",
+          "answers": ["derived", "derived value", "a derived value"],
+          "explanation": "Derived values can usually be computed when needed. Storing them adds a consistency burden."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A design copies student name onto every payment. Explain the integrity risk and the better placement.",
+          "points": ["the copies can disagree", "store the name once on Student and link the payment"],
+          "explanation": "Two copies drift when a name is corrected. The payment should reference the student, and the name should live in one place."
+        }
+      ],
+      "summary": "Put each attribute on the entity it describes, give every entity a real identifier, and name relationships so the rule can be read aloud. Leave derived counts calculated unless you have a reason to store a second, riskier copy."
+    },
+    {
+      "title": "Database Normalisation",
+      "description": "First, second, and third normal form, worked on a badly designed registration sheet.",
+      "durationMinutes": 22,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Explain the problem normalisation is trying to prevent",
+        "Apply first, second, and third normal form to a small example",
+        "Stop at a justified design instead of normalising for sport"
+      ],
+      "introduction": [
+        "A single spreadsheet of registrations often repeats the module title, the lecturer's phone, and the student's programme on every row. When the phone number changes, half the rows are updated and half are not. Normalisation is the step-by-step removal of that kind of repetition.",
+        "You need to apply the first three normal forms to a small table and to say, in words, which anomaly each step removes."
+      ],
+      "explanation": [
+        "First normal form says each column holds one value, and repeating groups are removed. A cell that contains IT211, IT212 is not first normal form. Split the enrolments into one module per row, with the student number repeated only as a key to the person, not as a bag of module codes.",
+        "Second normal form matters when the key is composite. If a row is identified by student number plus module code, the module title depends only on the module code, not on the whole key. That partial dependency is removed by putting title on a Module table. Student name depends only on student number and moves to Student.",
+        "Third normal form removes facts that depend on a non-key. If programme name depends on programme code, and programme code sits on Student, the name does not belong in a second copy on Enrolment or even beside unrelated payment data. Store programme name once, on Programme, if you store it at all.",
+        "The point is update, insert, and delete anomalies. You should not lose a module's title when the last student withdraws, and you should not need to edit fifty rows to rename a module. Normal form is a means. If a deliberate denormalised copy is kept for a stated performance reason, say so. Do not skip the argument."
+      ],
+      "definitions": [
+        {"term": "Normalisation", "meaning": "The organised splitting of tables so each fact is stored once and depends on the right key."},
+        {"term": "First normal form", "meaning": "Each attribute holds a single value, and repeating groups are removed."},
+        {"term": "Second normal form", "meaning": "Every non-key attribute depends on the whole key, not only part of a composite key."},
+        {"term": "Third normal form", "meaning": "Every non-key attribute depends on the key, not on another non-key attribute."}
+      ],
+      "exampleTitle": "Splitting the registration sheet",
+      "example": [
+        "Unnormalised row: student 2024-1184, name Banda, programme BSc Computing, modules IT211 Systems Analysis and IT212 Databases, lecturer phone for IT211. First normal form: two enrolment rows, one module each. Second: Module(code, title, lecturer phone) and Student(number, name, programme code), with Enrolment(student number, module code, status). Third: Programme(code, name) so the programme name is not repeated on every student as a text that can drift. Lecturer phone stays on Module only if each module has one lecturer; otherwise it needs its own entity.",
+        "Renaming Systems Analysis now updates one Module row. Withdrawing the last student does not delete the module."
+      ],
+      "pseudocode": "if a column holds a list:\n    split into one row per value          # towards 1NF\nif a fact depends on only part of a composite key:\n    move it to a table keyed by that part # towards 2NF\nif a fact depends on another non-key fact:\n    move it to a table keyed by that fact # towards 3NF",
+      "table": {
+        "caption": "Anomaly removed at each step",
+        "headers": ["Step", "Anomaly removed"],
+        "rows": [
+          ["1NF", "A cell hiding several modules"],
+          ["2NF", "Module title repeated and contradictable on each enrolment"],
+          ["3NF", "Programme name drifting independently of its code"]
+        ]
+      },
+      "application": [
+        "Show the unnormalised row and the resulting tables in your report. A definition of third normal form without the example does not demonstrate the skill.",
+        "If you keep a repeated column, write the anomaly you are accepting. Silence looks like an accident."
+      ],
+      "tip": "Each normal form removes a specific way for one fact to be stored twice and disagree.",
+      "takeaways": [
+        "1NF removes repeating groups and multi-valued cells",
+        "2NF removes partial dependencies on composite keys",
+        "3NF removes dependencies on non-key attributes",
+        "The aim is one fact in one place, not a trophy for the highest normal form"
+      ],
+      "revision": [
+        "What anomaly appears if module title is stored on every enrolment?",
+        "Which normal form is violated by a cell that lists two module codes?",
+        "When is it acceptable to stop and leave a repeated value? What must you write down?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "A column contains both IT211 and IT212 in one cell. Which normal form is already broken?",
+          "options": ["First", "Only third", "Only the context diagram", "None; lists are preferred"],
+          "correct": 0,
+          "explanation": "A multi-valued cell violates first normal form. Later forms assume you have already split such groups."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Third normal form is concerned with a non-key attribute depending on another non-key attribute.",
+          "correct": true,
+          "explanation": "That transitive dependency is what third normal form removes, so each fact lives with the key it depends on."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name of the process that splits tables so each fact is stored once, in stages called normal forms?",
+          "answers": ["normalisation", "normalization"],
+          "explanation": "Normalisation is that process. The first three normal forms are the ones this course expects you to apply."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Module title is stored on every enrolment row. Which anomaly occurs when the title changes, and which normal form step moves the title?",
+          "points": ["some rows keep the old title", "second normal form or moving title to Module"],
+          "explanation": "The update anomaly is inconsistent titles. Because title depends on module code alone, it belongs on Module, which is the second normal form move when enrolment uses a composite key."
+        }
+      ],
+      "summary": "Normalisation splits a repeating sheet so each fact depends on the right key: one value per cell, no partial dependencies, no facts hanging off other non-keys. Show the anomaly you removed. If you keep a duplicate, justify it."
+    },
+    {
+      "title": "User Interface Design",
+      "description": "Screens that match the tasks of a student and a clerk, including labels, errors, and a calm registration morning.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Design a screen around a task rather than around a table",
+        "Write labels and error messages a first-year can understand",
+        "Apply a simple usability check to your own layout"
+      ],
+      "introduction": [
+        "A correct database behind a confusing screen will be bypassed. User interface design turns the tasks in the use cases into layouts, labels, and messages. It is part of system design, and it is testable.",
+        "The users in our example are a first-year student on a phone and a clerk at a busy counter. They do not want the same screen."
+      ],
+      "explanation": [
+        "Start from the task, not from the list of columns. Request module needs the student to pick a module and see either a confirmation or one reason. It does not need to show capacity, lecturer phone, and payment history on the same view. The clerk's Record payment task needs the student number, the reference, and a clear statement of whether that reference was stored or refused.",
+        "Labels use the glossary. Say Module code, not crs_cd. Error messages say what happened and what to do. This reference is already used. Check the number with the student is better than Error 409. A student who was refused for fees should see a sentence about fees, not a stack trace or the word null.",
+        "Order the fields as the person works. The clerk asks for the student number first, then the reference. Putting the reference first forces the clerk to hold a number in memory. On a phone, the primary action Confirm or the refusal reason must be visible without hunting. Disabled buttons with no explanation are how students refresh until they create duplicates.",
+        "Check the design against the usability requirement if you wrote one. Five first-years should be able to request a module with little help. If your sketch needs a paragraph of instructions beside it, the sketch is not done. Also design the empty and error states, not only the happy screenshot."
+      ],
+      "definitions": [
+        {"term": "User interface", "meaning": "The labels, layout, and messages through which a person performs a task."},
+        {"term": "Task-centred design", "meaning": "Laying out a screen for one job, rather than exposing every stored column."},
+        {"term": "Error message", "meaning": "Text that states what went wrong and what the user can do next, in glossary language."},
+        {"term": "Empty state", "meaning": "What the screen shows when there is nothing to list yet, or when a search finds nothing."}
+      ],
+      "exampleTitle": "Two screens, two jobs",
+      "example": [
+        "Student phone: title Request a module, one field for the code or a short list of their programme's modules, and a button Request. Result region shows either You are confirmed on IT211 or You were not confirmed because your fees are not cleared. No second student's data appears.",
+        "Clerk counter: student number, then reference, then Save. Result: Reference stored or This reference is already used. The clerk is not shown a raw database error. The student's name is displayed after the number is found, so the clerk can confirm they have the right person."
+      ],
+      "application": [
+        "Sketch both screens in the report and annotate them with the requirement identifiers they satisfy. A gallery of unlabelled mockups is not a design.",
+        "Read every error aloud. If you would not say it at the counter, rewrite it."
+      ],
+      "tip": "One task, one screen. The database can be rich without the first view being crowded.",
+      "takeaways": [
+        "Design the task, not a dump of every column",
+        "Use glossary labels and messages that say what to do next",
+        "Students and clerks need different layouts",
+        "Design the refusal and the duplicate, not only the happy path"
+      ],
+      "revision": [
+        "Why should the student and the clerk not share one crowded screen?",
+        "Rewrite Error 409 for a duplicate reference.",
+        "What is wrong with a Confirm button that does nothing and offers no reason?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which message best fits a duplicate payment reference?",
+          "options": [
+            "Error 409",
+            "null",
+            "This reference is already used. Check the number with the student.",
+            "Success"
+          ],
+          "correct": 2,
+          "explanation": "The message names the problem and the next action, in language the clerk can say aloud. Codes and null are not an interface."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A good first screen for a student shows every column in the database.",
+          "correct": false,
+          "explanation": "The screen should serve one task. Extra columns slow the user and can expose data they should not see."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call an interface designed around one job the user came to do, rather than around the table layout?",
+          "answers": ["task-centred", "task centred", "task-centred design"],
+          "explanation": "Task-centred design starts from the job, such as request module or record payment."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A student is refused for unpaid fees. What must the screen show, and what must it not show?",
+          "points": ["a fees reason in plain language", "not another student's data or a raw error code"],
+          "explanation": "The functional requirement needs the reason. Privacy and usability rule out other students' details and unexplained codes."
+        }
+      ],
+      "summary": "Interface design lays out one task at a time, in glossary language, with messages that tell a student or a clerk what happened and what to do. Design the refusal and the duplicate. A screen that only celebrates success is unfinished."
+    },
+    {
+      "title": "Input and Output Design",
+      "description": "What may be entered, what is printed or exported, and the checks that stop bad data at the door.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Specify inputs with validation rules tied to requirements",
+        "Design an output such as a class list from the questions the store must answer",
+        "Explain why validation belongs in the design, not only in hopeful users"
+      ],
+      "introduction": [
+        "Inputs are the data the system accepts. Outputs are the information it gives back, on a screen, a printout, or a file. Both need design. A class list that omits the student number, or a reference field that accepts a blank, will fail a requirement even if the entity diagram was beautiful.",
+        "This lesson connects those validation rules to the constraints you already chose, so a blank reference is refused on the screen and also refused by the store."
+      ],
+      "explanation": [
+        "For each input, state the source, the format, whether it is required, and what happens when it is wrong. A mobile-money reference might be required, up to 20 characters, and rejected when it duplicates a stored value. The rejection is the same rule as the uniqueness constraint, surfaced as the clerk's message. Validation in the interface without the constraint, or a constraint without a message, is only half a design.",
+        "Do not ask users to type what the system already knows. The clerk enters a student number and the system shows the name. The student does not type their programme if the account already has it. Every extra typed field is a chance to contradict the store.",
+        "Outputs start from a decision. The lecturer needs a class list: module code and title, student number, name, and status confirmed. The dean may need a count of refusals by reason, which is a different output and a different audience. Put the audience and the purpose at the top of the output specification so columns are not added out of habit.",
+        "Batch outputs, such as a morning export to the exams office, need a time, a file layout, and a rule for pending students. If pending students are excluded, say so. An output that silently drops rows is a classic source of a queue at the counter."
+      ],
+      "definitions": [
+        {"term": "Input design", "meaning": "The specification of captured data, including format, source, and validation."},
+        {"term": "Output design", "meaning": "The specification of information produced for a named audience and purpose."},
+        {"term": "Validation", "meaning": "The checks that reject or question input before it is stored."},
+        {"term": "Audience", "meaning": "The person or office an output is for, which determines the columns and the timing."}
+      ],
+      "exampleTitle": "A class list that matches the question",
+      "example": [
+        "Input: payment reference, required, trimmed of spaces, rejected if empty or if uniqueness fails. The system shows the stored student name after the number is entered, so the clerk does not retype the name.",
+        "Output: class list for a lecturer, produced on demand for one module. Columns: student number, name, status. Only confirmed enrolments. Sorted by student number. Purpose: know who may attend. The refusal reason is not on this list, because the lecturer's decision does not need other students' fee details. A separate exams output can exist with a different audience."
+      ],
+      "table": {
+        "caption": "Input specification fragment",
+        "headers": ["Field", "Rule", "On failure"],
+        "rows": [
+          ["Student number", "Must match a student", "Tell the clerk the number was not found"],
+          ["Payment reference", "Required, unique", "Tell the clerk it is missing or already used"],
+          ["Module code", "Must be a published module", "Show that the code is not offered"]
+        ]
+      },
+      "application": [
+        "Add a small input table and one fully specified output to the design chapter. Tie each validation line to a requirement or a constraint.",
+        "Name the audience in the output title: Class list for the lecturer, not Report1."
+      ],
+      "tip": "If the system already stores it, do not make a person type it again.",
+      "takeaways": [
+        "Every important input has a format, a requirement, and a failure message",
+        "Interface checks and database constraints should enforce the same rule",
+        "Outputs name an audience and a decision",
+        "Silent dropping of rows is a design defect"
+      ],
+      "revision": [
+        "Why show the student name instead of asking the clerk to type it?",
+        "Which columns belong on a lecturer's class list, and which fee detail stays off it?",
+        "What must a batch export say about pending students?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Where should the unique-reference rule be enforced?",
+          "options": [
+            "Only in a comment",
+            "In the store as a constraint and in the interface as a message",
+            "Only by asking users to be careful",
+            "Only in the project logo"
+          ],
+          "correct": 1,
+          "explanation": "The constraint protects integrity even if another screen appears later. The message makes the rule usable at the counter."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "An output may omit its audience if the columns look complete.",
+          "correct": false,
+          "explanation": "The audience decides which columns are justified. A complete-looking dump can still be the wrong output."
+        },
+        {
+          "kind": "short",
+          "prompt": "What are the checks called that reject bad input before it is stored?",
+          "answers": ["validation", "input validation"],
+          "explanation": "Validation is that set of checks. It should agree with the database constraints."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Specify the failure behaviour for a blank payment reference and say which user sees it.",
+          "points": ["the reference is required", "the clerk is told it is missing and nothing is stored"],
+          "explanation": "A blank reference fails validation. The clerk sees a clear message, and the store does not gain an empty duplicate-prone row."
+        }
+      ],
+      "summary": "Input design states what may be captured and how bad values are refused, in line with the database constraints. Output design states who needs which decision and therefore which rows and columns appear. Neither is a dump of the tables."
+    },
+    {
+      "title": "System Architecture",
+      "description": "A simple structural picture of the registration system: clients, application, database, and the finance neighbour.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Describe a three-tier architecture in plain language",
+        "Place finance outside the system you are building",
+        "Explain what the architecture must not decide by itself"
+      ],
+      "introduction": [
+        "Architecture, at this level, is the arrangement of major parts and how they talk. It is not a brand list. A student phone, a clerk's browser, an application that applies the rules, a database, and a finance system you do not own: that is already an architecture.",
+        "The picture should match the context diagram. If finance was external there, it is external here."
+      ],
+      "explanation": [
+        "A simple three-tier layout puts presentation on the clients, rules in an application tier, and stored data in the database tier. The student's phone and the clerk's browser are both presentation. They should not each implement a private fee rule. The application checks prerequisites, uniqueness, and reasons, then reads and writes the database.",
+        "Finance stays outside. The application sends a fee query and receives a status. If finance is down, the architecture needs a stated behaviour: refuse new confirmations, or allow a pending state. That behaviour is a requirement and a design decision, not something the diagram invents in a footnote.",
+        "Draw the flows you already named: module request, decision, payment reference, fee status. Do not add a data warehouse, a message bus, or a second database because the shapes look professional. Extra tiers are justified by a requirement such as sharing one rule between two clients, which the application tier already does.",
+        "Architecture does not replace normalisation, screens, or requirements. It shows where those decisions run. A box labelled AI does not satisfy FR-04. A box labelled Registration application, which produces the refusal reason, might."
+      ],
+      "definitions": [
+        {"term": "Architecture", "meaning": "The arrangement of the major parts of the system and the paths between them."},
+        {"term": "Presentation tier", "meaning": "The clients people use, such as a phone page or a counter browser."},
+        {"term": "Application tier", "meaning": "The part that applies business rules and talks to the store and to neighbours."},
+        {"term": "Database tier", "meaning": "The shared store of entities and constraints."}
+      ],
+      "exampleTitle": "One rule, two clients",
+      "example": [
+        "The phone and the counter browser both call the registration application. Only the application writes Enrolment and Payment. Only the application calls Finance. When Finance returns unpaid, the application stores the refusal reason and both clients display the sentence the interface design already specified.",
+        "A second copy of the fee rule inside the phone would drift from the clerk's browser. The tier split exists to prevent that."
+      ],
+      "diagram": "[Student phone] \\\n                 --> [Registration application] --> [Database]\n[Clerk browser] /            |\n                             v\n                         [Finance]\n                         (external)\n\nRules live in the application, not in each phone.",
+      "application": [
+        "Draw this once, label it with the same names as the context diagram, and refer back to it when you discuss security and failure.",
+        "If you propose an extra component, add the sentence: this exists because requirement ... Without that sentence, delete the box."
+      ],
+      "tip": "Every client should ask the same application what the rule is. Do not copy the rule into each screen.",
+      "takeaways": [
+        "Presentation, application, and database are a sufficient campus architecture",
+        "Business rules live in one application tier",
+        "External neighbours on the context diagram stay outside",
+        "New boxes need a requirement, not a desire to look advanced"
+      ],
+      "revision": [
+        "Why must the phone and the browser not each invent the fee rule?",
+        "Where does Finance sit, and what does it exchange?",
+        "What behaviour must be specified when Finance does not answer?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "In the three-tier picture, where should the duplicate-reference rule run?",
+          "options": ["Separately inside every phone", "In the shared application and as a database constraint", "Only on a poster", "Inside the finance system you do not own"],
+          "correct": 1,
+          "explanation": "The application enforces the rule for every client, and the database constraint stops a contradictory write. Copies of the rule in each phone will drift."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "An architecture diagram may add external systems that the context diagram excluded.",
+          "correct": false,
+          "explanation": "The architecture should respect the agreed boundary. New neighbours are scope changes."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the tier that applies business rules and talks to the store called?",
+          "answers": ["application tier", "application", "the application tier"],
+          "explanation": "The application tier holds the shared rules. Presentation displays. The database stores."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Finance is unavailable. Give one acceptable designed behaviour and say where it should be implemented.",
+          "points": ["do not confirm, or record a defined pending state", "the registration application applies that behaviour"],
+          "explanation": "The failure behaviour is an explicit design. It belongs in the application shared by all clients, not as a guess inside one phone."
+        }
+      ],
+      "summary": "A small architecture puts people on clients, rules in one application, data in one database, and finance outside. The picture must match the context diagram and must not grow extra boxes that no requirement asked for."
+    },
+    {
+      "title": "Security and Access Control",
+      "description": "Who may see a fee balance, who may change a reference, and the records that make those actions auditable.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Separate authentication from authorisation",
+        "Give students and clerks different permissions",
+        "Specify an audit record for a sensitive change"
+      ],
+      "introduction": [
+        "A registration system holds fee facts and personal identifiers. Security design says who may see them and who may change them. A student who can open a classmate's balance, or a clerk whose identity is only a shared password on a sticky note, is a design failure.",
+        "This lesson uses two ideas you must not mix up: proving who someone is, and deciding what that person may do."
+      ],
+      "explanation": [
+        "Authentication establishes identity: the student signs in as one student number, the clerk as one staff account. Shared counter logins destroy accountability, because an audit cannot tell which clerk changed a reference. Authorisation decides permissions after identity is known. Students may see their own fee status and their own decisions. They may not see other students and they may not type a payment reference. Clerks may record references and see the student they have looked up. Lecturers may see confirmed class lists, not fee references.",
+        "Least privilege means each role gets the minimum it needs for its tasks. The dean's count of refusals by reason does not require opening every payment reference. If a report can be done with aggregates, do not grant the underlying rows just in case.",
+        "Sensitive writes need an audit trail: who changed a reference or a confirmed enrolment, when, and what the previous value was. This implements the auditability requirement. The trail is itself protected. A clerk who can edit the log can erase a mistake, so the log is written by the application and not offered as an editable screen.",
+        "Tell the truth about threats you are designing for. A classmate snooping on a lab PC, a shared password, and a lost phone are realistic on a campus. A design that only mentions foreign hackers and ignores the shared password has missed the likely incident. Also state what you are not solving, such as the bank-side security of mobile money, which sits outside the boundary."
+      ],
+      "definitions": [
+        {"term": "Authentication", "meaning": "The check that a person is the identity they claim, such as a signed-in student number."},
+        {"term": "Authorisation", "meaning": "The decision about what an authenticated identity may see or change."},
+        {"term": "Least privilege", "meaning": "Giving each role only the access its tasks require."},
+        {"term": "Audit trail", "meaning": "A protected record of who changed sensitive data, when, and what it was before."}
+      ],
+      "exampleTitle": "Three roles, three permissions",
+      "example": [
+        "Student 2024-1184 may read their fee state and their enrolment reasons, and may submit a module request. They receive an error, not data, if they change the number in the address bar to another student. Clerk accounts may save a reference for a student they have retrieved, and each save writes an audit row the clerk cannot edit. Lecturer accounts may open the class list and nothing about payment references.",
+        "The sticky shared password at the counter is recorded as a finding: it fails accountability even if the database constraints are perfect."
+      ],
+      "table": {
+        "caption": "Permissions for the registration release",
+        "headers": ["Role", "May do", "May not do"],
+        "rows": [
+          ["Student", "See own status and request a module", "See others or type a payment reference"],
+          ["Clerk", "Record a reference for a retrieved student", "Edit the audit log"],
+          ["Lecturer", "Read a confirmed class list", "Read payment references"]
+        ]
+      },
+      "application": [
+        "Include a permission table in the design chapter. Then say which requirement each row protects. Security that is only a paragraph about strong passwords is incomplete.",
+        "If your prototype has one login for everyone, label it as a prototype limit. Do not describe it as the security design."
+      ],
+      "tip": "Identity first, permission second, and a log the actor cannot rewrite.",
+      "takeaways": [
+        "Authentication says who you are; authorisation says what you may do",
+        "Students, clerks, and lecturers do not share one permission set",
+        "Least privilege prefers aggregates over raw rows when the task allows",
+        "Sensitive changes write a protected audit trail"
+      ],
+      "revision": [
+        "Why does a shared counter password defeat an audit trail?",
+        "What may a lecturer see that a clerk's payment screen shows?",
+        "Who is allowed to edit the audit log in the example, and why?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "A signed-in student tries to open another student's fee balance. Which control should stop them?",
+          "options": ["Authorisation", "A nicer font", "Normalisation", "A context diagram"],
+          "correct": 0,
+          "explanation": "The student is already authenticated. Authorisation must limit them to their own records."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Authentication and authorisation are two names for the same check.",
+          "correct": false,
+          "explanation": "Authentication establishes identity. Authorisation decides permissions for that identity. You need both."
+        },
+        {
+          "kind": "short",
+          "prompt": "What principle says each role receives only the access its tasks need?",
+          "answers": ["least privilege", "the principle of least privilege"],
+          "explanation": "Least privilege is that minimum-access principle. It keeps lecturers away from payment references they do not need."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A clerk changes a payment reference. What should the audit record contain, and why must the clerk be unable to edit it?",
+          "points": ["who, when, and the previous value", "an editable log can hide the change"],
+          "explanation": "The trail identifies the clerk, the time, and the old reference. If the clerk can alter the trail, accountability disappears."
+        }
+      ],
+      "summary": "Security design authenticates each person, authorises only the tasks of their role, and writes a protected audit trail for sensitive changes. A shared password or a student who can browse a classmate's balance means the design is not finished, however neat the tables are."
+    }
+  ]
+}

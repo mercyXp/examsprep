@@ -1,0 +1,662 @@
+{
+  "position": 2,
+  "title": "System Development Life Cycle (SDLC)",
+  "description": "The life of a system from the first request through feasibility, requirements, design, build, test, deployment, and the long maintenance that follows.",
+  "lessons": [
+    {
+      "title": "Introduction to SDLC",
+      "description": "Why a system has a life cycle, and the phases a second-year student should be able to name in order.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Define the system development life cycle",
+        "Name the main phases in a sensible order",
+        "Explain why maintenance is part of the cycle and not an afterthought"
+      ],
+      "introduction": [
+        "A student registration change does not begin when someone opens a code editor, and it does not end on the day the portal is switched on. It begins with a request and continues for as long as students still enrol.",
+        "The system development life cycle, or SDLC, is the disciplined sequence teams use so that request is not answered by an unexamined build. Names of phases vary by textbook. The work does not."
+      ],
+      "explanation": [
+        "A life cycle is a way of saying the system is born, used, changed, and eventually replaced. The SDLC organises the birth and the change. Typical phases are planning, analysis, design, implementation, testing, deployment, and maintenance. Some syllabi fold testing into implementation and evaluation into maintenance. You should be able to describe the work even when the headings differ.",
+        "Each phase has a purpose and a product. Planning asks whether the project is worth doing. Analysis asks what the new system must do. Design asks how. Implementation builds it. Testing checks it against the requirements. Deployment puts it into real use. Maintenance keeps it useful afterwards. Skipping a product, such as a feasibility note, does not remove the question. It only means the question will be answered accidentally.",
+        "The cycle is not always a single straight line. A test failure can send the team back to design. A new regulation can send a live system back to analysis. The value of the SDLC is that those returns are visible. People know which product they are revising.",
+        "For a university project the sponsor is often a head of department rather than a commercial client. The phases still apply. A head of department who wants hostel allocation, fees, and exams in one semester is making a planning decision, whether or not anyone uses that word."
+      ],
+      "definitions": [
+        {"term": "SDLC", "meaning": "The structured phases through which an information system is planned, built, introduced, and maintained."},
+        {"term": "Phase", "meaning": "A named stage of the life cycle with a purpose and a recognisable product."},
+        {"term": "Deliverable", "meaning": "The tangible product of a phase, such as a requirements list or a test report."},
+        {"term": "Life cycle", "meaning": "The full span from the first request until the system is replaced or retired."}
+      ],
+      "exampleTitle": "One change, seven headings",
+      "example": [
+        "The registry asks for a clearer way to handle supplementary exams. Planning checks that the exams office has time before the next sitting. Analysis lists who may apply and what evidence is required. Design sketches the form and the status values. Implementation builds the form. Testing tries a late application and a student who already passed. Deployment opens the form on a published date. Maintenance fixes the message that confused part-time students."
+      ],
+      "diagram": "Request\n  -> Planning\n  -> Analysis\n  -> Design\n  -> Implementation\n  -> Testing\n  -> Deployment\n  -> Maintenance\n         |\n         +--> back to analysis or design when the live system no longer fits",
+      "application": [
+        "When a lecturer sets a systems project, map your chapters to phases. A report that jumps from a screenshot to a conclusion has skipped analysis and testing, and the marker can see the gap.",
+        "In a vacation job, ask which phase the team thinks it is in. If code is being written and nobody can find the requirements, you have learned something important about that team."
+      ],
+      "tip": "Name the deliverable of the phase you claim to be in. If you cannot, you are not really in that phase.",
+      "takeaways": [
+        "The SDLC runs from the first request through maintenance",
+        "Each phase produces a deliverable",
+        "Returning to an earlier phase is normal when evidence changes",
+        "Maintenance is part of the cycle because live systems keep changing"
+      ],
+      "revision": [
+        "List the SDLC phases you will use in this course, in order.",
+        "What is a deliverable? Give one example.",
+        "Why is a straight line a poor picture of a real project?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which phase asks whether a project should be attempted at all?",
+          "options": ["Design", "Planning", "Deployment", "Maintenance"],
+          "correct": 1,
+          "explanation": "Planning, including the feasibility study, asks whether the project is worth doing before the team commits to a full build."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Maintenance sits outside the system development life cycle.",
+          "correct": false,
+          "explanation": "Maintenance is part of the cycle. A system that is live still needs corrections and changes."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call the tangible product of a phase, such as a test report?",
+          "answers": ["deliverable", "a deliverable"],
+          "explanation": "A deliverable is the tangible output that shows a phase has produced something the next phase can use."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A team is coding, but there is no written list of what the form must do. Which phase was skipped, and what is the risk?",
+          "points": ["analysis was skipped", "the build may solve the wrong problem"],
+          "explanation": "Analysis produces the requirements. Without them, implementation guesses, and the guess is expensive to undo."
+        }
+      ],
+      "summary": "The SDLC is a shared map: planning, analysis, design, implementation, testing, deployment, and maintenance. Each phase has a deliverable. Teams may loop back, but they should always know which product they are changing."
+    },
+    {
+      "title": "Planning and Feasibility Study",
+      "description": "How a sponsor decides that a problem is worth a project, and the kinds of feasibility a student should be able to discuss.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "State the questions a feasibility study answers",
+        "Compare technical, economic, operational, and schedule feasibility",
+        "Recommend go or no-go with a reason, not a slogan"
+      ],
+      "introduction": [
+        "Not every irritation deserves a software project. A dean who dislikes a paper form may be describing a training problem, a staffing problem, or a genuine system problem. Planning exists to tell those apart.",
+        "The feasibility study is the planning deliverable. It asks whether a proposed response is possible, affordable, acceptable to the people who must use it, and finishable in the time available."
+      ],
+      "explanation": [
+        "Technical feasibility asks whether the university can build or buy a solution with skills and technology it can actually obtain. A face-recognition gate may be technically possible in the abstract and still infeasible if no one on the team has built one and the network in the faculty is unreliable.",
+        "Economic feasibility asks whether the benefit is worth the cost. Costs include licences, staff time, training, and the clerks' slower weeks during changeover. Benefits include shorter queues and fewer lost payment references. A honest study states benefits it cannot measure, instead of inventing a precise kwacha figure.",
+        "Operational feasibility asks whether people will use the change. If lecturers refuse to upload marks from home because they have no data bundle, a home-upload design is operationally weak. Schedule feasibility asks whether the work can finish before a real deadline, such as the supplementary sitting in six weeks. A perfect design that lands after the sitting has failed.",
+        "The study ends with a recommendation: proceed, proceed with a smaller scope, or stop. Stopping is a successful outcome of planning. It saves the faculty from a project that would have failed in public."
+      ],
+      "definitions": [
+        {"term": "Feasibility study", "meaning": "An early assessment of whether a proposed project is practical, affordable, acceptable, and timely."},
+        {"term": "Technical feasibility", "meaning": "Whether the needed technology and skills can be obtained."},
+        {"term": "Economic feasibility", "meaning": "Whether expected benefits justify the costs."},
+        {"term": "Operational feasibility", "meaning": "Whether the people and the organisation can and will work in the new way."},
+        {"term": "Schedule feasibility", "meaning": "Whether the project can be finished by the date the organisation actually needs."}
+      ],
+      "exampleTitle": "Supplementary registration, six weeks out",
+      "example": [
+        "Technical: the current portal can add a form, and the developer has done similar work. Economic: the cost is one developer's time; the benefit is fewer students at the exams window. Operational: assistant registrars already use the portal daily, so training is short. Schedule: six weeks includes a test week, which is tight but possible if hostel requests are excluded.",
+        "Recommendation: proceed, with hostel allocation explicitly out of scope. That is a planning decision, written down."
+      ],
+      "table": {
+        "caption": "Four feasibility questions",
+        "headers": ["Kind", "Question", "Poor sign"],
+        "rows": [
+          ["Technical", "Can we build or buy this?", "No one has the skill and the network is unstable"],
+          ["Economic", "Is it worth the cost?", "Benefits are a slogan and costs are ignored"],
+          ["Operational", "Will people use it?", "The design assumes devices staff do not have"],
+          ["Schedule", "Will it land in time?", "The sitting is sooner than the build"]
+        ]
+      },
+      "application": [
+        "In a project proposal, give each feasibility a short paragraph and a clear recommendation. Markers penalise a study that says the project is feasible without saying feasible in which sense.",
+        "If the deadline is an exam sitting or a ZRA filing date, schedule feasibility outranks elegance. Say so."
+      ],
+      "tip": "A no-go that saves a term of wasted work is a successful feasibility study.",
+      "takeaways": [
+        "Planning asks whether the project should exist",
+        "Technical, economic, operational, and schedule feasibility answer different questions",
+        "Unmeasured benefits should be described, not faked",
+        "A smaller scope or a stop decision is a valid result"
+      ],
+      "revision": [
+        "Define operational feasibility using a campus example.",
+        "Why is a precise but invented cost figure worse than an honest range?",
+        "What recommendation would you write if the sitting is in three weeks and the build needs eight?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Lecturers cannot upload marks from home because they lack data bundles. Which feasibility is weak?",
+          "options": ["Technical only", "Operational", "A programming language choice", "Database normalisation"],
+          "correct": 1,
+          "explanation": "Operational feasibility is about whether people can and will work in the proposed way. A missing data bundle is an operational constraint."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Recommending that a project should stop can be a successful result of planning.",
+          "correct": true,
+          "explanation": "Planning exists to avoid bad projects. A documented no-go is a useful deliverable."
+        },
+        {
+          "kind": "short",
+          "prompt": "Which kind of feasibility asks whether the work can finish before a known deadline?",
+          "answers": ["schedule", "schedule feasibility"],
+          "explanation": "Schedule feasibility compares the time required with the date the organisation needs the system."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A vendor demo looks impressive. Name two feasibility checks you would still insist on before the faculty signs.",
+          "points": ["operational fit with local staff and rules", "schedule against the real academic deadline"],
+          "explanation": "A demo does not prove staff will use the product or that it will be ready before the sitting. Economic and technical checks also matter, but those two catch many campus failures."
+        }
+      ],
+      "summary": "A feasibility study tests a proposal against skills, cost, people, and the calendar. The honest product is a recommendation to proceed, to shrink the scope, or to stop. That decision is cheaper than discovering the same facts after go-live."
+    },
+    {
+      "title": "Requirements Analysis",
+      "description": "The SDLC phase that turns a vague complaint into a checked list of what the system must do.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe the purpose of the requirements analysis phase",
+        "Separate a complaint from a requirement",
+        "Explain why requirements are checked with users before design"
+      ],
+      "introduction": [
+        "The registry says registration is chaos. That sentence is a complaint, not a requirement. Requirements analysis is the phase that turns the complaint into statements a designer can satisfy and a tester can check.",
+        "This lesson stays at life-cycle level. The next chapter goes into functional and non-functional requirements, interviews, and validation in more detail."
+      ],
+      "explanation": [
+        "During requirements analysis the team studies the current process, identifies stakeholders, and writes what the new system must do and how well. The deliverable is a requirements specification that users have seen and agreed, at least for this release.",
+        "A complaint such as the queue is too long can hide several requirements: record a payment reference, show fee status without a phone call, and give the student a written reason when a module is refused. Each of those can be tested. The queue length itself is a symptom.",
+        "Analysts also record priorities. Must, should, and could are enough at this level. A must for the next sitting might be the payment reference. A could might be a dashboard for the dean. Mixing them into one undifferentiated list makes every later argument harder.",
+        "The phase ends when the sponsor accepts the list as the target for design. Acceptance does not mean the list will never change. It means design is no longer aiming at a rumour."
+      ],
+      "definitions": [
+        {"term": "Requirements analysis", "meaning": "The phase that investigates needs and produces an agreed specification."},
+        {"term": "Specification", "meaning": "The written set of requirements that design and testing will use."},
+        {"term": "Priority", "meaning": "The agreed importance of a requirement, such as must, should, or could."},
+        {"term": "Stakeholder", "meaning": "A person or group affected by the system or able to affect it."}
+      ],
+      "exampleTitle": "From chaos to three testable lines",
+      "example": [
+        "Complaint: registration week is chaos. After two mornings in the queue the analyst writes three must requirements. The system must store a mobile-money reference. The system must show a student why a module was refused. The system must let a clerk see fee status without leaving the enrolment screen.",
+        "The dean's wish for a live wall display is recorded as a could, not silently dropped and not allowed to delay the must items."
+      ],
+      "application": [
+        "In your own project, keep a column for priority. If everything is must, you have not finished analysis.",
+        "Read each requirement aloud and ask how a tester would fail it. If you cannot imagine a failure, the sentence is still a wish."
+      ],
+      "tip": "A requirement is testable. A complaint is not, until you rewrite it.",
+      "takeaways": [
+        "Requirements analysis produces an agreed specification",
+        "Complaints are symptoms; requirements are testable statements",
+        "Priorities stop every wish from blocking the release",
+        "Design should not start from an unconfirmed rumour"
+      ],
+      "revision": [
+        "Rewrite the queue is too long as one testable requirement.",
+        "What does it mean for a sponsor to accept the specification?",
+        "Why keep a could item on the list instead of deleting it?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which of these is already a requirement rather than only a complaint?",
+          "options": [
+            "Registration is stressful",
+            "The system must show the reason a module was refused",
+            "The office needs to be modern",
+            "Students are unhappy"
+          ],
+          "correct": 1,
+          "explanation": "A tester can check whether a refusal reason is shown. The other lines are symptoms or slogans."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Every request collected during analysis must be delivered in the first release.",
+          "correct": false,
+          "explanation": "Priorities exist so that must items can ship while could items wait. Recording them is not the same as promising them."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the main deliverable of the requirements analysis phase?",
+          "answers": ["requirements specification", "specification", "a requirements specification"],
+          "explanation": "The phase produces a specification that design and testing can share."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Explain how a priority such as must or could helps both the designer and the sponsor.",
+          "points": ["designer knows what cannot be dropped", "sponsor sees what will wait"],
+          "explanation": "Must items define the release. Could items stay visible so they are not forgotten, without blocking the work that has to land first."
+        }
+      ],
+      "summary": "Requirements analysis converts complaints into a prioritised, testable specification that the sponsor has accepted. Design uses that document as its target. Later chapters show how the statements are gathered and checked."
+    },
+    {
+      "title": "System Design",
+      "description": "The phase that chooses a concrete shape for data, processes, screens, and controls.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe what system design adds after requirements are agreed",
+        "Name the main design concerns a student project should cover",
+        "Explain why design is reviewed before building"
+      ],
+      "introduction": [
+        "Once the faculty agrees that a payment reference must be stored and shown, somebody still has to decide the field, the screen, the error message, and what happens when the reference is duplicated. That work is system design.",
+        "Design is where the project becomes specific. Two teams can accept the same requirements and produce different, both-valid designs. The phase exists so the chosen design is reviewed before it is expensive to change."
+      ],
+      "explanation": [
+        "System design specifies structure and behaviour. Data design says what is stored. Process design says the steps and the checks. Interface design says what the user sees and enters. Control design says how errors, duplicates, and unauthorised access are handled. A student project that only shows screens has done part of the work.",
+        "Design should be traceable. Each important design choice ought to point at a requirement. A second status value called pending exists because the specification says pending payments must be visible. If a choice points at no requirement, it may be decoration.",
+        "The team reviews the design with people who understand the work, not only with other developers. A clerk can see that a twenty-character reference is too short for the codes students actually receive. That comment is cheap on a sketch and costly after a thousand rows have been stored.",
+        "Design does not require the final code. Sketches, tables, and diagrams are the deliverables. Implementation should be boring if the design was clear: the builder is following a decision, not inventing policy."
+      ],
+      "definitions": [
+        {"term": "System design", "meaning": "The phase that specifies how the system will meet the agreed requirements."},
+        {"term": "Traceability", "meaning": "The ability to point from a design choice back to the requirement it serves."},
+        {"term": "Design review", "meaning": "A check of the specification of the solution before it is built."},
+        {"term": "Control", "meaning": "A check that prevents or detects errors and unauthorised actions."}
+      ],
+      "exampleTitle": "One requirement, one design note",
+      "example": [
+        "Requirement: the system must reject a duplicate mobile-money reference. Design note: store the reference as a unique value; if the database refuses the row, the screen says this reference is already used and shows the earlier student number to the clerk, not to the student standing nearby.",
+        "The last clause is a control about privacy. It is a design decision, and it should be reviewed with the bursar, because the analyst should not invent who may see another student's number."
+      ],
+      "application": [
+        "In a report, add a column that links each table or screen back to a requirement number. That single habit is what lecturers mean by traceability.",
+        "Hold a short design review with someone who does the job, even if that person is a classmate role-playing the clerk. Ask them to find one field that is the wrong length."
+      ],
+      "tip": "If a builder has to invent a rule while coding, the design was not finished.",
+      "takeaways": [
+        "Design specifies data, process, interface, and controls",
+        "Every important choice should trace to a requirement",
+        "Users can review a sketch more cheaply than they can review code",
+        "Clear design makes implementation a matter of following decisions"
+      ],
+      "revision": [
+        "What does traceability mean between a field and a requirement?",
+        "Name two design concerns besides the screen layout.",
+        "Why show a duplicate-reference message to the clerk rather than deciding in code without a review?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which activity belongs in system design rather than requirements analysis?",
+          "options": [
+            "Writing that duplicate references must be rejected",
+            "Deciding that the reference is a unique stored value and drafting the error message",
+            "Interviewing the bursar about today's queue",
+            "Deciding whether the project is worth doing"
+          ],
+          "correct": 1,
+          "explanation": "The must statement is a requirement. The unique value and the message are design. The interview is analysis. Worth doing is planning."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A design choice that serves no requirement is a reason to ask whether it belongs in this release.",
+          "correct": true,
+          "explanation": "Traceability exposes decoration and scope creep. Untraced choices should be challenged before they are built."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name for the link from a design decision back to the requirement it satisfies?",
+          "answers": ["traceability"],
+          "explanation": "Traceability lets a reviewer see why a field, screen, or control exists."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A requirement says refused modules must show a reason. Give one data decision and one interface decision that would satisfy it.",
+          "points": ["store a reason or reason code", "show that reason on the student or clerk screen"],
+          "explanation": "Data design keeps the reason. Interface design presents it to the right person. Both should be reviewable before coding."
+        }
+      ],
+      "summary": "System design turns an agreed requirement into decisions about data, steps, screens, and controls. Those decisions should trace back to the specification and be reviewed on sketches, while a wrong field length is still only a pencil mark."
+    },
+    {
+      "title": "Implementation",
+      "description": "Building the designed system: code, configuration, data conversion, and the procedures that must be ready too.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe what happens in the implementation phase",
+        "Explain why implementation includes data and procedures, not only code",
+        "Identify a risk when builders change the design silently"
+      ],
+      "introduction": [
+        "Implementation is the phase in which the design becomes a system people could, in principle, use. For a software project that includes constructing the programs. It also includes preparing data and writing the procedures staff will follow.",
+        "A student who equates implementation with typing code will under-prepare the boring parts that decide whether go-live works."
+      ],
+      "explanation": [
+        "Construction follows the design. Developers build modules, configure a bought package, or both. The analyst's job does not vanish. When a builder discovers that a reference can be longer than the design allowed, the right response is to revisit the design, not to quietly widen the field and hope the screen still makes sense.",
+        "Data preparation moves or cleans what the new system must already know. Existing students, modules, and payments may be exported from a workbook. Duplicate student numbers and blank programmes have to be resolved before the import, or the new system starts life already wrong.",
+        "Procedures and training materials are part of implementation as well. A correct program with no instruction for a pending payment will be misused on the first busy morning. The phase deliverables include the built system, converted data, and the instructions operators need.",
+        "Implementation is also where version control and a simple build record matter. The team should be able to say which design the running system matches. If nobody can, testing will argue about a moving target."
+      ],
+      "definitions": [
+        {"term": "Implementation", "meaning": "The phase that builds the system, prepares its data, and readies procedures."},
+        {"term": "Data conversion", "meaning": "Moving and cleaning existing data so the new system can start from a trustworthy state."},
+        {"term": "Configuration", "meaning": "Setting options in a package so it behaves as the design requires, without writing all the code."},
+        {"term": "Build record", "meaning": "A note of what was constructed and which design it is supposed to match."}
+      ],
+      "exampleTitle": "Importing the workbook",
+      "example": [
+        "The old registration workbook has 4,200 rows. Forty student numbers appear twice because a January intake reused a sequence. Implementation includes a cleaning step: the registry confirms which row is live, and only that row is imported. The program that loads the file is a small part of the work. The decision about the duplicates is the part that protects results day.",
+        "The analyst files a one-page note: design version 3, import run on 2 March, duplicates listed in an appendix. That note is the build record a tester can trust."
+      ],
+      "pseudocode": "for each row in the workbook:\n    if student number already accepted:\n        send the row to the duplicate list\n    else if programme is blank:\n        send the row to the exception list\n    else:\n        accept the row into the new system",
+      "application": [
+        "If your project starts from a spreadsheet, show the cleaning rules. Examiners know that real campus data are messy, and they reward a plan for duplicates.",
+        "When a developer wants to change a rule during coding, write the change back into the design note the same day. Silent drift is how tests stop meaning anything."
+      ],
+      "tip": "Converted data is part of the product. A perfect screen on empty tables is not a finished implementation.",
+      "takeaways": [
+        "Implementation builds the system and prepares data and procedures",
+        "Design gaps found while building should update the design, not be hidden",
+        "Dirty source data must be cleaned before import",
+        "A build record says which design the running system matches"
+      ],
+      "revision": [
+        "Name three products of implementation besides source code.",
+        "What should happen when a builder finds that a designed field is too short?",
+        "Why does a duplicate student number matter before go-live?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which task is part of implementation?",
+          "options": [
+            "Deciding whether the project is affordable",
+            "Cleaning duplicate student numbers before import",
+            "Writing the original complaint log",
+            "Choosing the company vision statement"
+          ],
+          "correct": 1,
+          "explanation": "Data conversion and cleaning belong to implementation. Affordability is planning. The complaint log is analysis."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "If coding reveals a design mistake, the builder should change the behaviour and leave the design document untouched.",
+          "correct": false,
+          "explanation": "The design should be updated so testers and users are judging the decision the team actually made."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name for moving and cleaning existing records so the new system starts from a sound state?",
+          "answers": ["data conversion", "conversion"],
+          "explanation": "Data conversion prepares the starting data. It is easy to forget and painful to repair after go-live."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Give two reasons a build record helps the people who will test the system.",
+          "points": ["they know which design they are testing", "they can see when data were imported"],
+          "explanation": "Testers need a fixed target. A record of the design version and the import date stops arguments about a system that changed overnight."
+        }
+      ],
+      "summary": "Implementation constructs the designed system, cleans and loads the data it depends on, and prepares the procedures staff will use. Changes discovered during the build belong back in the design, with a record of what is actually running."
+    },
+    {
+      "title": "Testing and Deployment",
+      "description": "Checking the system against requirements, then putting a chosen version into real use.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain the aim of testing in the SDLC",
+        "Distinguish a test that finds a fault from a demonstration that nothing was tried",
+        "Describe what deployment must hand to the people who will operate the system"
+      ],
+      "introduction": [
+        "A demonstration in which the developer clicks the happy path is not a test. Testing tries to show that a requirement fails. Deployment is the separate decision to let real students and real fees depend on a particular version.",
+        "This lesson introduces both phases. A later chapter covers test levels and conversion strategies in more depth, because those choices decide how much pain go-live causes."
+      ],
+      "explanation": [
+        "Testing compares the running system with the specification and the design. A useful test has inputs, steps, and an expected result written down before the tester runs it. If the expected result is invented after the screen looks fine, the test cannot fail, and a test that cannot fail teaches nothing.",
+        "Faults are recorded, fixed, and retested. A fault may reveal a wrong requirement rather than a wrong program. Either way, the specification or the design is updated so the next test has an honest target. Testing is finished for a release when the agreed must requirements pass, not when everyone is tired.",
+        "Deployment puts that release into the live environment. It includes installing the software, loading live data, training the operators, choosing a conversion strategy, and agreeing how to fall back if the first day goes badly. Deployment without a fallback is optimism, not a plan.",
+        "Communication is part of deployment. Students need to know which queue to join on Monday. Lecturers need to know the old workbook is no longer the source of class lists. A technically successful install that nobody was told about will be treated as a failure."
+      ],
+      "definitions": [
+        {"term": "Test case", "meaning": "A documented input, procedure, and expected result used to check one behaviour."},
+        {"term": "Fault", "meaning": "A difference between what the system does and what the agreed target says it should do."},
+        {"term": "Deployment", "meaning": "The phase that places a chosen release into live use."},
+        {"term": "Fallback", "meaning": "A prepared way to return to a safe older method if the new release fails."}
+      ],
+      "exampleTitle": "A test that is allowed to fail",
+      "example": [
+        "Requirement: a duplicate mobile-money reference is rejected. Test case: enter reference ABC123 for student A, then enter ABC123 for student B. Expected result: the second save is refused and the clerk sees that the reference is already used. The tester does not accept a green success message.",
+        "Deployment note: the form opens on Monday 08:00, the workbook becomes read-only at the same minute, and if the portal is down for more than thirty minutes the clerks return to a numbered paper list that will be typed in later."
+      ],
+      "application": [
+        "Write at least one test case that should fail if the requirement is missing. Put the expected result in the report before you paste a screenshot.",
+        "For deployment, name the person who may authorise a fallback. A plan that says we will see on the day is not a plan."
+      ],
+      "tip": "If your test cannot fail, you have written a tour, not a test.",
+      "takeaways": [
+        "A test case states the expected result in advance",
+        "Faults may come from the program or from the specification",
+        "Deployment includes data, training, communication, and a fallback",
+        "An install that nobody was told about will be treated as a failure"
+      ],
+      "revision": [
+        "What three parts does a test case need?",
+        "Why is a developer demonstration weaker than a written test?",
+        "Give one fallback for a registration portal on the first morning."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What makes a test case able to detect a fault?",
+          "options": [
+            "It uses the newest laptop",
+            "The expected result was written before the run",
+            "The developer performs it",
+            "It only tries the happy path and stops when the screen looks attractive"
+          ],
+          "correct": 1,
+          "explanation": "An expected result written in advance gives the tester something to compare. A tour of the happy path cannot fail."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Deployment is complete once the software has been copied to the server.",
+          "correct": false,
+          "explanation": "Deployment also covers live data, training, telling users what changed, and a fallback if the release fails."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the prepared way back to a safe older method called, if the new release fails on the first day?",
+          "answers": ["fallback", "a fallback", "fallback plan"],
+          "explanation": "A fallback is the prepared return path. Deciding it during the outage is much harder."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Write the idea of a test case for a refused module that must show a reason. Include the expected result.",
+          "points": ["attempt to register without meeting a rule", "the screen shows a specific reason"],
+          "explanation": "The input breaks a rule, such as a missing prerequisite. The expected result is that the refusal reason is visible, not merely that an error occurred."
+        }
+      ],
+      "summary": "Testing checks a release against results that were written down first. Deployment then puts that release into live use, with data, training, a public explanation, and a fallback. Both phases are about reducing surprise, not about admiring a demo."
+    },
+    {
+      "title": "Maintenance and Evaluation",
+      "description": "What happens after go-live: keeping the system fit, and judging whether it met the original need.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain why maintenance begins as soon as a system is live",
+        "Distinguish fixing a fault from changing the system because the world changed",
+        "Describe a simple evaluation a faculty could perform after one term"
+      ],
+      "introduction": [
+        "Go-live is the start of the longest phase, not the end of the project. Students will find messages that made sense in a test and not at a crowded counter. A new faculty rule will arrive in the middle of the year.",
+        "Maintenance keeps the system aligned with the work. Evaluation asks whether the project achieved what planning and analysis promised. They are related, and neither is optional."
+      ],
+      "explanation": [
+        "Corrective maintenance repairs faults discovered in live use: a wrong fee total, a crash when a name contains an apostrophe, a report that omits part-time students. These are defects relative to the agreed target.",
+        "Other changes are not defects. When the university introduces a new sponsorship letter, the system must be extended. That is adaptive work. When clerks ask for a shorter path they now understand, that is improvement. A later chapter names these categories carefully. For the life cycle, the point is that change requests are normal and should re-enter analysis and design rather than being patched in silence.",
+        "Evaluation looks back at the purpose. If the aim was a shorter queue and fewer lost payment references, the faculty can count both after one registration period. A system that is admired by the developer and unchanged in the queue has not met its purpose, even if it rarely crashes.",
+        "Evaluation feeds the next planning cycle. Findings become the problems of the next small project. That is why the picture is a cycle rather than a line that stops at a ribbon-cutting."
+      ],
+      "definitions": [
+        {"term": "Maintenance", "meaning": "Work done after go-live to correct faults and keep the system fit for the organisation."},
+        {"term": "Change request", "meaning": "A formal ask to alter a live system, which should be analysed before it is built."},
+        {"term": "Evaluation", "meaning": "A check of whether the live system met the purpose and the measures agreed at the start."},
+        {"term": "Corrective maintenance", "meaning": "Repairs to faults that mean the system does not meet its agreed target."}
+      ],
+      "exampleTitle": "One term after the new form",
+      "example": [
+        "The faculty counts median queue time and the number of payment references retyped. Queue time fell. Retyping did not, because clerks still keep a paper duplicate out of habit. Evaluation says the payment requirement is only partly met. The follow-up is a short change: retire the paper duplicate and train the Friday shift, not a new portal.",
+        "Separately, a fault report says names with apostrophes crash the search. That is corrective maintenance and should be fixed without waiting for the wider change."
+      ],
+      "application": [
+        "End a student project with an evaluation section that uses the original objectives, not a new set invented after the demo worked.",
+        "If you are asked to add a feature to a live coursework system, write it as a change request with a requirement. Do not only edit the code."
+      ],
+      "tip": "Evaluate against the purpose you wrote in planning, or you will grade your own demo instead of the users' problem.",
+      "takeaways": [
+        "Maintenance is the longest phase and starts at go-live",
+        "Fault fixes and new needs are both legitimate and should be told apart",
+        "Change requests re-enter analysis rather than bypassing it",
+        "Evaluation uses the original purpose and feeds the next cycle"
+      ],
+      "revision": [
+        "Give one corrective change and one change that is not a fault.",
+        "What should a change request pass through before code is altered?",
+        "How would you evaluate a project whose purpose was fewer lost payment references?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "A search crashes when a name contains an apostrophe, contrary to the specification. What kind of work is the fix?",
+          "options": ["A new feasibility study only", "Corrective maintenance", "A marketing campaign", "Schedule feasibility"],
+          "correct": 1,
+          "explanation": "The system fails an agreed behaviour. Repairing that fault is corrective maintenance."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Evaluation should invent new success measures after the demo, if the original ones look disappointing.",
+          "correct": false,
+          "explanation": "Evaluation uses the purpose and measures agreed earlier. Changing them after the fact hides whether the project worked."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the formal name for an ask to alter a system that is already live?",
+          "answers": ["change request", "a change request"],
+          "explanation": "A change request records the ask so it can be analysed instead of being patched in quietly."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Queue time fell but clerks still retype payment references. What does evaluation conclude, and what kind of follow-up fits?",
+          "points": ["the payment aim is only partly met", "a small change and training rather than a new system"],
+          "explanation": "Evaluation compares outcomes with the original aim. Partial success points to a focused change, not automatically to another large project."
+        }
+      ],
+      "summary": "After deployment, maintenance corrects faults and absorbs real change, preferably through a change request that is analysed. Evaluation asks whether the original purpose was met and turns the answer into the next, smaller plan."
+    },
+    {
+      "title": "SDLC Models: Waterfall, Iterative and Agile",
+      "description": "Three ways of arranging the same work, and how to choose one for a university project without treating the names as fashion.",
+      "durationMinutes": 22,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Describe waterfall, iterative, and agile arrangements of the SDLC",
+        "Match each model to a project situation",
+        "Explain the risk of using a model your team will not actually follow"
+      ],
+      "introduction": [
+        "The phases do not change their meaning when a team picks a fashionable name. What changes is how much of the system is specified before building starts, and how often users see a working piece.",
+        "Waterfall, iterative development, and agile are three common arrangements. A second-year student should be able to choose among them for a given campus project and defend the choice."
+      ],
+      "explanation": [
+        "Waterfall completes each phase for the whole system before the next phase starts. It fits when requirements are stable and the cost of a wrong release is high: a payroll link to NAPSA, or a results process with a published calendar. Its weakness is late discovery. Users may see nothing working until the end, so a misunderstood requirement travels a long way.",
+        "An iterative model builds the system in slices. Each iteration passes through analysis, design, build, and test for a subset, and a review decides the next slice. The faculty might first deliver payment references, then refusal reasons, then the dean's report. Risk drops because a wrong slice is smaller. The team still needs a picture of the whole so the slices fit together.",
+        "Agile methods are a family of iterative approaches that keep iterations short, prefer working software over thick documents, and expect requirements to be refined with the users continuously. A daily or weekly conversation with the registry can replace a large unread specification, but only if that conversation really happens. Agile is not we wrote no requirements. It is we confirmed a small set often.",
+        "The wrong model is the one the team will fake. A group that claims agile and never speaks to a user is doing chaotic waterfall. A group that claims waterfall and changes the database every evening without updating the design is doing undocumented iteration. Choose the model you can staff, and say what artefact each iteration or phase will leave behind."
+      ],
+      "definitions": [
+        {"term": "Waterfall", "meaning": "A model that finishes each SDLC phase for the whole system before starting the next."},
+        {"term": "Iterative development", "meaning": "Building the system in successive slices, each of which is analysed, designed, built, and tested."},
+        {"term": "Agile", "meaning": "A family of short-iteration methods that refine requirements continuously with users and emphasise working software."},
+        {"term": "Iteration", "meaning": "One pass that produces a reviewed slice of the system."}
+      ],
+      "exampleTitle": "Choosing for three campus projects",
+      "example": [
+        "Results processing for a published board meeting is close to waterfall: the rules are stable, and a late surprise is unacceptable. A new student feedback form can be iterative: ship two questions, see whether students answer, then add more. A registration counter change during a live term suits a short agile loop with the clerks, because the team will learn something every morning that no January specification captured.",
+        "The choice is written in the plan: model, why, and what done means for the first slice or phase."
+      ],
+      "diagram": "Waterfall:  Plan -> Analyse -> Design -> Build -> Test -> Deploy\n\nIterative:\n  slice 1: analyse-design-build-test\n  slice 2: analyse-design-build-test\n  slice 3: analyse-design-build-test\n\nAgile: short slices, user review every slice, scope of the next slice can change",
+      "table": {
+        "caption": "When each arrangement earns its keep",
+        "headers": ["Model", "Fits when", "Fails when"],
+        "rows": [
+          ["Waterfall", "Rules are stable and a late surprise is costly", "Users first see the system at the end and it is wrong"],
+          ["Iterative", "The problem can be sliced and reviews are real", "Slices ignore the overall data design"],
+          ["Agile", "A user is available often and scope can flex", "The name is used but nobody meets the users"]
+        ]
+      },
+      "application": [
+        "In coursework, state the model in the introduction and then follow it in the chapter structure. A waterfall report needs a requirements chapter before screens. An iterative report needs a review after each slice.",
+        "If your group cannot meet a real clerk, do not claim a tight agile loop. Claim a small iterative build and be honest about whose feedback you used."
+      ],
+      "tip": "Pick the model you will actually leave evidence for. Markers can tell a label from a practice.",
+      "takeaways": [
+        "Waterfall finishes each phase before the next, for the whole system",
+        "Iterative development delivers reviewed slices",
+        "Agile keeps iterations short and revisits priorities with users",
+        "A model you only name, and do not follow, hides risk instead of managing it"
+      ],
+      "revision": [
+        "Why might results processing fit waterfall better than a brand-new feedback form?",
+        "What must still exist in an iterative project so the slices fit?",
+        "Why is agile without user contact not really agile?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which description matches the waterfall model?",
+          "options": [
+            "Each phase for the whole system is finished before the next phase starts",
+            "No requirements are written",
+            "Users rewrite the database every morning with no record",
+            "Testing is forbidden until the third year of operation"
+          ],
+          "correct": 0,
+          "explanation": "Waterfall sequences the phases and expects a phase to be substantially complete before the next begins."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Agile means the team is allowed to skip confirming requirements with users.",
+          "correct": false,
+          "explanation": "Agile confirms a small set of requirements often. Skipping users removes the method's main control."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is one pass that produces a reviewed slice of the system called?",
+          "answers": ["iteration", "an iteration"],
+          "explanation": "An iteration is one cycle through the work for a slice, followed by a review."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A group claims to be agile but has never spoken to a user. What are they actually doing, and what should they change?",
+          "points": ["they are not practising agile", "they should meet a user or honestly choose another model"],
+          "explanation": "The label does not create the feedback loop. They should either establish a real user review or describe their process as something else."
+        }
+      ],
+      "summary": "Waterfall, iterative development, and agile arrange the same SDLC work differently. Waterfall suits stable, high-cost rules. Iterations and agile suit learning in slices, but only when reviews with users actually happen. Choose a model the team will leave evidence for."
+    }
+  ]
+}

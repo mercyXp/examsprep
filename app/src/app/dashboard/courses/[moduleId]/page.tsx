@@ -44,6 +44,26 @@ function CourseOverviewPage() {
                 <span style={{ width: `${course.progressPercent}%` }} />
               </div>
             </article>
+            {course.quizzes?.length ? (
+              <article className="dash-card">
+                <header className="dash-card-head">
+                  <h2>Quizzes and exams</h2>
+                </header>
+                <ul className="cms-lessons">
+                  {course.quizzes.map((quiz) => (
+                    <li key={quiz.id}>
+                      <div>
+                        <h3>{quiz.title}</h3>
+                        <p>{quiz.kind === "mock" ? "Timed mock exam" : "Practice"}</p>
+                      </div>
+                      <Link className="dash-primary" href={`/dashboard/quizzes/${quiz.id}`}>
+                        Open
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ) : null}
             {course.chapters.map((chapter) => (
               <article key={chapter.id} className="dash-card">
                 <header className="dash-card-head">

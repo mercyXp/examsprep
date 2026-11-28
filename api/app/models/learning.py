@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, UniqueConstraint, Uuid, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, Text, UniqueConstraint, Uuid, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -82,6 +82,7 @@ class QuizAttempt(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     score_percent: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
     passed: Mapped[bool | None] = mapped_column(nullable=True)
+    timed_out: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     user: Mapped[User] = relationship()
     quiz: Mapped[Quiz] = relationship()
@@ -110,6 +111,7 @@ class AttemptAnswer(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=list,
         server_default=text("'[]'::jsonb"),
     )
+    response_text: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
     is_correct: Mapped[bool | None] = mapped_column(nullable=True)
     points_awarded: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
