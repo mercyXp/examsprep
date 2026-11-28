@@ -26,6 +26,8 @@ from app.solana.gates import assert_rewards_viewer
 from app.solana.service import (
     badge_out,
     claim_badge,
+    claim_pool_reward,
+    close_pool,
     create_pool,
     fund_pool,
     leaderboard_out,
@@ -226,6 +228,15 @@ def admin_fund_pool(
     return {"ok": True, "pool": pool_out(pool)}
 
 
+@router.post("/api/pools/{pool_id}/claim")
+def pool_claim(
+    pool_id: uuid.UUID,
+    user: User = Depends(require_user),
+    session: Session = Depends(get_session),
+) -> dict:
+    return claim_pool_reward(session, user, _pool(session, pool_id), get_chain())
+
+
 @router.post("/api/admin/pools/{pool_id}/settle")
 def admin_settle_pool(
     pool_id: uuid.UUID,
@@ -233,4 +244,14 @@ def admin_settle_pool(
     session: Session = Depends(get_session),
 ) -> dict:
     pool = settle_pool(session, scope, _pool(session, pool_id), get_chain())
+    return {"ok": True, "pool": pool_out(pool)}
+
+
+@router.post("/api/admin/pools/{pool_id}/close")
+def admin_close_pool(
+    pool_id: uuid.UUID,
+    scope: AccessScope = Depends(_scope),
+    session: Session = Depends(get_session),
+) -> dict:
+    pool = close_pool(session, scope, _pool(session, pool_id), get_chain())
     return {"ok": True, "pool": pool_out(pool)}
