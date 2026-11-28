@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5433/examsprep"
     secret_key: str = "dev-only-change-me-please-use-a-long-local-secret"
     access_token_minutes: int = 60 * 24 * 7
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3000,http://localhost:8081"
     seed_demo_users: bool = True
     media_root: str = "var/media"
     super_admin_name: str = ""
@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     # "live" talks to SOLANA_RPC_URL. "record" stores the calls and does not
     # send them (local demos and tests). "off" refuses chain actions.
     solana_chain_mode: str = ""
+    # ExamSprint / Byte Arena. Leave both empty until the API is on public https.
+    # See docs/byte.md. The token is an upload token, not a player secret.
+    sprint_public_base_url: str = ""
+    byte_game_token: str = ""
 
 
 settings = Settings()

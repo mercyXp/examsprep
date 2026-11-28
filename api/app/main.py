@@ -23,6 +23,7 @@ from app.routers.research import router as research_router
 from app.routers.revision import router as revision_router
 from app.routers.rewards import router as rewards_router
 from app.routers.snap import router as snap_router
+from app.routers.sprint import router as sprint_router
 from app.routers.staff import router as staff_router
 from app.routers.voice import router as voice_router
 
@@ -74,6 +75,7 @@ app.include_router(snap_router)
 app.include_router(practice_router)
 app.include_router(revision_router)
 app.include_router(rewards_router)
+app.include_router(sprint_router)
 app.include_router(media_router)
 
 
