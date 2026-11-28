@@ -30,10 +30,10 @@ uvicorn app.main:app --reload
 
 Demo logins (password `examsready`): `student@examsprep.local`, `creator@examsprep.local`, `admin@examsprep.local`, `super@examsprep.local`. Google sign-in verifies a Google ID token when `GOOGLE_CLIENT_ID` is set. New Google accounts are students. Password reset and staff invitations send mail through Resend when `RESEND_API_KEY` and `EMAIL_FROM` are set. See [deployment.md](../docs/operations/deployment.md).
 
-Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md). Lesson JSON schema and studio notes: [docs/cms/lesson-studio.md](../docs/cms/lesson-studio.md). Solana badges, wallet linking, and prize pools: [docs/architecture/solana.md](../docs/architecture/solana.md).
+Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md). Lesson JSON schema and studio notes: [docs/cms/lesson-studio.md](../docs/cms/lesson-studio.md). Solana badges, wallet linking, and prize pools: [docs/architecture/solana.md](../docs/architecture/solana.md). ExamSprint sessions, the agent API, and the leaderboard: [docs/byte.md](../docs/byte.md) and `mobile-examsprint/`.
 
 ```bash
-python -m unittest tests.test_cms_slides tests.test_media
+python -m unittest discover -s tests
 ```
 
 ## Production

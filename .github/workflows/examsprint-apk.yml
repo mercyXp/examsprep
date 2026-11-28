@@ -1,0 +1,51 @@
+name: ExamSprint APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "mobile-examsprint/**"
+      - ".github/workflows/examsprint-apk.yml"
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile-examsprint/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install
+        working-directory: mobile-examsprint
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: mobile-examsprint
+        run: npx tsc --noEmit
+
+      - name: Generate the Android project
+        working-directory: mobile-examsprint
+        run: npx expo prebuild -p android --non-interactive
+
+      - name: Sign the release build with the debug keystore
+        working-directory: mobile-examsprint
+        run: python3 scripts/debug-sign-release.py
+
+      - name: Assemble the APK
+        working-directory: mobile-examsprint/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: examsprint-apk
+          path: mobile-examsprint/android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error

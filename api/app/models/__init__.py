@@ -1,7 +1,7 @@
 from app.models.access import ContentCreatorAssignment, ProgramAdminAssignment, ProgramModule
-from app.models.comms import Announcement, AnnouncementRead
 from app.models.audit import AuditLog
 from app.models.catalogue import AcademicYear, Chapter, Module, Programme, Semester, Topic
+from app.models.comms import Announcement, AnnouncementRead
 from app.models.content import (
     ContentReview,
     Lesson,
@@ -16,11 +16,12 @@ from app.models.content import (
     ReusableGame,
 )
 from app.models.identity import Permission, Role, RolePermission, StudentProfile, User, UserRole
-from app.models.recovery import PasswordResetToken
-from app.models.staff import StaffInvitation
-from app.models.settings import AcademicPeriod, ExamType, ModuleExamSlot, ProgramExamSchedule
 from app.models.learning import AttemptAnswer, Bookmark, Enrolment, LessonProgress, QuizAttempt
+from app.models.recovery import PasswordResetToken
+from app.models.settings import AcademicPeriod, ExamType, ModuleExamSlot, ProgramExamSchedule
 from app.models.solana import BadgeAward, PrizePayout, PrizePool, WalletLink
+from app.models.sprint import SprintAchievement, SprintSession
+from app.models.staff import StaffInvitation
 
 __all__ = [
     "AcademicPeriod",
@@ -28,8 +29,8 @@ __all__ = [
     "Announcement",
     "AnnouncementRead",
     "AttemptAnswer",
-    "BadgeAward",
     "AuditLog",
+    "BadgeAward",
     "Bookmark",
     "Chapter",
     "ContentCreatorAssignment",
@@ -41,8 +42,8 @@ __all__ = [
     "LessonVersion",
     "Module",
     "ModuleExamSlot",
-    "PastPaper",
     "PasswordResetToken",
+    "PastPaper",
     "Permission",
     "PrizePayout",
     "PrizePool",
@@ -61,6 +62,8 @@ __all__ = [
     "Role",
     "RolePermission",
     "Semester",
+    "SprintAchievement",
+    "SprintSession",
     "StaffInvitation",
     "StudentProfile",
     "Topic",

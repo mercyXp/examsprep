@@ -48,3 +48,5 @@ From a machine that can get devnet SOL:
 - Live demo: [https://www.examsprep.xyz](https://www.examsprep.xyz). Solana badges and pools appear after `SOLANA_AUTHORITY_KEYPAIR` is set on the API and the program is deployed. Until then the site behaves as it does today and those routes answer 503.
 
 Design notes: [docs/architecture/solana.md](docs/architecture/solana.md). Phone build and Fake Wallet: [mobile/README.md](mobile/README.md).
+
+ExamSprint, the separate Android knowledge-challenge game, lives in [mobile-examsprint/](mobile-examsprint/README.md). It uses this API for sign-in and the question bank. Byte Arena and Pollar notes: [docs/byte.md](docs/byte.md), [docs/pollar.md](docs/pollar.md).
