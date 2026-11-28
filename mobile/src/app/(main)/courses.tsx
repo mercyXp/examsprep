@@ -32,7 +32,13 @@ export default function CoursesScreen() {
     <Screen>
       <Title subtitle="Only published modules you are allowed to study.">My Courses</Title>
       {error ? <ErrorText>{error}</ErrorText> : null}
-      {items.length === 0 && !error ? <Card><Text style={styles.body}>No courses yet. Finish onboarding on the website, or ask an administrator to publish a module.</Text></Card> : null}
+      {items.length === 0 && !error ? (
+        <Card>
+          <Text style={styles.body}>
+            No courses yet. Finish onboarding on the website, or ask an administrator to publish a module.
+          </Text>
+        </Card>
+      ) : null}
       {items.map((module) => (
         <Pressable key={module.id} onPress={() => router.push(`/course/${module.id}`)}>
           <Card>

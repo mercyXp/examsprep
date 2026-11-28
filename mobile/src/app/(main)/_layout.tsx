@@ -1,14 +1,16 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Tabs } from 'expo-router/js-tabs'
 
+import { colors } from '@/ui/screen'
+
 export default function MainTabs() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#0E6B62',
-        tabBarInactiveTintColor: '#5C6B73',
-        tabBarStyle: { backgroundColor: '#FFFFFF', borderTopColor: '#E2E8E4' },
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.line },
       }}
     >
       <Tabs.Screen
@@ -26,26 +28,37 @@ export default function MainTabs() {
         }}
       />
       <Tabs.Screen
-        name="quizzes"
+        name="study"
         options={{
-          title: 'Quizzes',
+          title: 'Study',
           tabBarIcon: ({ color, size }) => <Ionicons color={color as string} name="checkbox-outline" size={size} />,
         }}
       />
       <Tabs.Screen
-        name="leaderboard"
+        name="studio"
         options={{
-          title: 'Board',
-          tabBarIcon: ({ color, size }) => <Ionicons color={color as string} name="trophy-outline" size={size} />,
+          title: 'AI',
+          tabBarIcon: ({ color, size }) => <Ionicons color={color as string} name="sparkles-outline" size={size} />,
         }}
       />
       <Tabs.Screen
-        name="badges"
+        name="me"
         options={{
-          title: 'Badges',
-          tabBarIcon: ({ color, size }) => <Ionicons color={color as string} name="ribbon-outline" size={size} />,
+          title: 'Me',
+          tabBarIcon: ({ color, size }) => <Ionicons color={color as string} name="person-outline" size={size} />,
         }}
       />
+      <Tabs.Screen name="quizzes" options={{ href: null }} />
+      <Tabs.Screen name="mocks" options={{ href: null }} />
+      <Tabs.Screen name="planner" options={{ href: null }} />
+      <Tabs.Screen name="snap" options={{ href: null }} />
+      <Tabs.Screen name="tutor" options={{ href: null }} />
+      <Tabs.Screen name="audio" options={{ href: null }} />
+      <Tabs.Screen name="achievements" options={{ href: null }} />
+      <Tabs.Screen name="leaderboard" options={{ href: null }} />
+      <Tabs.Screen name="wallet" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="badges" options={{ href: null }} />
     </Tabs>
   )
 }

@@ -42,8 +42,25 @@ export default function BadgesScreen() {
   }, [token])
 
   useEffect(() => {
-    void reload()
-  }, [reload])
+    if (!token) return
+    let cancelled = false
+    void (async () => {
+      const [badgeResult, walletResult] = await Promise.all([
+        api<{ badges: Badge[]; claimable: Claimable[] }>('/api/badges/me', {}, token),
+        api<{ address: string | null }>('/api/wallet/me', {}, token),
+      ])
+      if (cancelled) return
+      if (!badgeResult.ok) setError(badgeResult.message)
+      else {
+        setBadges(badgeResult.data.badges ?? [])
+        setClaimable(badgeResult.data.claimable ?? [])
+      }
+      if (walletResult.ok) setWalletAddress(walletResult.data.address)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [token])
 
   async function link() {
     if (!token || !wallet.account) return
@@ -63,10 +80,14 @@ export default function BadgesScreen() {
     if (!token) return
     setBusy(true)
     setError('')
-    const result = await api('/api/badges/claim', {
-      method: 'POST',
-      body: JSON.stringify({ kind: item.kind, subject_key: item.subjectKey }),
-    }, token)
+    const result = await api(
+      '/api/badges/claim',
+      {
+        method: 'POST',
+        body: JSON.stringify({ kind: item.kind, subject_key: item.subjectKey }),
+      },
+      token,
+    )
     setBusy(false)
     if (!result.ok) setError(result.message)
     else await reload()
@@ -104,7 +125,9 @@ export default function BadgesScreen() {
       ))}
       {badges.length === 0 && claimable.length === 0 ? (
         <Card>
-          <Text style={styles.body}>Finish every published lesson in a module, pass a mock, or study three days in a row.</Text>
+          <Text style={styles.body}>
+            Finish every published lesson in a module, pass a mock, or study three days in a row.
+          </Text>
         </Card>
       ) : null}
     </Screen>

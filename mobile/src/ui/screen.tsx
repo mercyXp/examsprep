@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View, type PressableProps } from 'react-native'
 
+import { useStudyData } from '@/features/offline/study-data'
+
 export const colors = {
-  bg: '#F3F6F4',
+  bg: '#F4F6FB',
   card: '#FFFFFF',
   ink: '#142033',
   muted: '#5C6B73',
-  accent: '#0E6B62',
-  line: '#E2E8E4',
+  accent: '#3444DA',
+  violet: '#7B5CFF',
+  line: '#E2E6F2',
   gold: '#8A6420',
   danger: '#9B2C2C',
 }
@@ -15,8 +18,25 @@ export const colors = {
 export function Screen({ children }: { children: ReactNode }) {
   return (
     <ScrollView contentContainerStyle={styles.screen} style={{ backgroundColor: colors.bg }}>
+      <ConnectionNote />
       {children}
     </ScrollView>
+  )
+}
+
+function ConnectionNote() {
+  const study = useStudyData()
+  if (!study.ready) return null
+  if (study.online && study.pending === 0) return null
+  const label = study.online
+    ? `${study.pending} saved change${study.pending === 1 ? '' : 's'} waiting to sync.`
+    : study.pending > 0
+      ? `Offline. ${study.pending} change${study.pending === 1 ? '' : 's'} will sync when you reconnect.`
+      : 'Offline. Saved lessons and quizzes on this phone still open.'
+  return (
+    <View style={styles.banner}>
+      <Text style={styles.bannerText}>{label}</Text>
+    </View>
   )
 }
 
@@ -59,6 +79,10 @@ export function ErrorText({ children }: { children: string }) {
   return <Text style={styles.error}>{children}</Text>
 }
 
+export function Note({ children }: { children: string }) {
+  return <Text style={styles.note}>{children}</Text>
+}
+
 const styles = StyleSheet.create({
   screen: { padding: 20, paddingBottom: 48, gap: 14 },
   titleBlock: { gap: 6, marginBottom: 4 },
@@ -83,4 +107,12 @@ const styles = StyleSheet.create({
   buttonLabelGhost: { color: colors.ink },
   disabled: { opacity: 0.5 },
   error: { color: colors.danger, fontSize: 14, lineHeight: 20 },
+  note: { color: colors.muted, fontSize: 14, lineHeight: 20 },
+  banner: {
+    backgroundColor: '#E8ECFF',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  bannerText: { color: colors.accent, fontSize: 14, fontWeight: '600', lineHeight: 20 },
 })

@@ -26,11 +26,15 @@ export async function linkConnectedWallet({
     return { ok: false as const, message: 'The wallet did not return a signature.' }
   }
 
-  return api<{ address: string }>('/api/wallet/link', {
-    method: 'POST',
-    body: JSON.stringify({
-      address,
-      signature: getBase64Decoder().decode(signed),
-    }),
-  }, token)
+  return api<{ address: string }>(
+    '/api/wallet/link',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        address,
+        signature: getBase64Decoder().decode(signed),
+      }),
+    },
+    token,
+  )
 }

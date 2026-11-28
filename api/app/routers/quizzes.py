@@ -12,12 +12,13 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
 from app.db import get_session
+from app.idempotency import clean_idempotency_key, remember_response, stored_response
 from app.models import Quiz, QuizAttempt, User
 from app.models.content import QuizVersion, QuizVersionQuestion
 from app.models.enums import ContentStatus
@@ -154,7 +155,12 @@ def submit_quiz(
     body: SubmitIn,
     user: User = Depends(require_user),
     session: Session = Depends(get_session),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ) -> dict[str, Any]:
+    key = clean_idempotency_key(idempotency_key)
+    prior = stored_response(session, user.id, "attempt", key)
+    if prior is not None:
+        return prior
     quiz = _published_quiz(session, quiz_id, user)
     version = quiz.published_version
     if version is None:
@@ -190,7 +196,7 @@ def submit_quiz(
             )
         )
     session.flush()
-    return {
+    payload = {
         "ok": True,
         "attemptId": str(attempt.id),
         "scorePercent": percent,
@@ -208,3 +214,4 @@ def submit_quiz(
             for result in results
         ],
     }
+    return remember_response(session, user.id, "attempt", key, payload)

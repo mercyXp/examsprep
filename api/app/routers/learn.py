@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -20,7 +20,9 @@ from app.course_selection import (
     select_module,
 )
 from app.db import get_session
+from app.idempotency import clean_idempotency_key, remember_response, stored_response
 from app.models import AcademicYear, Chapter, Lesson, LessonProgress, LessonVersion, Module, Semester, User
+from app.progress_merge import merge_slide_progress
 from app.profile import ensure_profile
 from app.models.comms import AnnouncementRead
 from app.models.enums import ContentStatus
@@ -429,7 +431,12 @@ def save_progress(
     body: ProgressIn,
     user: User = Depends(require_user),
     session: Session = Depends(get_session),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ) -> dict[str, Any]:
+    key = clean_idempotency_key(idempotency_key)
+    prior = stored_response(session, user.id, "progress", key)
+    if prior is not None:
+        return prior
     lesson = published_lesson(session, lesson_id, user)
     version = lesson.published_version
     slides = student_slides(version)
@@ -439,24 +446,41 @@ def save_progress(
     if row is None:
         row = LessonProgress(user_id=user.id, lesson_id=lesson.id)
         session.add(row)
+        session.flush()
     row.last_viewed_version_id = lesson.published_version_id
-    row.current_slide_index = slide_index
-    row.revealed_units = body.revealed_units
-    row.check_results = body.check_results or {}
     required_checks = [
         block["id"]
         for slide in slides
         for block in slide.get("blocks") or []
         if block.get("type") == "check"
     ]
-    checks_passed = all(row.check_results.get(block_id, {}).get("correct") is True for block_id in required_checks)
+    merged_checks = dict(row.check_results or {})
+    merged_checks.update(body.check_results or {})
+    checks_passed = all(merged_checks.get(block_id, {}).get("correct") is True for block_id in required_checks)
     at_end = slide_index >= len(slides) - 1 if slides else True
-    if body.completed and at_end and checks_passed:
+    index, revealed, completed, conflict = merge_slide_progress(
+        server_index=row.current_slide_index or 0,
+        server_revealed=row.revealed_units or 0,
+        server_completed=row.completed_at is not None,
+        incoming_index=slide_index,
+        incoming_revealed=body.revealed_units,
+        incoming_completed=body.completed,
+        checks_passed=checks_passed,
+        at_end=at_end,
+        guarded=key is not None,
+    )
+    row.current_slide_index = index
+    row.revealed_units = revealed
+    row.check_results = merged_checks if key is not None else (body.check_results or {})
+    if completed:
         row.completed_at = row.completed_at or datetime.now(UTC)
     elif not checks_passed:
         row.completed_at = None
     session.flush()
-    return {"ok": True, "progress": progress_out(row)}
+    payload: dict[str, Any] = {"ok": True, "progress": progress_out(row)}
+    if conflict:
+        payload["conflict"] = conflict
+    return remember_response(session, user.id, "progress", key, payload)
 
 
 @router.get("/announcements")

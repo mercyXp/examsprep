@@ -33,8 +33,12 @@ export default function LeaderboardScreen() {
       ) : null}
       {items.map((row) => (
         <Card key={`${row.rank}-${row.displayName}`}>
-          <Text style={styles.rank}>#{row.rank} {row.displayName}</Text>
-          <Text style={styles.body}>{row.quizPoints} quiz points · {row.lessonsCompleted} lessons</Text>
+          <Text style={styles.rank}>
+            #{row.rank} {row.displayName}
+          </Text>
+          <Text style={styles.body}>
+            {row.quizPoints} quiz points · {row.lessonsCompleted} lessons
+          </Text>
         </Card>
       ))}
     </Screen>

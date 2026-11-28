@@ -8,6 +8,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "package": "xyz.examsprep.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "experiments": {
@@ -36,12 +42,38 @@
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
           },
-          "backgroundColor": "#208AEF"
+          "backgroundColor": "#3444DA"
         }
       ],
       "expo-status-bar",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-secure-store",
+      "expo-sqlite",
+      [
+        "expo-camera",
+        {
+          "barcodeScannerEnabled": false,
+          "cameraPermission": "ExamsPrep uses the camera to photograph a question.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true,
+          "microphonePermission": "ExamsPrep uses the microphone so you can talk to the AI tutor.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#3444DA"
+        }
+      ],
+      "expo-video"
     ],
     "scheme": "examsprep",
     "slug": "examsprep",
