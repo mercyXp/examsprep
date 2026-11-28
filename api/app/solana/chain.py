@@ -89,6 +89,10 @@ def vault_pda(program_id: Pubkey, pool: Pubkey) -> Pubkey:
     return find_pda([b"vault", bytes(pool)], program_id)
 
 
+def receipt_pda(program_id: Pubkey, pool: Pubkey, student: Pubkey) -> Pubkey:
+    return find_pda([b"receipt", bytes(pool), bytes(student)], program_id)
+
+
 def associated_token_address(owner: Pubkey, mint: Pubkey) -> Pubkey:
     address, _bump = Pubkey.find_program_address(
         [bytes(owner), bytes(TOKEN_PROGRAM_ID), bytes(mint)],
@@ -122,6 +126,29 @@ def pay_winners_data(amounts: list[int]) -> bytes:
     for amount in amounts:
         body += struct.pack("<Q", amount)
     return instruction_discriminator("pay_winners") + body
+
+
+def record_achievement_data(kind: int, subject: bytes, detail: int, pool_id: int, amount: int) -> bytes:
+    if len(subject) != 32:
+        raise ChainError("An achievement subject hash must be 32 bytes.")
+    return (
+        instruction_discriminator("record_achievement")
+        + bytes([kind])
+        + subject
+        + struct.pack("<I", detail)
+        + struct.pack("<Q", pool_id)
+        + struct.pack("<Q", amount)
+    )
+
+
+def claim_reward_data(kind: int, subject: bytes, amount: int) -> bytes:
+    if len(subject) != 32:
+        raise ChainError("An achievement subject hash must be 32 bytes.")
+    return instruction_discriminator("claim_reward") + bytes([kind]) + subject + struct.pack("<Q", amount)
+
+
+def close_reward_pool_data() -> bytes:
+    return instruction_discriminator("close_reward_pool")
 
 
 def load_keypair(raw: str) -> Keypair:
@@ -237,6 +264,82 @@ def create_ata_idempotent_instruction(payer: Pubkey, owner: Pubkey, mint: Pubkey
     )
 
 
+def record_instruction(
+    program_id: Pubkey,
+    authority: Pubkey,
+    student: Pubkey,
+    kind: int,
+    subject: bytes,
+    detail: int,
+    pool_id: int,
+    amount: int,
+) -> Instruction:
+    return Instruction(
+        program_id,
+        record_achievement_data(kind, subject, detail, pool_id, amount),
+        [
+            _meta(authority, signer=True, writable=True),
+            _meta(config_pda(program_id)),
+            _meta(student),
+            _meta(badge_pda(program_id, student, kind, subject), writable=True),
+            _meta(SYSTEM_PROGRAM_ID),
+        ],
+    )
+
+
+def claim_instruction(
+    program_id: Pubkey,
+    authority: Pubkey,
+    student: Pubkey,
+    kind: int,
+    subject: bytes,
+    amount: int,
+    mint: Pubkey,
+    pool_id: int,
+) -> Instruction:
+    pool = pool_pda(program_id, pool_id)
+    return Instruction(
+        program_id,
+        claim_reward_data(kind, subject, amount),
+        [
+            _meta(authority, signer=True, writable=True),
+            _meta(config_pda(program_id)),
+            _meta(student),
+            _meta(pool, writable=True),
+            _meta(badge_pda(program_id, student, kind, subject)),
+            _meta(receipt_pda(program_id, pool, student), writable=True),
+            _meta(mint),
+            _meta(vault_pda(program_id, pool), writable=True),
+            _meta(associated_token_address(student, mint), writable=True),
+            _meta(TOKEN_PROGRAM_ID),
+            _meta(SYSTEM_PROGRAM_ID),
+        ],
+    )
+
+
+def close_instruction(
+    program_id: Pubkey,
+    authority: Pubkey,
+    mint: Pubkey,
+    pool_id: int,
+    destination_owner: Pubkey,
+) -> Instruction:
+    pool = pool_pda(program_id, pool_id)
+    return Instruction(
+        program_id,
+        close_reward_pool_data(),
+        [
+            _meta(authority, signer=True, writable=True),
+            _meta(config_pda(program_id)),
+            _meta(pool, writable=True),
+            _meta(mint),
+            _meta(vault_pda(program_id, pool), writable=True),
+            _meta(associated_token_address(destination_owner, mint), writable=True),
+            _meta(TOKEN_PROGRAM_ID),
+        ],
+    )
+
+
 def pay_instruction(
     program_id: Pubkey,
     authority: Pubkey,
@@ -299,6 +402,37 @@ class RecordingChain:
         self.calls.append(("pay", pool_id, tuple(winners), tuple(amounts)))
         return ChainReceipt(signature=f"record-pay-{pool_id}")
 
+    def record_achievement(
+        self,
+        student: str,
+        kind: int,
+        subject_key: str,
+        detail: int,
+        pool_id: int,
+        amount: int,
+    ) -> ChainReceipt:
+        self.calls.append(("record_achievement", student, kind, subject_key, detail, pool_id, amount))
+        return ChainReceipt(signature=f"record-achievement-{len(self.calls)}")
+
+    def claim_reward(
+        self,
+        student: str,
+        kind: int,
+        subject_key: str,
+        detail: int,
+        pool_id: int,
+        amount: int,
+        mint: str,
+    ) -> ChainReceipt:
+        self.calls.append(("claim", student, kind, subject_key, pool_id, amount, mint))
+        program_id = Pubkey.from_string(settings.solana_program_id)
+        pool = pool_pda(program_id, pool_id)
+        return ChainReceipt(signature=f"record-claim-{pool_id}", pool_address=str(pool))
+
+    def close_pool(self, pool_id: int, mint: str, destination_owner: str) -> ChainReceipt:
+        self.calls.append(("close", pool_id, mint, destination_owner))
+        return ChainReceipt(signature=f"record-close-{pool_id}")
+
 
 class SolanaChain:
     def __init__(self, rpc_url: str, program_id: str, authority: Keypair, sponsor: Keypair | None) -> None:
@@ -324,8 +458,16 @@ class SolanaChain:
         if not isinstance(payload, dict):
             raise ChainError("The Solana RPC returned an unexpected response.")
         if payload.get("error"):
-            message = payload["error"].get("message") if isinstance(payload["error"], dict) else str(payload["error"])
-            raise ChainError(str(message))
+            error = payload["error"]
+            if isinstance(error, dict):
+                message = str(error.get("message") or error)
+                data = error.get("data")
+                logs = data.get("logs") if isinstance(data, dict) else None
+                if isinstance(logs, list) and logs:
+                    message = f"{message} {' '.join(str(line) for line in logs)}"
+            else:
+                message = str(error)
+            raise ChainError(message)
         return payload.get("result")
 
     def account_exists(self, address: Pubkey) -> bool:
@@ -447,6 +589,96 @@ class SolanaChain:
             # A retry after a successful payout hits the program's AlreadyPaid
             # check. The tokens already moved, so the API can keep recording it.
             if "alreadypaid" in exc.message.lower() or "already paid" in exc.message.lower():
+                return ChainReceipt(signature="", already_existed=True)
+            raise
+        return ChainReceipt(signature=signature)
+
+    def record_achievement(
+        self,
+        student: str,
+        kind: int,
+        subject_key: str,
+        detail: int,
+        pool_id: int,
+        amount: int,
+    ) -> ChainReceipt:
+        self.ensure_config()
+        student_key = Pubkey.from_string(student)
+        subject = subject_hash(subject_key)
+        instruction = record_instruction(
+            self.program_id,
+            self.authority.pubkey(),
+            student_key,
+            kind,
+            subject,
+            detail,
+            pool_id,
+            amount,
+        )
+        return self._send_or_exists([instruction], [self.authority])
+
+    def claim_reward(
+        self,
+        student: str,
+        kind: int,
+        subject_key: str,
+        detail: int,
+        pool_id: int,
+        amount: int,
+        mint: str,
+    ) -> ChainReceipt:
+        """Record the entitlement if it is missing, then claim. One transaction when both are needed."""
+        self.ensure_config()
+        student_key = Pubkey.from_string(student)
+        subject = subject_hash(subject_key)
+        mint_key = Pubkey.from_string(mint)
+        achievement = badge_pda(self.program_id, student_key, kind, subject)
+        instructions = [
+            create_ata_idempotent_instruction(self.authority.pubkey(), student_key, mint_key),
+        ]
+        if not self.account_exists(achievement):
+            instructions.insert(
+                0,
+                record_instruction(
+                    self.program_id,
+                    self.authority.pubkey(),
+                    student_key,
+                    kind,
+                    subject,
+                    detail,
+                    pool_id,
+                    amount,
+                ),
+            )
+        instructions.append(
+            claim_instruction(
+                self.program_id,
+                self.authority.pubkey(),
+                student_key,
+                kind,
+                subject,
+                amount,
+                mint_key,
+                pool_id,
+            )
+        )
+        try:
+            signature = self.send(instructions, [self.authority])
+        except ChainError as exc:
+            if _already_there(exc.message):
+                return ChainReceipt(signature="", already_existed=True)
+            raise
+        return ChainReceipt(signature=signature)
+
+    def close_pool(self, pool_id: int, mint: str, destination_owner: str) -> ChainReceipt:
+        mint_key = Pubkey.from_string(mint)
+        owner = Pubkey.from_string(destination_owner) if destination_owner else self.authority.pubkey()
+        create = create_ata_idempotent_instruction(self.authority.pubkey(), owner, mint_key)
+        close = close_instruction(self.program_id, self.authority.pubkey(), mint_key, pool_id, owner)
+        try:
+            signature = self.send([create, close], [self.authority])
+        except ChainError as exc:
+            if "pool is closed" in exc.message.lower() or "poolclosed" in exc.message.lower():
                 return ChainReceipt(signature="", already_existed=True)
             raise
         return ChainReceipt(signature=signature)
