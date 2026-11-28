@@ -1,24 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-
+import { StyleSheet, Text } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
 
 import { useSession } from '@/features/auth/session'
+import { useStudyData } from '@/features/offline/study-data'
 import { api } from '@/lib/api'
-import { Button, Card, ErrorText, Screen, Title, colors } from '@/ui/screen'
+import { Button, Card, ErrorText, Note, Screen, Title } from '@/ui/screen'
+import { LessonBlockView, type LessonBlock } from '@/ui/lesson-blocks'
 
-type Block = {
-  id: string
-  type: string
-  text?: string
-  code?: string
-  prompt?: string
-  options?: { id: string; label: string }[]
-  correctId?: string
-  notesOnly?: boolean
-}
-type Slide = { id: string; title: string; blocks?: Block[] }
+type Slide = { id?: string; title: string; blocks?: LessonBlock[] }
 type Lesson = {
+  id?: string
   title: string
   description: string
   slides: Slide[]
@@ -28,25 +20,53 @@ type Lesson = {
 export default function LessonScreen() {
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>()
   const { token } = useSession()
+  const study = useStudyData()
+  const online = study.online
+  const readDownload = study.readDownload
   const [lesson, setLesson] = useState<Lesson | null>(null)
   const [slideIndex, setSlideIndex] = useState(0)
   const [revealed, setRevealed] = useState(1)
   const [checks, setChecks] = useState<Record<string, { correct?: boolean }>>({})
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
+  const [offlineCopy, setOfflineCopy] = useState(false)
 
   useEffect(() => {
-    if (!token || !lessonId) return
-    void api<{ item: Lesson }>(`/api/learn/lessons/${lessonId}`, {}, token).then((result) => {
-      if (!result.ok) {
-        setError(result.message)
+    if (!lessonId) return
+    let cancelled = false
+    void (async () => {
+      const show = (item: Lesson) => {
+        if (cancelled) return
+        setLesson(item)
+        setSlideIndex(item.progress?.currentSlideIndex ?? 0)
+        setChecks(item.progress?.checkResults ?? {})
+        setError('')
+      }
+      if (token && online) {
+        const result = await api<{ item: Lesson }>(`/api/learn/lessons/${lessonId}`, {}, token)
+        if (cancelled) return
+        if (result.ok) {
+          show(result.data.item)
+          return
+        }
+        if (!result.offline) {
+          setError(result.message)
+          return
+        }
+      }
+      const stored = await readDownload('lesson', lessonId)
+      if (cancelled) return
+      if (!stored) {
+        setError('This lesson is not on the phone, and the API could not be reached.')
         return
       }
-      setLesson(result.data.item)
-      setSlideIndex(result.data.item.progress?.currentSlideIndex ?? 0)
-      setChecks(result.data.item.progress?.checkResults ?? {})
-    })
-  }, [lessonId, token])
+      show(JSON.parse(stored.payload) as Lesson)
+      setOfflineCopy(true)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [lessonId, online, readDownload, token])
 
   const slide = lesson?.slides[slideIndex]
   const blocks = (slide?.blocks ?? []).filter((block) => !block.notesOnly)
@@ -56,16 +76,25 @@ export default function LessonScreen() {
 
   async function persist(nextIndex: number, nextRevealed: number, nextChecks: typeof checks, completed: boolean) {
     if (!token || !lessonId) return
-    const result = await api(`/api/learn/lessons/${lessonId}/progress`, {
+    const body = {
+      current_slide_index: nextIndex,
+      revealed_units: nextRevealed,
+      check_results: nextChecks,
+      completed,
+    }
+    if (!study.online) {
+      await study.enqueue({ kind: 'progress', path: `/api/learn/lessons/${lessonId}/progress`, method: 'PUT', body })
+      setSaved('Saved on this phone. It will sync when you are back online.')
+      return
+    }
+    const key = await study.enqueue({
+      kind: 'progress',
+      path: `/api/learn/lessons/${lessonId}/progress`,
       method: 'PUT',
-      body: JSON.stringify({
-        current_slide_index: nextIndex,
-        revealed_units: nextRevealed,
-        check_results: nextChecks,
-        completed,
-      }),
-    }, token)
-    setSaved(result.ok ? (completed ? 'Lesson complete.' : 'Progress saved.') : result.message)
+      body,
+    })
+    await study.flush()
+    setSaved(completed ? `Lesson marked. Sync key ${key.slice(0, 12)}.` : 'Progress sent.')
   }
 
   function revealMore() {
@@ -83,75 +112,65 @@ export default function LessonScreen() {
       void persist(nextIndex, 1, checks, false)
       return
     }
-    const required = (lesson.slides.flatMap((item) => item.blocks ?? [])).filter((block) => block.type === 'check')
-    const passed = required.every((block) => checks[block.id]?.correct === true)
+    const required = lesson.slides.flatMap((item) => item.blocks ?? []).filter((block) => block.type === 'check')
+    const passed = required.every((block) => checks[block.id || '']?.correct === true)
     void persist(slideIndex, revealed, checks, passed)
   }
 
-  function answer(block: Block, optionId: string) {
+  function answer(block: LessonBlock, optionId: string) {
+    const id = block.id || block.prompt || 'check'
     const correct = optionId === block.correctId
-    const next = { ...checks, [block.id]: { correct } }
+    const next = { ...checks, [id]: { correct } }
     setChecks(next)
     void persist(slideIndex, revealed, next, false)
+  }
+
+  async function download() {
+    if (!token || !lessonId || !lesson) return
+    await study.saveDownload({
+      kind: 'lesson',
+      remoteId: lessonId,
+      title: lesson.title,
+      payload: JSON.stringify(lesson),
+    })
+    await study.saveDownload({
+      kind: 'notes',
+      remoteId: lessonId,
+      title: `${lesson.title} notes`,
+      payload: JSON.stringify({ title: lesson.title, slides: lesson.slides }),
+    })
+    setSaved('Lesson and notes saved on this phone.')
   }
 
   return (
     <Screen>
       <Title subtitle={lesson?.description}>{lesson?.title ?? 'Lesson'}</Title>
+      {offlineCopy ? <Note>Opened from this phone. Progress will sync later.</Note> : null}
       {error ? <ErrorText>{error}</ErrorText> : null}
+      {lesson ? <Button label="Save for offline" tone="ghost" onPress={() => void download()} /> : null}
       {slide ? (
         <Card>
           <Text style={styles.kicker}>
             Slide {slideIndex + 1} of {lesson?.slides.length ?? 1}
           </Text>
           <Text style={styles.slideTitle}>{slide.title}</Text>
-          {visible.map((block) => (
-            <View key={block.id} style={styles.block}>
-              {block.type === 'code' ? <Text style={styles.code}>{block.code}</Text> : null}
-              {block.type === 'check' ? (
-                <>
-                  <Text style={styles.body}>{block.prompt}</Text>
-                  {block.options?.map((option) => (
-                    <Pressable key={option.id} onPress={() => answer(block, option.id)}>
-                      <Text style={styles.option}>{option.label}</Text>
-                    </Pressable>
-                  ))}
-                  {checks[block.id] ? (
-                    <Text style={checks[block.id]?.correct ? styles.good : styles.bad}>
-                      {checks[block.id]?.correct ? 'Correct' : 'Try another answer'}
-                    </Text>
-                  ) : null}
-                </>
-              ) : block.type !== 'code' ? (
-                <Text style={styles.body}>{block.text || block.prompt || `${block.type} block`}</Text>
-              ) : null}
-            </View>
+          {visible.map((block, index) => (
+            <LessonBlockView
+              block={block}
+              checks={checks}
+              key={block.id || `${slideIndex}-${index}`}
+              onAnswer={answer}
+            />
           ))}
-          <Button
-            label={atEndOfSlide ? (lastSlide ? 'Finish lesson' : 'Next slide') : 'Next point'}
-            onPress={() => void revealMore()}
-          />
-          {saved ? <Text style={styles.saved}>{saved}</Text> : null}
+          <Button label={lastSlide && atEndOfSlide ? 'Finish lesson' : 'Continue'} onPress={revealMore} />
         </Card>
       ) : null}
+      {saved ? <Note>{saved}</Note> : null}
     </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  kicker: { color: colors.muted, fontSize: 13 },
-  slideTitle: { color: colors.ink, fontSize: 20, fontWeight: '700' },
-  block: { gap: 6 },
-  body: { color: colors.ink, fontSize: 16, lineHeight: 24 },
-  code: {
-    backgroundColor: '#142033',
-    borderRadius: 10,
-    color: '#E7F6F2',
-    fontFamily: 'monospace',
-    padding: 12,
-  },
-  option: { color: colors.accent, fontSize: 16, paddingVertical: 4 },
-  good: { color: colors.accent, fontWeight: '700' },
-  bad: { color: colors.danger, fontWeight: '700' },
-  saved: { color: colors.muted, fontSize: 13 },
+  kicker: { color: '#3444DA', fontSize: 12, fontWeight: '700' },
+  slideTitle: { color: '#142033', fontSize: 20, fontWeight: '700' },
 })

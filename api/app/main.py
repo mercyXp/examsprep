@@ -16,6 +16,7 @@ from app.routers.auth import router as auth_router
 from app.routers.learn import router as learn_router
 from app.routers.mail import router as mail_router
 from app.routers.media import router as media_router
+from app.routers.mobile import router as mobile_router
 from app.routers.onboarding import router as onboarding_router
 from app.routers.quizzes import router as quizzes_router
 from app.routers.rewards import router as rewards_router
@@ -56,6 +57,7 @@ app.include_router(learn_router)
 app.include_router(quizzes_router)
 app.include_router(rewards_router)
 app.include_router(media_router)
+app.include_router(mobile_router)
 
 
 @app.exception_handler(StarletteHTTPException)

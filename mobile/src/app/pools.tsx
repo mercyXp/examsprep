@@ -33,7 +33,11 @@ export default function PoolsScreen() {
         Prize pools
       </Title>
       {error ? <ErrorText>{error}</ErrorText> : null}
-      {items.length === 0 && !error ? <Card><Text style={styles.body}>No prize pools yet.</Text></Card> : null}
+      {items.length === 0 && !error ? (
+        <Card>
+          <Text style={styles.body}>No prize pools yet.</Text>
+        </Card>
+      ) : null}
       {items.map((pool) => (
         <Card key={pool.id}>
           <Text style={styles.title}>{pool.title}</Text>

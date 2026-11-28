@@ -32,6 +32,8 @@ Demo logins (password `examsready`): `student@examsprep.local`, `creator@examspr
 
 Access model: [docs/architecture/access-control.md](../docs/architecture/access-control.md). Lesson JSON schema and studio notes: [docs/cms/lesson-studio.md](../docs/cms/lesson-studio.md). Solana badges, wallet linking, and prize pools: [docs/architecture/solana.md](../docs/architecture/solana.md).
 
+The Android app also uses `PUT` progress and `POST` quiz attempts with an `Idempotency-Key` header, plus `/api/mobile/notification-preferences`, `/api/mobile/push-tokens`, and `/api/mobile/seeker/verify`. Those tables arrive in Alembic revision `20261128_0019`. `SOLANA_MAINNET_RPC_URL` is optional and is only used to read Seeker Genesis Token accounts. Phone setup, including Firebase for server push, is in [mobile/README.md](../mobile/README.md).
+
 ```bash
 python -m unittest tests.test_cms_slides tests.test_media
 ```

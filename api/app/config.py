@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # Solana hackathon phase 1. Leave the keypairs empty until you deploy.
     # See docs/architecture/solana.md. Secrets stay on the API, never on Vercel.
     solana_rpc_url: str = "https://api.devnet.solana.com"
+    # Seeker Genesis Tokens exist only on mainnet. Leave this on the public
+    # endpoint, or set a provider URL on the API host. Never put it in the app.
+    solana_mainnet_rpc_url: str = "https://api.mainnet-beta.solana.com"
     solana_program_id: str = "Ebo9c8SiwLx37wXejAwQmx1vLv1YtR8kYVb2Lb6V8FVH"
     solana_authority_keypair: str = ""
     solana_sponsor_keypair: str = ""

@@ -18,6 +18,8 @@ type AuthResponse = { access_token: string; user: SessionUser }
 export default function SignInScreen() {
   const session = useSession()
   const wallet = useMobileWallet()
+  const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -26,16 +28,16 @@ export default function SignInScreen() {
   const googleClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID
 
   async function accept(result: AuthResponse) {
-    session.signIn(result.access_token, result.user)
+    await session.signIn(result.access_token, result.user)
     setError('')
   }
 
   async function signInWithEmail() {
     setBusy(true)
     setError('')
-    const result = await api<AuthResponse>('/api/auth/login', {
+    const result = await api<AuthResponse>(mode === 'register' ? '/api/auth/signup' : '/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(mode === 'register' ? { name, email, password } : { email, password }),
     })
     setBusy(false)
     if (!result.ok) {
@@ -64,8 +66,8 @@ export default function SignInScreen() {
 
   return (
     <Screen>
-      <Title subtitle="Email or Google for your ExamsPrep account, then connect a Solana wallet to hold badges and prize USDC.">
-        Sign in
+      <Title subtitle="The same email account as the website. The token is kept in the Android keystore. Connect a wallet afterwards if you want badges.">
+        {mode === 'register' ? 'Create account' : 'Sign in'}
       </Title>
       {session.token ? (
         <Card>
@@ -73,7 +75,11 @@ export default function SignInScreen() {
           {wallet.account ? (
             <>
               <Text style={styles.body}>Wallet {wallet.account.address}</Text>
-              <Button disabled={busy} label={busy ? 'Waiting for the wallet…' : 'Sign the link message'} onPress={() => void linkWallet()} />
+              <Button
+                disabled={busy}
+                label={busy ? 'Waiting for the wallet…' : 'Sign the link message'}
+                onPress={() => void linkWallet()}
+              />
               {linked ? <Text style={styles.ok}>Linked {linked}</Text> : null}
             </>
           ) : (
@@ -84,6 +90,16 @@ export default function SignInScreen() {
         </Card>
       ) : (
         <Card>
+          {mode === 'register' ? (
+            <TextInput
+              autoComplete="name"
+              onChangeText={setName}
+              placeholder="Name"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+              value={name}
+            />
+          ) : null}
           <TextInput
             autoCapitalize="none"
             autoComplete="email"
@@ -103,7 +119,16 @@ export default function SignInScreen() {
             value={password}
           />
           {error ? <ErrorText>{error}</ErrorText> : null}
-          <Button disabled={busy} label="Sign in" onPress={() => void signInWithEmail()} />
+          <Button
+            disabled={busy}
+            label={mode === 'register' ? 'Create account' : 'Sign in'}
+            onPress={() => void signInWithEmail()}
+          />
+          <Button
+            label={mode === 'register' ? 'I already have an account' : 'Create an account'}
+            tone="ghost"
+            onPress={() => setMode(mode === 'register' ? 'login' : 'register')}
+          />
           {googleClientId ? <GoogleSignIn clientId={googleClientId} onError={setError} onToken={accept} /> : null}
         </Card>
       )}
