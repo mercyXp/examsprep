@@ -18,6 +18,9 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    columns = {column["name"] for column in sa.inspect(op.get_bind()).get_columns("academic_periods")}
+    if "is_published" in columns:
+        return
     op.add_column(
         "academic_periods",
         sa.Column("is_published", sa.Boolean(), server_default="false", nullable=False),

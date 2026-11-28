@@ -9,6 +9,7 @@ export type NavIconName =
   | "chart"
   | "spark"
   | "bell"
+  | "camera"
   | "gear"
   | "people"
   | "lessons"
@@ -67,6 +68,14 @@ export function NavIcon({ name }: { name: NavIconName }) {
     return (
       <svg {...common}>
         <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.2 6.2l2.8 2.8M15 15l2.8 2.8M17.8 6.2 15 9M9 15l-2.8 2.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (name === "camera") {
+    return (
+      <svg {...common}>
+        <path d="M8 8 9.5 6h5L16 8h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+        <circle cx="12" cy="13" r="3" stroke="currentColor" strokeWidth="1.8" />
       </svg>
     );
   }

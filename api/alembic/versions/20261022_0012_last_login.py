@@ -18,6 +18,9 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    columns = {column["name"] for column in sa.inspect(op.get_bind()).get_columns("users")}
+    if "last_login_at" in columns:
+        return
     op.add_column("users", sa.Column("last_login_at", sa.DateTime(timezone=True), nullable=True))
 
 

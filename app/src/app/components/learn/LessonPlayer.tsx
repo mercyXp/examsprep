@@ -23,6 +23,8 @@ import {
 } from "@/lib/learn-api";
 import { FullNotes } from "./FullNotes";
 import { handlePlayerKey, SlideStage } from "./SlideStage";
+import { AudioPlayer } from "@/app/components/assist/AudioPlayer";
+import { proxyMedia, requestLessonAudio } from "@/lib/assist";
 
 export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const search = useSearchParams();
@@ -38,6 +40,10 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   const [drawer, setDrawer] = useState<null | "nav" | "resources" | "more">(null);
   const [focusMode, setFocusMode] = useState(false);
   const [shortcuts, setShortcuts] = useState(false);
+  const [listenSrc, setListenSrc] = useState<string | null>(null);
+  const [listenNote, setListenNote] = useState("");
+  const [listenError, setListenError] = useState("");
+  const [listenBusy, setListenBusy] = useState(false);
   const lock = useRef(false);
   const stageRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +78,21 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
   useEffect(() => {
     stageRef.current?.focus();
   }, [slideIndex, mode]);
+
+  async function listen() {
+    setListenBusy(true);
+    setListenError("");
+    const result = await requestLessonAudio(lessonId);
+    setListenBusy(false);
+    if (!result.ok) {
+      setListenSrc(null);
+      setListenNote("");
+      setListenError(result.message);
+      return;
+    }
+    setListenSrc(proxyMedia(result.data.url));
+    setListenNote(result.data.message || (result.data.cached ? "Playing the saved recording." : "A new recording was created."));
+  }
 
   async function persist(next: { slideIndex: number; revealed: number; checks: LessonProgress["checkResults"]; completed: boolean }) {
     if (preview) return;
@@ -323,6 +344,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               </p>
             </div>
             <div className="learn-head-actions">
+              <button type="button" className="learn-notes-btn" onClick={() => void listen()} disabled={listenBusy}>
+                {listenBusy ? "Preparing audio…" : "Listen to this lesson"}
+              </button>
               {mode === "notes" ? (
                 <div className="learn-mode">
                   <button type="button" onClick={() => setMode("presentation")}>
@@ -339,6 +363,9 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
               )}
             </div>
           </div>
+          {listenError ? <p className="cms-error">{listenError}</p> : null}
+          {listenNote ? <p>{listenNote}</p> : null}
+          <AudioPlayer src={listenSrc} label="This lesson" />
           {lesson.progress.completed ? <p className="learn-complete">This lesson is marked complete. You can still review the slides and notes.</p> : null}
           {mode === "notes" ? (
             <div className="learn-notes-wrap">

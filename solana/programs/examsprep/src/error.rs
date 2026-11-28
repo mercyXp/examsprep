@@ -25,9 +25,24 @@ pub enum ExamsPrepError {
     #[msg("The winner list is empty, does not match the amounts, or exceeds top N.")]
     BadWinners,
 
-    #[msg("The escrow does not hold enough tokens for those payouts.")]
+    #[msg("The reward vault does not hold enough tokens for that payout.")]
     InsufficientFunds,
 
-    #[msg("A token account is missing, or it is for a different mint than this pool.")]
+    #[msg("A token account is missing, or it does not belong to the expected wallet.")]
     BadTokenAccount,
+
+    #[msg("The mint does not match this reward pool.")]
+    InvalidMint,
+
+    #[msg("This pool is closed.")]
+    PoolClosed,
+
+    #[msg("Claims have already started, so this pool cannot be funded or batch-paid.")]
+    ClaimsStarted,
+
+    #[msg("That achievement is not an entitlement for this reward pool.")]
+    AchievementMismatch,
+
+    #[msg("The claim amount does not match the amount recorded on the achievement.")]
+    BadAmount,
 }

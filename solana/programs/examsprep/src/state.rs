@@ -8,9 +8,12 @@ use anchor_lang::prelude::*;
 
 /// Seed strings. Changing one of these changes every derived address.
 pub const CONFIG_SEED: &[u8] = b"config";
+/// Student achievement account. The API calls this a badge.
 pub const BADGE_SEED: &[u8] = b"badge";
 pub const POOL_SEED: &[u8] = b"pool";
 pub const VAULT_SEED: &[u8] = b"vault";
+/// One claim receipt per student per reward pool.
+pub const RECEIPT_SEED: &[u8] = b"receipt";
 
 /// The highest `top_n` a pool may pay. Keeps the payout transaction small.
 pub const MAX_TOP_N: u8 = 10;
@@ -42,6 +45,10 @@ pub struct Badge {
     /// Unix time (seconds) when the authority awarded it.
     pub awarded_at: i64,
     pub bump: u8,
+    /// Reward pool this achievement can be claimed against. Zero means "badge only".
+    pub pool_id: u64,
+    /// Base units the student may claim. Zero means the achievement pays nothing.
+    pub amount: u64,
 }
 
 /// A leaderboard prize pool. Address seeds: `["pool", pool_id as 8 little-endian bytes]`.
@@ -69,4 +76,23 @@ pub struct PrizePool {
     pub total_funded: u64,
     pub bump: u8,
     pub vault_bump: u8,
+    /// Set by `close_reward_pool`. Claims and new funding are rejected after this.
+    pub closed: bool,
+    /// Sum of successful `claim_reward` payouts. A batch `pay_winners` is rejected once this is non-zero.
+    pub total_claimed: u64,
+}
+
+/// Proof that `student` already claimed `pool`. Seeds: `["receipt", pool, student]`.
+///
+/// The account stores the wallet, the amount, and the achievement address.
+/// It does not store a name, an email, or an exam answer.
+#[account]
+#[derive(InitSpace)]
+pub struct ClaimReceipt {
+    pub pool: Pubkey,
+    pub student: Pubkey,
+    pub achievement: Pubkey,
+    pub amount: u64,
+    pub claimed_at: i64,
+    pub bump: u8,
 }

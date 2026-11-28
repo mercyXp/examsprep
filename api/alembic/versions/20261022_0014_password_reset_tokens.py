@@ -18,6 +18,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    if "password_reset_tokens" in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.create_table(
         "password_reset_tokens",
         sa.Column("id", sa.Uuid(), nullable=False),

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { QuizBoard } from "@/app/components/assist/QuizBoard";
 import AppShell from "@/app/components/shell/AppShell";
 import { loadPerformance, loadQuizzes, type AttemptSummary, type QuizSummary } from "@/lib/learn-api";
 
@@ -85,6 +86,7 @@ export default function QuizzesPage() {
             <p className="dash-empty">Your attempt history will appear here after the first submission.</p>
           )}
         </article>
+        <QuizBoard />
       </div>
     </AppShell>
   );

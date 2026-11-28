@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import AppShell from "@/app/components/shell/AppShell";
+import { ResearchAssistant } from "@/app/components/assist/ResearchAssistant";
 import { BackLink, ChapterMark, GuideDialog, InfoBanner, MenuButton, RowMenu, routeParam } from "@/app/components/cms/LessonGuide";
 import {
   courseLabel,
@@ -148,6 +149,7 @@ function ManageChaptersPage() {
     <AppShell variant="admin" title="Manage Chapters" subtitle={subtitle}>
       <div className="dash-body lesson-flow">
         <BackLink href="/admin/lessons" />
+        {course ? <ResearchAssistant modules={scope?.modules || [course]} initialModuleId={course.id} /> : null}
         {error && !missing ? (
           <p className="cms-error" role="alert">
             {error}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ChevronDown, Redo2, Undo2 } from "lucide-react";
+import { ResearchAssistant } from "@/app/components/assist/ResearchAssistant";
 import { SlideStage } from "@/app/components/learn/SlideStage";
 import { LessonStatusNote, LessonWorkflowButtons } from "@/app/components/cms/LessonWorkflow";
 import BrandLogo from "@/app/components/ui/BrandLogo";
@@ -866,17 +867,20 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                   <ChevronDown size={16} aria-hidden="true" className={generateOpen ? "is-open" : undefined} />
                 </button>
                 {generateOpen ? (
-                  <AuthoringTools
-                    lessonId={lessonId}
-                    moduleId={moduleId}
-                    modules={modules}
-                    slides={slides}
-                    busy={authorBusy}
-                    onBusy={setAuthorBusy}
-                    onSlides={acceptSlides}
-                    onMessage={setNotice}
-                    onError={setError}
-                  />
+                  <>
+                    <AuthoringTools
+                      lessonId={lessonId}
+                      moduleId={moduleId}
+                      modules={modules}
+                      slides={slides}
+                      busy={authorBusy}
+                      onBusy={setAuthorBusy}
+                      onSlides={acceptSlides}
+                      onMessage={setNotice}
+                      onError={setError}
+                    />
+                    <ResearchAssistant modules={modules} initialModuleId={moduleId} />
+                  </>
                 ) : null}
               </div>
               {dismissedWarnings !== warningSig ? (

@@ -17,6 +17,8 @@ const STUDENT_NAV: { href: string; label: string; icon: NavIconName }[] = [
   { href: "/dashboard/courses", label: "My Courses", icon: "book" },
   { href: "/dashboard/planner", label: "Study Planner", icon: "cal" },
   { href: "/dashboard/quizzes", label: "Quizzes & Mock Exams", icon: "quiz" },
+  { href: "/dashboard/practice", label: "Practice", icon: "cards" },
+  { href: "/dashboard/snap", label: "Snap a Question", icon: "camera" },
   { href: "/dashboard/flashcards", label: "Flashcards", icon: "cards" },
   { href: "/dashboard/progress", label: "Progress & Analytics", icon: "chart" },
   { href: "/dashboard/assistant", label: "Study Assistant", icon: "spark" },

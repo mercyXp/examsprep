@@ -28,10 +28,13 @@ from app.solana.chain import (
     award_badge_data,
     badge_pda,
     config_pda,
+    claim_reward_data,
     create_pool_data,
     instruction_discriminator,
     pay_winners_data,
     pool_pda,
+    receipt_pda,
+    record_achievement_data,
     subject_hash,
     vault_pda,
 )
@@ -42,6 +45,7 @@ from app.solana.eligibility import (
     MockPass,
     PublishedLesson,
     ScoreRow,
+    linked_prize_shares,
     mastered_topics,
     passed_mocks,
     rank_students,
@@ -121,6 +125,12 @@ class EligibilityTests(unittest.TestCase):
         self.assertEqual(split_prize(10, 3), [4, 3, 3])
         self.assertEqual(split_prize(0, 2), [])
 
+    def test_unlinked_places_are_skipped_and_the_first_linked_student_gets_the_remainder(self) -> None:
+        shares = linked_prize_shares(["a", "b", "c"], {"b", "c"}, 10, 3)
+        self.assertEqual(shares, [("b", 2, 5), ("c", 3, 5)])
+        self.assertEqual(linked_prize_shares(["a", "b"], {"a", "b"}, 10, 1), [("a", 1, 10)])
+        self.assertEqual(linked_prize_shares(["a"], set(), 10, 1), [])
+
 
 class WalletTests(unittest.TestCase):
     def test_a_wallet_signature_links_and_a_wrong_one_does_not(self) -> None:
@@ -174,6 +184,15 @@ class ChainLayoutTests(unittest.TestCase):
         self.assertEqual(len(create_pool_data(7, 10, 20, 3)), 8 + 8 + 8 + 8 + 1)
         self.assertEqual(pay_winners_data([2, 1])[8:12], (2).to_bytes(4, "little"))
 
+        recorded = record_achievement_data(3, subject, 1, 7, 1_000_000)
+        self.assertEqual(recorded[:8], instruction_discriminator("record_achievement"))
+        self.assertEqual(recorded[8], 3)
+        self.assertEqual(recorded[9:41], subject)
+        self.assertNotIn(b"computing:IT212", recorded)
+        claimed = claim_reward_data(3, subject, 1_000_000)
+        self.assertEqual(claimed[:8], instruction_discriminator("claim_reward"))
+        self.assertEqual(int.from_bytes(claimed[-8:], "little"), 1_000_000)
+
     def test_pdas_are_stable_and_the_vault_hangs_off_the_pool(self) -> None:
         program = Pubkey.from_string("Ebo9c8SiwLx37wXejAwQmx1vLv1YtR8kYVb2Lb6V8FVH")
         self.assertEqual(config_pda(program), config_pda(program))
@@ -182,6 +201,8 @@ class ChainLayoutTests(unittest.TestCase):
         self.assertEqual(badge_pda(program, student, 2, subject), badge_pda(program, student, 2, subject))
         pool = pool_pda(program, 7)
         self.assertNotEqual(vault_pda(program, pool), pool)
+        self.assertNotEqual(receipt_pda(program, pool, student), pool)
+        self.assertEqual(receipt_pda(program, pool, student), receipt_pda(program, pool, student))
         mint = Pubkey.from_string("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
         self.assertEqual(associated_token_address(student, mint), associated_token_address(student, mint))
 

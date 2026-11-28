@@ -19,10 +19,16 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "users",
-        sa.Column("token_version", sa.Integer(), nullable=False, server_default="0"),
-    )
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    if "token_version" not in user_columns:
+        op.add_column(
+            "users",
+            sa.Column("token_version", sa.Integer(), nullable=False, server_default="0"),
+        )
+    if "academic_calendars" in inspector.get_table_names():
+        return
     op.create_table(
         "academic_calendars",
         sa.Column("id", sa.Uuid(), nullable=False),
