@@ -681,6 +681,33 @@ export function moduleLabel(item: { code: string; name?: string | null; programm
   return item.programmeName ? `${item.programmeName} · ${title}` : title;
 }
 
+export function courseLabel(item: { code: string; name?: string | null }) {
+  return item.name ? `${item.code} — ${item.name}` : item.code;
+}
+
+const LESSON_RETURN =
+  /^\/admin\/lessons\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?:\/chapters\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$/i;
+
+/** Only the guided lessons steps are safe return targets for the studio back link. */
+export function lessonReturnPath(value: string | null | undefined) {
+  if (!value || !LESSON_RETURN.test(value)) return "/admin/lessons";
+  return value;
+}
+
+export function lessonEditorHref(lessonId: string, from?: string | null) {
+  const back = lessonReturnPath(from);
+  const href = `/admin/lessons/${lessonId}/edit`;
+  if (back === "/admin/lessons") return href;
+  return `${href}?from=${encodeURIComponent(back)}`;
+}
+
+export function lessonStatusTone(status: string) {
+  if (status === "PUBLISHED") return "published";
+  if (status === "DRAFT") return "draft";
+  if (status === "IN_REVIEW" || status === "CHANGES_REQUESTED") return "review";
+  return "muted";
+}
+
 export function statusLabel(status: string) {
   switch (status) {
     case "DRAFT":
