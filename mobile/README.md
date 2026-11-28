@@ -62,6 +62,8 @@ cd android
 android/app/build/outputs/apk/release/app-release.apk
 ```
 
+A copy of that arm64 release build is committed at `mobile/apk/examsprep-arm64-release.apk` so it can be downloaded from GitHub without opening the Actions tab. It installs on arm64 phones, including Seeker. An x86_64 emulator needs the all-ABI build from GitHub Actions after this lands on `main`.
+
 Install it:
 
 ```bash
