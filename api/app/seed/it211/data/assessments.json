@@ -1,0 +1,1136 @@
+{
+  "quizzes": [
+    {
+      "code": "ch1",
+      "title": "IT211 Quiz: Introduction to Systems Analysis and Design",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "Which statement best separates information from data in a university office?",
+          "choices": [
+            "A stored mark is already a decision",
+            "Information is data arranged so a named person can act",
+            "Any spreadsheet is an information system by itself",
+            "Hardware is the only component that matters"
+          ],
+          "correct": 1,
+          "explanation": "A mark is data until someone uses the processed result, such as a pass or fail, to act.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "A clerk's private workbook is best treated by an analyst as what?",
+          "choices": [
+            "An embarrassment to omit from the notes",
+            "Evidence of how the current system actually works",
+            "Proof that no procedures exist",
+            "A design for the new database"
+          ],
+          "correct": 1,
+          "explanation": "Workarounds are part of the current system. They show where the official process fails.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "Systems design specifies how a solution will meet requirements that analysis has already described.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 0,
+          "explanation": "Analysis produces the problem and the requirements. Design specifies one way to meet them.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "What is the name for the line between the process being studied and the organisations outside it?",
+          "accepted": [
+            "system boundary",
+            "boundary"
+          ],
+          "explanation": "The system boundary separates what is inside the study from external parties such as a sponsor or ZRA.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "Give two reasons a faculty should study registration before buying a portal.",
+          "accepted": [
+            "local rules such as payment types",
+            "avoid a system staff will bypass"
+          ],
+          "modelAnswer": "Local payment paths must be known before a purchase, otherwise staff bypass the new system and the faculty pays for rework.",
+          "explanation": "Local payment paths must be known before a purchase, otherwise staff bypass the new system and the faculty pays for rework.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch2",
+      "title": "IT211 Quiz: System Development Life Cycle (SDLC)",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Which phase asks whether a project should be attempted at all?",
+          "choices": [
+            "Design",
+            "Planning and feasibility",
+            "Acceptance testing only",
+            "Perfective maintenance"
+          ],
+          "correct": 1,
+          "explanation": "Planning, including the feasibility study, decides whether the work is worth starting.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Which model finishes each phase for the whole system before the next phase starts?",
+          "choices": [
+            "Waterfall",
+            "A use case ellipse",
+            "Normalisation",
+            "A context diagram"
+          ],
+          "correct": 0,
+          "explanation": "Waterfall sequences whole phases. Iterative and agile approaches deliver reviewed slices instead.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Agile means the team may skip confirming requirements with users.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Agile confirms a small set of requirements often. Removing users removes the method's control.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "What is the tangible product of a life-cycle phase, such as a test report, called?",
+          "accepted": [
+            "deliverable",
+            "a deliverable"
+          ],
+          "explanation": "A deliverable is the tangible output the next phase or a reviewer can use.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "A team is coding with no written list of what the form must do. Which phase was skipped, and what is the risk?",
+          "accepted": [
+            "requirements analysis was skipped",
+            "the build may solve the wrong problem"
+          ],
+          "modelAnswer": "Analysis should have produced the specification. Without it, implementation guesses and the guess is expensive to undo.",
+          "explanation": "Analysis should have produced the specification. Without it, implementation guesses and the guess is expensive to undo.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch3",
+      "title": "IT211 Quiz: Requirements Gathering and Analysis",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "Which line is already a functional requirement?",
+          "choices": [
+            "The system shall be modern",
+            "The clerk shall record a mobile-money reference against a payment",
+            "The project shall feel agile",
+            "The screen shall be blue"
+          ],
+          "correct": 1,
+          "explanation": "Recording a reference is behaviour for an actor. Fashion, method, and colour are not functional requirements.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "Which technique is strongest for discovering an unofficial paper list at the counter?",
+          "choices": [
+            "A questionnaire sent only to deans",
+            "Observation",
+            "Choosing a programming language",
+            "A Gantt chart"
+          ],
+          "correct": 1,
+          "explanation": "Observation sees the list in use. A dean questionnaire and a plan do not.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "The system shall be user friendly is a strong non-functional requirement.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Without a user, a task, and a measure, the sentence cannot fail a test.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "What is the name for drawing needs out of people, documents, and observation?",
+          "accepted": [
+            "elicitation",
+            "requirements elicitation"
+          ],
+          "explanation": "Elicitation is the discovery activity that comes before the needs are written as a specification.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "Name a second field, besides the statement, that a requirements row needs so a tester can use it, and say why.",
+          "accepted": [
+            "an identifier",
+            "a source or a verification method"
+          ],
+          "modelAnswer": "The identifier lets the test point back. A source shows evidence, and a verification note says how the requirement will be judged.",
+          "explanation": "The identifier lets the test point back. A source shows evidence, and a verification note says how the requirement will be judged.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch4",
+      "title": "IT211 Quiz: System Modelling and UML",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "System Modelling and UML",
+          "prompt": "Which diagram shows the order of messages for one scenario?",
+          "choices": [
+            "Class diagram",
+            "Sequence diagram",
+            "Entity relationship diagram",
+            "A backup rota"
+          ],
+          "correct": 1,
+          "explanation": "Time runs downward on a sequence diagram. A class diagram shows structure, not message order.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Modelling and UML",
+          "prompt": "How many processes does a context diagram contain?",
+          "choices": [
+            "One process representing the whole system",
+            "One process per database table",
+            "No processes, only actors",
+            "Every use case as a separate process"
+          ],
+          "correct": 0,
+          "explanation": "The context diagram is a data flow diagram with a single process. Detail waits for a lower level.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Modelling and UML",
+          "prompt": "A data store may check prerequisites without a process on a data flow diagram.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Checking is a transformation, so it belongs in a process. Stores only hold data.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Modelling and UML",
+          "prompt": "What is the box that encloses use cases and excludes actors called?",
+          "accepted": [
+            "system boundary",
+            "boundary"
+          ],
+          "explanation": "Actors stay outside the system boundary because they are not part of the system being built.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Modelling and UML",
+          "prompt": "A refusal must not confirm a seat. What should the activity diagram show, and what must it avoid?",
+          "accepted": [
+            "a decision path that records the reason and ends",
+            "do not join that path into confirm seat"
+          ],
+          "modelAnswer": "The failed decision ends after the reason is recorded. A join into confirmation would seat a refused student.",
+          "explanation": "The failed decision ends after the reason is recorded. A join into confirmation would seat a refused student.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch5",
+      "title": "IT211 Quiz: Database and System Design",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "Database and System Design",
+          "prompt": "Why is Enrolment often its own entity?",
+          "choices": [
+            "Because diagrams need extra boxes",
+            "Because the link has facts such as status and reason",
+            "Because students cannot relate to modules",
+            "Because UML forbids relationships"
+          ],
+          "correct": 1,
+          "explanation": "Status and reason describe that enrolment, so the relationship becomes an associative entity.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Database and System Design",
+          "prompt": "A cell contains both IT211 and IT212. Which normal form is already broken?",
+          "choices": [
+            "First normal form",
+            "Only the context diagram",
+            "Third normal form and nothing earlier",
+            "No normal form; lists are preferred"
+          ],
+          "correct": 0,
+          "explanation": "A multi-valued cell violates first normal form. Later forms assume the group has been split.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Database and System Design",
+          "prompt": "Authentication and authorisation are the same check.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Authentication establishes identity. Authorisation decides what that identity may see or change.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "Database and System Design",
+          "prompt": "What principle gives each role only the access its tasks need?",
+          "accepted": [
+            "least privilege",
+            "principle of least privilege"
+          ],
+          "explanation": "Least privilege avoids granting lecturers payment references, or students a classmate's balance.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "Database and System Design",
+          "prompt": "Module title is copied onto every enrolment. What goes wrong when the title changes, and where should it live?",
+          "accepted": [
+            "some rows keep the old title",
+            "the title belongs on Module"
+          ],
+          "modelAnswer": "That is an update anomaly. The title depends on the module, so it is stored once and joined when a report needs it.",
+          "explanation": "That is an update anomaly. The title depends on the module, so it is stored once and joined when a report needs it.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch6",
+      "title": "IT211 Quiz: System Implementation and Testing",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "System Implementation and Testing",
+          "prompt": "Which strategy tries the live system with one group before a wider switch?",
+          "choices": [
+            "Direct cutover of the whole university",
+            "Pilot conversion",
+            "Normalisation",
+            "A glossary"
+          ],
+          "correct": 1,
+          "explanation": "A pilot limits first live use to a chosen group so the organisation can learn before widening.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Implementation and Testing",
+          "prompt": "When is the expected result of a test case written?",
+          "choices": [
+            "After the screen looks attractive",
+            "Before the case is run",
+            "Only if a test fails",
+            "Never"
+          ],
+          "correct": 1,
+          "explanation": "The expected result is the target. Writing it afterwards means the test cannot independently fail.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Implementation and Testing",
+          "prompt": "During a parallel run, both the old and new systems should be equally authoritative.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "One channel must win if they disagree, or the organisation has two truths.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Implementation and Testing",
+          "prompt": "What is the short period called when new transactions are held so data can be moved and checked?",
+          "accepted": [
+            "freeze",
+            "a freeze",
+            "data freeze"
+          ],
+          "explanation": "The freeze creates a stable moment for the load and the reconciliation before cutover.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Implementation and Testing",
+          "prompt": "A unit test of the reference rule passes, but the screen says Error 409. Which level should catch that, and what should acceptance do?",
+          "accepted": [
+            "system testing",
+            "do not sign until the clerk message is right"
+          ],
+          "modelAnswer": "The isolated rule can be correct while the interface is wrong. The sponsor should refuse acceptance until the agreed message appears.",
+          "explanation": "The isolated rule can be correct while the interface is wrong. The sponsor should refuse acceptance until the agreed message appears.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch7",
+      "title": "IT211 Quiz: System Maintenance and Evaluation",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "A new policy adds a fee status the specification never mentioned. What maintenance is required?",
+          "choices": [
+            "Corrective",
+            "Adaptive",
+            "Preventive",
+            "None, because policies do not affect systems"
+          ],
+          "correct": 1,
+          "explanation": "The environment changed. The system was not failing its old target, so the work is adaptive.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "Which activity is preventive?",
+          "choices": [
+            "Restoring a backup in a drill before any disk has failed",
+            "Fixing a crash that already stopped the counter",
+            "Adding a status the policy just invented",
+            "Reordering fields after users mis-keyed"
+          ],
+          "correct": 0,
+          "explanation": "The drill reduces the impact of a future failure. The other items are corrective, adaptive, and perfective.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "An average response time proves that the slow tail met a percentile target.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Averages can look healthy while the slowest requests, which form the queue, miss the target.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "What is a measurement taken before a change, so later evaluation has a comparison, called?",
+          "accepted": [
+            "baseline",
+            "a baseline"
+          ],
+          "explanation": "The baseline is that earlier measurement. Evaluation is weaker without it.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "Field order causes mis-saves but the business rule is correct. What maintenance is this, and what must be rerun?",
+          "accepted": [
+            "perfective maintenance",
+            "the existing functional tests"
+          ],
+          "modelAnswer": "The rule stays, so the change is perfective. Regression tests prove the improvement did not change the promised behaviour.",
+          "explanation": "The rule stays, so the change is perfective. Regression tests prove the improvement did not change the promised behaviour.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "ch8",
+      "title": "IT211 Quiz: Practical Case Study and Revision",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "Which item is inside the registration case release?",
+          "choices": [
+            "Hostel allocation",
+            "A stored reason when a module is refused",
+            "Replacing the finance system",
+            "Building the full timetable"
+          ],
+          "correct": 1,
+          "explanation": "Refusal reasons are one of the three aims. Hostels, a new finance system, and timetables are out of scope.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "Where should the duplicate-reference rule run in the proposed design?",
+          "choices": [
+            "Separately inside every student phone",
+            "In the shared application and as a database constraint",
+            "Only on a poster in the corridor",
+            "Inside the hostel module"
+          ],
+          "correct": 1,
+          "explanation": "One application keeps every client consistent, and the constraint still holds if another screen appears.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "The dean must be drawn as an actor because the dean sponsors the project.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "A sponsor is a stakeholder. An actor needs a goal achieved through the system.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "What is the fallback channel for the Computing pilot in the case?",
+          "accepted": [
+            "workbook",
+            "the workbook"
+          ],
+          "explanation": "The workbook remains the fallback and stays authoritative until the pilot targets are met.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "Banda's fees are unpaid. What should the phone show, and what should the class list do?",
+          "accepted": [
+            "a fees reason and no confirmation",
+            "Banda is absent from the confirmed list"
+          ],
+          "modelAnswer": "The case shows one refusal reason and does not confirm. The lecturer's list contains only confirmations.",
+          "explanation": "The case shows one refusal reason and does not confirm. The lecturer's list contains only confirmations.",
+          "points": 2
+        }
+      ]
+    },
+    {
+      "code": "practice",
+      "title": "IT211 Practice Exam: Systems Analysis and Design",
+      "kind": "practice",
+      "timeLimitSeconds": null,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "Which set is the five components of an information system in this course?",
+          "choices": [
+            "Hardware, software, data, procedures, and people",
+            "Only hardware and a brand name",
+            "Actors, use cases, and a Gantt chart",
+            "Normal forms and nothing else"
+          ],
+          "correct": 0,
+          "explanation": "Procedures and people belong with hardware, software, and data.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Operational feasibility is weak in which situation?",
+          "choices": [
+            "Staff are asked to work in a way they cannot sustain",
+            "The entity names are short",
+            "A legend is missing from a diagram",
+            "A test case has an expected result"
+          ],
+          "correct": 0,
+          "explanation": "Operational feasibility asks whether people can and will work in the proposed way.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "Which interview question is leading?",
+          "choices": [
+            "Walk me through the last missing payment",
+            "Don't you think the portal is the real problem?",
+            "May the student attend today, yes or no?",
+            "What do you tell the student while you wait?"
+          ],
+          "correct": 1,
+          "explanation": "The wording pushes the clerk toward a preferred answer.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Modelling and UML",
+          "prompt": "Which name is the best use case?",
+          "choices": [
+            "Button3",
+            "Request module",
+            "PostgreSQL",
+            "The dean is busy"
+          ],
+          "correct": 1,
+          "explanation": "Request module is an actor's goal. The others are a widget, a product, and a complaint.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Database and System Design",
+          "prompt": "A student's full name is a safe identifier because campus names are unique.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Names repeat and change. An issued student number is safer if the university keeps it unique.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Implementation and Testing",
+          "prompt": "Direct conversion stops the old channel when the new system becomes the only live one.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 0,
+          "explanation": "That single cutover is direct conversion. Parallel running keeps the old channel for comparison.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "What quality concerns reconstructing who changed a payment reference and when?",
+          "accepted": [
+            "auditability",
+            "audit"
+          ],
+          "explanation": "Auditability is the retained record of who did what.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "What is one pass that produces a reviewed slice of the system called?",
+          "accepted": [
+            "iteration",
+            "an iteration"
+          ],
+          "explanation": "An iteration is one cycle of work on a slice, followed by a review.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Modelling and UML",
+          "prompt": "Name the diagram for stored concepts and the diagram for message order.",
+          "accepted": [
+            "class diagram for concepts",
+            "sequence diagram for message order"
+          ],
+          "modelAnswer": "A class diagram shows structure. A sequence diagram shows message order for one scenario.",
+          "explanation": "A class diagram shows structure. A sequence diagram shows message order for one scenario.",
+          "points": 2
+        },
+        {
+          "kind": "structured",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "State one aim of the registration release and one exclusion.",
+          "accepted": [
+            "stored references or visible refusal reasons",
+            "hostels or timetable construction stay out"
+          ],
+          "modelAnswer": "The aims judge the release. An exclusion such as hostels keeps the case small enough to design.",
+          "explanation": "The aims judge the release. An exclusion such as hostels keeps the case small enough to design.",
+          "points": 2
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Implementation and Testing",
+          "prompt": "Which level asks the sponsor to compare the release with the signed requirements?",
+          "choices": [
+            "Unit testing",
+            "Integration testing",
+            "Acceptance testing",
+            "A code comment"
+          ],
+          "correct": 2,
+          "explanation": "Acceptance is the sponsor's comparison. Unit tests can pass while the counter message is still wrong.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "Which document tells a clerk what to do when a reference is already used?",
+          "choices": [
+            "User documentation",
+            "Only the data dictionary",
+            "A marketing brochure",
+            "The vision statement"
+          ],
+          "correct": 0,
+          "explanation": "That is a task procedure for the user. The data dictionary is for the next maintainer.",
+          "points": 1
+        }
+      ]
+    },
+    {
+      "code": "mock",
+      "title": "IT211 Mock Exam: Systems Analysis and Design",
+      "kind": "mock",
+      "timeLimitSeconds": 2700,
+      "passMarkPercent": 50,
+      "questions": [
+        {
+          "kind": "mcq",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "Feedback in a system is best described as what?",
+          "choices": [
+            "A logo on the portal",
+            "Information about results that is returned so the system can adjust",
+            "A favourite framework",
+            "A list of job titles"
+          ],
+          "correct": 1,
+          "explanation": "Feedback closes the loop, such as a capacity report that leads a dean to open another stream.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "Which product belongs to analysis rather than design?",
+          "choices": [
+            "A column type",
+            "An agreed list of what the new system must do",
+            "A programming language",
+            "A button colour"
+          ],
+          "correct": 1,
+          "explanation": "Requirements are analysis products. Types, languages, and colours are design.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Introduction to Systems Analysis and Design",
+          "prompt": "An information system must include a computer.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Agreed procedures and records are enough. A computer is not part of the definition.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Schedule feasibility asks which question?",
+          "choices": [
+            "Can the work finish by the date the organisation needs?",
+            "Which UML symbol is prettiest?",
+            "How many normal forms exist?",
+            "Who is the sponsor?"
+          ],
+          "correct": 0,
+          "explanation": "Schedule feasibility compares effort with a real deadline such as a sitting.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Where does maintenance sit in the life cycle?",
+          "choices": [
+            "Outside it, after a ribbon-cutting",
+            "Inside it, because a live system keeps changing",
+            "Only inside the feasibility study",
+            "Only on a sequence diagram"
+          ],
+          "correct": 1,
+          "explanation": "Maintenance is a phase. Go-live starts the longest part of the cycle.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Development Life Cycle (SDLC)",
+          "prompt": "Which feasibility asks whether people will work in the new way?",
+          "accepted": [
+            "operational",
+            "operational feasibility"
+          ],
+          "explanation": "Operational feasibility is about people and the organisation.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "What does a testable non-functional requirement need?",
+          "choices": [
+            "A measure, a condition, or a named user task",
+            "Only the word secure",
+            "A programming language",
+            "A colour palette"
+          ],
+          "correct": 0,
+          "explanation": "Without a measure or a checkable task, a quality statement is a slogan.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "Specification sign-off should name what?",
+          "choices": [
+            "A person and a version, with open issues still visible",
+            "Only the word agile",
+            "Every future hostel rule",
+            "The server brand"
+          ],
+          "correct": 0,
+          "explanation": "Sign-off freezes a base for design without pretending open issues vanished.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "One sentence that demands three unrelated behaviours is easier to test than three numbered requirements.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "Separate identifiers show which part failed.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "Requirements Gathering and Analysis",
+          "prompt": "Which check asks whether the requirements describe the system stakeholders need?",
+          "accepted": [
+            "validation",
+            "requirements validation"
+          ],
+          "explanation": "Validation checks the requirements. Later testing checks the built system against them.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Modelling and UML",
+          "prompt": "UML is best described as what?",
+          "choices": [
+            "A method that replaces the SDLC",
+            "A shared notation for structure and behaviour diagrams",
+            "Proof that requirements are correct",
+            "A database constraint"
+          ],
+          "correct": 1,
+          "explanation": "UML standardises diagrams. It does not choose a life-cycle model.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Modelling and UML",
+          "prompt": "A data-flow arrow should be labelled with what?",
+          "choices": [
+            "The data being carried",
+            "The word fast",
+            "A nickname",
+            "Only a colour"
+          ],
+          "correct": 0,
+          "explanation": "A flow carries data such as fee status. An adjectival arrow is incomplete.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Modelling and UML",
+          "prompt": "A lower-level data flow diagram may add an external entity the context diagram excluded.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "New neighbours are scope changes. Lower levels keep the agreed boundary.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Modelling and UML",
+          "prompt": "What is a fact stored about each object of a class called?",
+          "accepted": [
+            "attribute",
+            "an attribute"
+          ],
+          "explanation": "An attribute describes one object, such as a student number.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Modelling and UML",
+          "prompt": "A diagram says Course while the specification says Module. Why does that matter, and what should you do?",
+          "accepted": [
+            "readers may treat them as different things",
+            "use one glossary term everywhere"
+          ],
+          "modelAnswer": "Inconsistent names break traceability. Align the diagram and the specification to one glossary.",
+          "explanation": "Inconsistent names break traceability. Align the diagram and the specification to one glossary.",
+          "points": 2
+        },
+        {
+          "kind": "mcq",
+          "topic": "Database and System Design",
+          "prompt": "Logical database design decides what before a product is chosen?",
+          "choices": [
+            "Entities, relationships, and constraints",
+            "Paint colours",
+            "The pilot lunch rota",
+            "Which sponsor is the dean"
+          ],
+          "correct": 0,
+          "explanation": "Logical design names stored facts and rules. Product choice comes later.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "Database and System Design",
+          "prompt": "Which clerk message fits a duplicate payment reference?",
+          "choices": [
+            "Error 409",
+            "null",
+            "This reference is already used. Check the number with the student.",
+            "Success"
+          ],
+          "correct": 2,
+          "explanation": "The message names the problem and the next action in ordinary language.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "Database and System Design",
+          "prompt": "Seats remaining should be stored as well as calculated, with no comment.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "A stored count can drift from the enrolments. Calculate it unless you document a reason.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "Database and System Design",
+          "prompt": "What is the tier that applies shared business rules called?",
+          "accepted": [
+            "application tier",
+            "application",
+            "the application tier"
+          ],
+          "explanation": "The application tier holds the rules. Clients display them and the database stores the facts.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "Database and System Design",
+          "prompt": "A clerk changes a reference. What should the audit record contain, and why is an editable log unsafe?",
+          "accepted": [
+            "who, when, and the previous value",
+            "the clerk could hide the change"
+          ],
+          "modelAnswer": "Accountability needs the person, the time, and the old value. An editable log can be rewritten.",
+          "explanation": "Accountability needs the person, the time, and the old value. An editable log can be rewritten.",
+          "points": 2
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Implementation and Testing",
+          "prompt": "Which situation means conversion has not happened?",
+          "choices": [
+            "The workbook is read-only and staff are trained",
+            "Both the workbook and the portal still accept new enrolments",
+            "A fallback owner is named",
+            "Opening data were cleaned"
+          ],
+          "correct": 1,
+          "explanation": "Two writable channels split the truth.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Implementation and Testing",
+          "prompt": "Which slice is a clear phase boundary?",
+          "choices": [
+            "Whoever is at the counter",
+            "One faculty, with cross-faculty cases counted as exceptions",
+            "Anyone who likes the new colour",
+            "Every second student"
+          ],
+          "correct": 1,
+          "explanation": "A faculty with a stated exception path can be operated. A crowd cannot.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Implementation and Testing",
+          "prompt": "A pilot that is not allowed to stop was never really a pilot.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 0,
+          "explanation": "Widen, change, or stop must all be possible, or the pilot is only a softer rollout.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Implementation and Testing",
+          "prompt": "What is a mismatch between observed behaviour and the expected result called?",
+          "accepted": [
+            "fault",
+            "a fault"
+          ],
+          "explanation": "A fault is that mismatch. Cite the requirement so the same case can be retested.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "Which request is an emergency repair?",
+          "choices": [
+            "Search crashes and the counter stops",
+            "Hostel allocation wanted by Friday",
+            "A new banner colour",
+            "A report for next term"
+          ],
+          "correct": 0,
+          "explanation": "A stopped counter is an emergency. The other items use ordinary change control.",
+          "points": 1
+        },
+        {
+          "kind": "mcq",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "A fair evaluation compares the system with what?",
+          "choices": [
+            "The original aims and baseline",
+            "New aims chosen after success appeared",
+            "The developer's favourite screen",
+            "An unrelated hostel project"
+          ],
+          "correct": 0,
+          "explanation": "Changing the aims afterwards hides whether the project worked.",
+          "points": 1
+        },
+        {
+          "kind": "true_false",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "A backup that has never been restored is already proven prevention.",
+          "choices": [
+            "True",
+            "False"
+          ],
+          "correct": 1,
+          "explanation": "An untested backup may be unreadable. The restore rehearsal is the control.",
+          "points": 1
+        },
+        {
+          "kind": "short",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "What is the list of stored fields, meanings, and constraints called?",
+          "accepted": [
+            "data dictionary",
+            "a data dictionary"
+          ],
+          "explanation": "The data dictionary serves the maintainer. Clerks need a shorter procedure.",
+          "points": 1
+        },
+        {
+          "kind": "structured",
+          "topic": "System Maintenance and Evaluation",
+          "prompt": "Queue time fell and the intake was smaller. How should evaluation treat the speed claim?",
+          "accepted": [
+            "report both facts",
+            "do not credit the portal with the whole change"
+          ],
+          "modelAnswer": "A smaller intake may explain part of the shorter queue, so the claim stays cautious.",
+          "explanation": "A smaller intake may explain part of the shorter queue, so the claim stays cautious.",
+          "points": 2
+        },
+        {
+          "kind": "structured",
+          "topic": "Practical Case Study and Revision",
+          "prompt": "For the reference aim, name the required behaviour and the database rule that implements it.",
+          "accepted": [
+            "store a reference and refuse a duplicate",
+            "a unique constraint on the payment reference"
+          ],
+          "modelAnswer": "The requirements say store and refuse. Uniqueness on the payment reference still holds if a later screen forgets.",
+          "explanation": "The requirements say store and refuse. Uniqueness on the payment reference still holds if a later screen forgets.",
+          "points": 2
+        }
+      ]
+    }
+  ]
+}

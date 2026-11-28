@@ -1,0 +1,700 @@
+{
+  "position": 3,
+  "title": "Requirements Gathering and Analysis",
+  "description": "How to elicit, write, and check functional and non-functional requirements so design has a testable target.",
+  "lessons": [
+    {
+      "title": "Introduction to Requirements Engineering",
+      "description": "The discipline of discovering, documenting, and agreeing requirements, beyond a single interview.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Define requirements engineering as more than a wish list",
+        "Name the activities from elicitation through validation",
+        "Explain why conflicting stakeholders are normal"
+      ],
+      "introduction": [
+        "Requirements engineering is the disciplined work of finding out what a system must do, writing it so others can test it, and getting agreement from people who do not all want the same thing.",
+        "A registry clerk, a dean, and a student can each be honest and still describe three different registration systems. The analyst's job is to surface those differences, not to pretend a single interview removed them."
+      ],
+      "explanation": [
+        "The activities usually taught together are elicitation, analysis, specification, and validation. Elicitation draws needs out of people, documents, and observation. Analysis sorts, prioritises, and resolves conflicts. Specification writes the result in a stable form. Validation checks that the writing matches what stakeholders meant and that it is testable.",
+        "A requirement is a statement of a needed behaviour or quality. It is not a design. It should be necessary, clear enough for one reading, and checkable. The student must receive a reason when a module is refused is closer than the system should be user friendly, because a tester can fail the first and can only argue about the second.",
+        "Conflicts are a sign the work is real. The dean may want a live display of every refusal. The student may not want that display on a public screen. Analysis records both concerns and proposes a resolution: the reason is visible to the student and the clerk, not on a corridor monitor. That resolution is a decision, and it should be written down.",
+        "Requirements engineering continues after the first specification. A change request during maintenance is requirements work again, on a smaller scale. Teams that treat the first document as frozen forever, or as optional, both get into trouble. The healthy habit is a controlled change."
+      ],
+      "definitions": [
+        {"term": "Requirements engineering", "meaning": "The activities of eliciting, analysing, specifying, and validating what a system must do and how well."},
+        {"term": "Elicitation", "meaning": "The discovery of needs from stakeholders, documents, and observation."},
+        {"term": "Specification", "meaning": "The written, stable statement of agreed requirements."},
+        {"term": "Validation", "meaning": "The check that the specification matches stakeholder intent and is testable."}
+      ],
+      "exampleTitle": "Three honest descriptions of one counter",
+      "example": [
+        "The clerk says the problem is students who have not paid. The student says the problem is a counter that cannot see a payment made ten minutes ago. The dean says the problem is a lack of management information. All three can be true. Elicitation records them separately. Analysis asks which release must satisfy which person. The specification then contains a payment-status requirement and a later report, not a blended slogan about better service."
+      ],
+      "application": [
+        "In a group, assign one person to keep a conflict log. A project with no conflicts recorded probably did not talk to more than one kind of user.",
+        "When you write a requirement, add the stakeholder who asked and how you would test it. Those two columns prevent vague lines from surviving into design."
+      ],
+      "tip": "If two stakeholders disagree, write both views down before you pick a side.",
+      "takeaways": [
+        "Requirements engineering covers discovery, analysis, writing, and checking",
+        "A requirement is testable and is not yet a design",
+        "Conflicting stakeholders are expected and must be resolved in writing",
+        "Later change requests are requirements work on a smaller scale"
+      ],
+      "revision": [
+        "Name the four activities of requirements engineering used in this lesson.",
+        "Why is the system should be easy a weak requirement?",
+        "How should a conflict between a public display and student privacy be handled?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which activity checks that a written requirement matches what stakeholders meant?",
+          "options": ["Elicitation", "Validation", "Hardware sizing", "Deployment"],
+          "correct": 1,
+          "explanation": "Validation checks the specification against intent and testability. Elicitation is the earlier discovery step."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A project that records no disagreement among stakeholders has definitely understood the problem.",
+          "correct": false,
+          "explanation": "Silence often means only one voice was heard. Real campuses contain conflicts that should be written down."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name for drawing needs out of people, documents, and observation?",
+          "answers": ["elicitation", "requirements elicitation"],
+          "explanation": "Elicitation is the discovery activity. It comes before the needs are sorted and written as a specification."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A dean wants public refusal lists and students do not. What should the analyst record, and what kind of outcome is a private reason shown only to the student?",
+          "points": ["both stakeholder views", "a written resolution or requirement"],
+          "explanation": "Both views are elicited and kept. The private reason is a resolution written as a requirement, not an unrecorded compromise."
+        }
+      ],
+      "summary": "Requirements engineering discovers needs, sorts conflicts, writes testable statements, and checks them with the people who must live with the system. Disagreement is part of the evidence. A specification that hides it will surprise the project later."
+    },
+    {
+      "title": "Functional Requirements",
+      "description": "Statements of behaviour: what the system must do, in a form a tester can fail.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Define a functional requirement",
+        "Rewrite a vague wish as a behaviour with an actor and an outcome",
+        "Spot a design detail that has been smuggled into a functional requirement"
+      ],
+      "introduction": [
+        "Functional requirements describe behaviour. They say what the system must do when a particular person or another system acts. They do not say whether the screen is blue.",
+        "This lesson gives a pattern you can use in coursework: actor, action, outcome, and the condition that matters."
+      ],
+      "explanation": [
+        "A functional requirement is a statement of a function the system must provide. The clerk must be able to record a mobile-money reference against a student is functional. The system must use PostgreSQL is not. The second is a design or technology constraint, and it belongs in a different section if it is a real constraint at all.",
+        "A practical pattern is: when a stated condition holds, the system shall let an actor achieve an outcome. When a module is refused, the system shall show the student the reason. The actor is the student. The outcome is a visible reason. The condition is the refusal. A tester can create a refusal and look for the reason.",
+        "Good functional requirements are singular. A sentence that says the system shall check fees, prerequisites, and timetable clashes and email the dean is four requirements wearing one coat. Split them so a failure can be traced. Give each an identifier such as FR-04 so design and tests can point at it.",
+        "Include the unhappy path when it is part of the behaviour users care about. FR-04 might be paired with FR-05: if the reason code is missing, the system shall not confirm the refusal and shall warn the clerk. Teams that only write the happy path discover the gaps in production."
+      ],
+      "definitions": [
+        {"term": "Functional requirement", "meaning": "A statement of behaviour the system must provide for an actor."},
+        {"term": "Actor", "meaning": "A role, person, or external system that interacts with the system."},
+        {"term": "Shall", "meaning": "The word used in a requirement to mark a binding behaviour, as distinct from a suggestion."},
+        {"term": "Identifier", "meaning": "A stable code such as FR-04 that lets design and tests refer to one requirement."}
+      ],
+      "exampleTitle": "Four lines instead of better registration",
+      "example": [
+        "FR-01: The clerk shall record one mobile-money reference against one payment. FR-02: The system shall refuse a reference that is already stored and tell the clerk. FR-03: The student shall see whether fees are cleared, pending, or unpaid. FR-04: When a module is refused, the system shall show the student one reason drawn from an agreed list.",
+        "None of these chooses a colour, a framework, or a table name. A designer still has work to do, which is the point."
+      ],
+      "table": {
+        "caption": "Wish versus functional requirement",
+        "headers": ["Weak line", "Stronger functional requirement"],
+        "rows": [
+          ["Registration should be modern", "The student shall receive a reason when a module is refused"],
+          ["Handle payments", "The clerk shall record a mobile-money reference against a payment"],
+          ["No duplicates, and also email the dean, and be fast", "Split into separate numbered requirements"]
+        ]
+      },
+      "application": [
+        "Number every functional requirement in your report. In the test section, repeat the number. Markers can then see coverage instead of trusting a paragraph.",
+        "If you cannot name the actor, you may be writing a design slogan. Ask who presses the control or receives the message."
+      ],
+      "tip": "One behaviour, one identifier, one way for a tester to fail it.",
+      "takeaways": [
+        "Functional requirements state behaviour, not colour or brand of database",
+        "A useful pattern is condition, actor, and outcome",
+        "Split compound sentences so each can pass or fail alone",
+        "Unhappy paths are functional requirements too"
+      ],
+      "revision": [
+        "Rewrite handle fees properly as one functional requirement.",
+        "Why give a requirement an identifier?",
+        "Which of these is functional: the screen shall be blue, or the clerk shall record a reference?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which line is a functional requirement?",
+          "options": [
+            "The system shall be built in Python",
+            "The clerk shall record a mobile-money reference against a payment",
+            "The interface shall be modern",
+            "The project shall use agile"
+          ],
+          "correct": 1,
+          "explanation": "Recording a reference is behaviour for an actor. Language, visual fashion, and the life-cycle model are not functional requirements."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A single sentence that demands three unrelated behaviours is easier to test than three numbered requirements.",
+          "correct": false,
+          "explanation": "Compound requirements hide which part failed. Separate identifiers make testing and traceability possible."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the role or external system that interacts with the system called, in requirements writing?",
+          "answers": ["actor", "an actor"],
+          "explanation": "An actor is the person or external system that triggers or receives the behaviour."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Turn students get confused when a module is refused into a functional requirement that names the actor and the outcome.",
+          "points": ["the student is the actor", "a reason is shown"],
+          "explanation": "A testable form is: when a module is refused, the system shall show the student the reason. The actor and the outcome are both explicit."
+        }
+      ],
+      "summary": "Functional requirements say what an actor can get the system to do, including the unhappy path. Number them, keep each one singular, and leave colours and programming languages out. A tester should be able to fail each identifier on purpose."
+    },
+    {
+      "title": "Non-Functional Requirements",
+      "description": "Quality requirements: how well the system must perform, protect, and fit the people who use it.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Define a non-functional requirement and give campus examples",
+        "Make a quality statement measurable",
+        "Separate a non-functional requirement from a functional one"
+      ],
+      "introduction": [
+        "A registration form that stores the right reference and takes two minutes to open during peak week has met the functional requirement and failed the students. The missing statement was about quality, not about behaviour alone.",
+        "Non-functional requirements describe how well the system must do its work: speed, capacity, security, usability, reliability, and similar qualities. They are testable only when they contain a measure."
+      ],
+      "explanation": [
+        "Categories you should be able to use include performance, capacity, usability, reliability, security, and auditability. Performance might say the fee-status lookup shall return within three seconds for the clerk at peak. Capacity might say the system shall accept four hundred concurrent student sessions on registration morning. Without the number, the sentence cannot fail a test.",
+        "Usability is the category students most often leave as easy to use. A stronger line names the user and the task: a first-year student shall complete a module request without staff help in a trial of five representative students, with at most one prompt from the facilitator. That can be tried. Easy cannot.",
+        "Security and privacy are non-functional when they constrain how behaviour is delivered. A student shall not see another student's fee balance is a constraint on the fee-status function. It may be written beside the functional requirement, but it is a quality of access, and it needs its own test.",
+        "Non-functional requirements compete. Very fast and fully audited can pull against each other. The specification should say which quality wins at peak, or the designer will guess. Guessing during a registration morning is how audit logs get switched off in a panic."
+      ],
+      "definitions": [
+        {"term": "Non-functional requirement", "meaning": "A measurable statement of how well the system must perform a function or protect a quality."},
+        {"term": "Performance", "meaning": "A quality concerned with response time or throughput under a stated load."},
+        {"term": "Usability", "meaning": "A quality concerned with whether stated users can complete a stated task."},
+        {"term": "Auditability", "meaning": "The ability to reconstruct who did what, from retained records."}
+      ],
+      "exampleTitle": "Measures for a Monday morning",
+      "example": [
+        "NFR-01: At peak, a fee-status lookup shall return in under three seconds for at least 95 percent of requests. NFR-02: The system shall support four hundred signed-in students without refusing new sessions. NFR-03: A student shall not be able to open another student's payment reference. NFR-04: Every change to a payment reference shall record the clerk and the time.",
+        "NFR-01 without the three seconds and the 95 percent would be the system shall be fast, which a vendor can always claim to have met."
+      ],
+      "table": {
+        "caption": "Make the quality measurable",
+        "headers": ["Vague", "Measurable non-functional requirement"],
+        "rows": [
+          ["Fast", "Fee status in under 3 seconds for 95 percent of peak requests"],
+          ["Easy", "Five first-years complete a request with at most one prompt"],
+          ["Secure", "A student cannot open another student's payment reference"],
+          ["Reliable", "Planned uptime from 08:00 to 17:00 on registration days"]
+        ]
+      },
+      "application": [
+        "Add a non-functional section to every project, even a small one. Two measured lines are worth more than ten adjectives.",
+        "When a functional requirement is about seeing data, ask who must not see it. That question produces security requirements people forget."
+      ],
+      "tip": "If a quality has no number, no user, and no condition, it is still a slogan.",
+      "takeaways": [
+        "Non-functional requirements describe quality, with a measure",
+        "Performance, capacity, usability, security, and auditability are core categories",
+        "They can compete, so the specification should say what wins at peak",
+        "A student must not see another student's balance is testable"
+      ],
+      "revision": [
+        "Rewrite the system shall be secure as one non-functional requirement.",
+        "Why do non-functional requirements need numbers or named users?",
+        "Give an example of two qualities that can conflict on registration morning."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which line is a non-functional requirement?",
+          "options": [
+            "The clerk shall record a payment reference",
+            "A fee-status lookup shall return in under three seconds for 95 percent of peak requests",
+            "The system shall list refused modules",
+            "The dean shall export a class list"
+          ],
+          "correct": 1,
+          "explanation": "The three-second line constrains how well a lookup performs. The others describe behaviour and are functional."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "The system shall be user friendly is a strong non-functional requirement.",
+          "correct": false,
+          "explanation": "Without a user, a task, and a measure, the line cannot fail a test. It is a slogan."
+        },
+        {
+          "kind": "short",
+          "prompt": "What quality is concerned with reconstructing who changed a payment and when?",
+          "answers": ["auditability", "audit"],
+          "explanation": "Auditability is the quality of retaining who did what. Security is related but is about preventing improper access."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Write a usability requirement for first-year students requesting a module. Include the user and a way to judge success.",
+          "points": ["first-year students", "a trial or a limit on help needed"],
+          "explanation": "Name the users and a check, such as a small trial in which they finish with little help. Easy to use alone is not enough."
+        }
+      ],
+      "summary": "Non-functional requirements state how well the system must behave: time, capacity, usability, security, reliability, and audit. They earn a place in the specification only when a tester could fail them. Unmeasured praise words do not constrain the design."
+    },
+    {
+      "title": "Requirements Elicitation Techniques",
+      "description": "A map of the main ways analysts discover requirements, and how to combine them instead of relying on one meeting.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "List the main elicitation techniques used in this course",
+        "Match a technique to a kind of fact it is good at finding",
+        "Explain why one interview is not a complete elicitation"
+      ],
+      "introduction": [
+        "Elicitation is not a single method. An interview finds what people believe the rules are. A questionnaire reaches students who will never sit in your sample. Observation finds the workaround nobody mentions. Document analysis finds the rule the faculty already printed.",
+        "This lesson is the map. The next two lessons practise interviews, questionnaires, observation, and documents in more detail."
+      ],
+      "explanation": [
+        "Interviews are conversations with selected stakeholders, useful for explanations and for hearing conflicts. They are slow and they reflect the people you chose. Questionnaires collect structured answers from many people and are weak at follow-up. A student who ticks often on the portal is slow cannot tell you which screen.",
+        "Observation watches the work as it happens. It is strong evidence for queues, retyping, and unofficial lists, and it is weak if people change their behaviour because they are watched. Document analysis reads policies, forms, and reports. It shows the official system, which may differ from the lived one. Using both is the point.",
+        "Workshops bring several stakeholders into one room to resolve a conflict that interviews only collected. Prototypes, even paper sketches, elicit reactions people cannot give to an abstract question. A sketch of a refusal message produces better comments than do you want the system to be clear.",
+        "Choose techniques to cover official rules, lived practice, and the people who will not be in the room. A project that only interviewed the dean knows the desired story. It does not yet know the counter."
+      ],
+      "definitions": [
+        {"term": "Interview", "meaning": "A prepared conversation with a stakeholder, used to explore explanations and conflicts."},
+        {"term": "Questionnaire", "meaning": "A structured set of questions distributed to many people."},
+        {"term": "Observation", "meaning": "Watching the work happen so unofficial steps become visible."},
+        {"term": "Prototype", "meaning": "A sketch or partial system used to provoke a reaction and refine requirements."}
+      ],
+      "exampleTitle": "A one-week elicitation plan",
+      "example": [
+        "Monday: read the fee policy and last year's registration form. Tuesday: interview the bursar and a clerk separately. Wednesday: observe the counter for two hours and note every workaround. Thursday: a short questionnaire to one first-year class about where they got stuck. Friday: a workshop with the bursar and the clerk to resolve the pending-payment rule the interviews disagreed on.",
+        "No single day would have been enough. The policy did not mention the paper list. The dean was not at the counter."
+      ],
+      "table": {
+        "caption": "What each technique is good for",
+        "headers": ["Technique", "Strong at", "Weak at"],
+        "rows": [
+          ["Interview", "Explanations and conflicts", "Covering large numbers"],
+          ["Questionnaire", "Many respondents", "Follow-up and why"],
+          ["Observation", "Workarounds and timing", "Official policy wording"],
+          ["Documents", "The official rule", "What people actually do"],
+          ["Workshop", "Resolving a known conflict", "Quiet voices if badly run"]
+        ]
+      },
+      "application": [
+        "In a report, include a short elicitation plan with at least two techniques and a reason for each. A single interview with a friend is thin evidence.",
+        "If you cannot observe a real office, say so, and use a role-play plus documents rather than pretending you stood at the counter."
+      ],
+      "tip": "Official documents and lived observation answer different questions. Collect both.",
+      "takeaways": [
+        "Interviews, questionnaires, observation, documents, workshops, and prototypes elicit different facts",
+        "One technique systematically misses something",
+        "Observation finds workarounds that interviews forget",
+        "A workshop is for resolving a conflict, not for replacing discovery"
+      ],
+      "revision": [
+        "Which technique best finds a workaround the clerk did not mention?",
+        "Why is a questionnaire a poor way to learn which screen is slow?",
+        "What is a workshop for, after interviews have already happened?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which technique is strongest for discovering an unofficial paper list at the counter?",
+          "options": ["A questionnaire of deans", "Observation", "Choosing a programming language", "A Gantt chart"],
+          "correct": 1,
+          "explanation": "Observation sees the list being used. A dean questionnaire is unlikely to mention it, and a Gantt chart is a plan, not elicitation."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Reading the official fee policy is enough to know how payments are handled on a busy morning.",
+          "correct": false,
+          "explanation": "The policy is the official system. The busy morning may include workarounds the policy never names."
+        },
+        {
+          "kind": "short",
+          "prompt": "What elicitation technique puts several stakeholders in one room to resolve a disagreement?",
+          "answers": ["workshop", "a workshop"],
+          "explanation": "A workshop is used to resolve conflicts that earlier interviews or observations have already exposed."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Name two techniques you would combine to learn both the official fee rule and the lived queue, and say what each contributes.",
+          "points": ["documents or policy for the official rule", "observation for the lived queue"],
+          "explanation": "Document analysis supplies the printed rule. Observation supplies the workarounds and delays. Together they stop the specification from describing only one of the two systems."
+        }
+      ],
+      "summary": "Elicitation uses several techniques because each one misses a class of facts. Interviews explain, questionnaires reach further, observation catches workarounds, documents hold the official rule, and workshops resolve the conflicts the other techniques revealed."
+    },
+    {
+      "title": "Interviews and Questionnaires",
+      "description": "How to prepare a useful interview and a questionnaire that does not waste the respondent's answers.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Prepare open and closed questions for a purpose",
+        "Explain sampling and question wording risks in a questionnaire",
+        "Record answers so they can become requirements"
+      ],
+      "introduction": [
+        "An unprepared interview becomes a tour of grievances. An unprepared questionnaire becomes a list of questions you wish you had asked differently. Both tools are worth using, and both punish improvisation.",
+        "This lesson covers how to plan them, how to avoid leading the witness, and how to file what you heard so it can be traced to a requirement."
+      ],
+      "explanation": [
+        "Start an interview with the decision you need to make. If you need the rule for a pending payment, write three open questions that ask for stories and two closed questions that check a draft rule. Open: walk me through the last student whose payment did not show. Closed: is a student with a pending reference allowed to attend class today, yes or no. Do not begin with don't you think the portal is the problem. That tells the clerk the answer you want.",
+        "Interview two roles separately before you combine them. A clerk beside a dean may not describe a workaround. Take notes the person can correct, or agree a short written summary the same day. Memory is not an audit trail. Mark quotes, inferences, and things you still need to check.",
+        "Questionnaires need a population and a sample you can describe. All first-years on the Lusaka campus is a population. The forty students in one lab, if that is everyone you could reach, is a convenience sample, and you should say so. Questions must mean the same thing to every reader. Often is not a measure unless you define it. Prefer how many times last week did you visit the finance window.",
+        "Leave room for one open comment, and resist twenty open essays. You will not analyse them. Pilot the form with three people before you send it. A pilot finds the question everybody misunderstands, which is the question that would have ruined the study."
+      ],
+      "definitions": [
+        {"term": "Open question", "meaning": "A question that invites an explanation rather than a fixed choice."},
+        {"term": "Closed question", "meaning": "A question with a fixed set of answers, used to check a specific point."},
+        {"term": "Leading question", "meaning": "A question worded so that it pushes the respondent toward one answer."},
+        {"term": "Pilot", "meaning": "A small trial of a questionnaire or interview guide before the real run."}
+      ],
+      "exampleTitle": "A five-question clerk interview",
+      "example": [
+        "Purpose: decide the pending-payment rule. Questions: 1. Tell me about the last payment that did not appear. 2. What do you do while you wait? 3. What do you tell the student? 4. Yes or no: may that student attend today? 5. What would a wrong rule cost you on Monday? Question 4 is closed because the specification needs a yes or no. Question 1 is open because you do not yet know the story.",
+        "Afterward you send five lines: what you heard, what you inferred, and the one fact you will confirm with the bursar. The clerk corrects the inference the same afternoon."
+      ],
+      "application": [
+        "Put the interview guide in an appendix. A report that says we interviewed stakeholders and shows no questions has not demonstrated method.",
+        "If you survey students, state who was invited and who replied. Forty cheerful friends are not the student body."
+      ],
+      "tip": "Write the decision the interview must inform, then write the questions. Not the other way around.",
+      "takeaways": [
+        "Open questions explore; closed questions check a draft rule",
+        "Avoid leading wording that tells the person your preferred answer",
+        "Separate notes into quotes, inferences, and facts still to check",
+        "Pilot a questionnaire and describe the sample honestly"
+      ],
+      "revision": [
+        "Rewrite don't you agree the queue is management's fault as a neutral open question.",
+        "Why interview a clerk and a dean separately?",
+        "What is wrong with the answer often on a questionnaire?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which question is leading?",
+          "options": [
+            "Walk me through the last missing payment",
+            "Don't you think the portal is the real problem?",
+            "May the student attend class today, yes or no?",
+            "What do you tell the student while you wait?"
+          ],
+          "correct": 1,
+          "explanation": "The don't you think wording pushes the clerk toward blaming the portal. The others ask for a story or a checkable fact."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A convenience sample of friends should be described as if it were the whole campus.",
+          "correct": false,
+          "explanation": "Honest method names the sample. Over-claiming who responded makes later requirements look more certain than they are."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a small trial of a questionnaire, run before the real distribution, called?",
+          "answers": ["pilot", "a pilot", "piloting"],
+          "explanation": "A pilot finds ambiguous questions while you can still fix them."
+        },
+        {
+          "kind": "structured",
+          "prompt": "You need a yes-or-no rule and you do not yet understand the workaround. Which two question types do you use, and why?",
+          "points": ["an open question for the story", "a closed question for the yes-or-no rule"],
+          "explanation": "The open question discovers the workaround. The closed question forces the specific decision the specification needs. One without the other is incomplete."
+        }
+      ],
+      "summary": "Interviews and questionnaires earn trust when they are aimed at a decision, worded neutrally, and recorded so a requirement can be traced back to evidence. Pilot the form, separate fact from inference, and describe who actually answered."
+    },
+    {
+      "title": "Observation and Document Analysis",
+      "description": "Seeing the lived process and reading the official one, then writing down where they disagree.",
+      "durationMinutes": 18,
+      "difficulty": "beginner",
+      "objectives": [
+        "Plan an observation without disrupting the work more than necessary",
+        "Extract candidate requirements from forms and policies",
+        "Record a gap between the official process and the observed one"
+      ],
+      "introduction": [
+        "People describe work as they believe it should be done. The counter on Monday shows the work as it is done. Policies and forms show the work as the institution claims it is done. Analysts need all three, and they need the gaps in writing.",
+        "This lesson treats observation and document analysis as a pair. Each one accuses the other of being incomplete, and that argument is useful."
+      ],
+      "explanation": [
+        "Plan an observation around a time when the behaviour you care about actually happens. Registration questions are not visible at 16:30 in a quiet week. Tell the supervisor you are watching the process, not scoring the clerk. Decide what you will count: minutes waiting, times a reference is retyped, times a student is sent to another window. Counts beat a vague impression that it seemed busy.",
+        "Stay out of the way, and note the moment people notice you. If the paper list disappears into a drawer when you arrive, write that down. It is data about a workaround that may be unofficial. Do not confront anyone at the counter. Confirm later, in private, what the list is for.",
+        "Document analysis starts with the artefacts the process already uses: the fee policy, the module form, the class-list report, last year's timetable circular. For each field or rule, ask who fills it, who reads it, and what decision it supports. A field nobody can explain is either obsolete or a hidden requirement waiting for a story.",
+        "Then compare. If the policy says no attendance without cleared fees, and observation shows pending students in class with a handwritten note, the gap is a candidate requirement. You do not silently pick the policy or the note. You take the gap to the stakeholder who is allowed to choose."
+      ],
+      "definitions": [
+        {"term": "Observation", "meaning": "A planned watch of work in its real setting, with notes of visible actions and counts."},
+        {"term": "Document analysis", "meaning": "A structured reading of forms, policies, and reports to find official rules and fields."},
+        {"term": "Gap", "meaning": "A difference between the official process and the process you observed."},
+        {"term": "Artefact", "meaning": "A form, policy, report, or other existing object the process already produces or uses."}
+      ],
+      "exampleTitle": "The policy and the handwritten note",
+      "example": [
+        "Policy sentence: a student with an outstanding balance shall not be confirmed on a module. Observed on Tuesday: four students with pending mobile-money payments were confirmed after the clerk attached a handwritten note with the reference and the time. The form has no field for that reference.",
+        "Gap record: official rule forbids confirmation; lived practice confirms and relies on paper; the form cannot store the evidence the clerk is keeping. Candidate requirement: record a pending reference without pretending the fee is cleared. The bursar must accept or reject that candidate."
+      ],
+      "table": {
+        "caption": "What to capture during two hours at the counter",
+        "headers": ["Count or note", "Why it matters"],
+        "rows": [
+          ["Minutes from arrival to answer", "Turns a busy impression into evidence"],
+          ["Retyped references", "Shows a missing field or a broken integration"],
+          ["Students sent elsewhere", "Shows a broken hand-off"],
+          ["Unofficial lists", "Shows a workaround to confirm later"]
+        ]
+      },
+      "application": [
+        "If you observe, include the time of day and what you counted. A paragraph of atmosphere will not survive questions.",
+        "Attach the form, or a blank copy, and annotate which fields became requirements. That annotation is document analysis a marker can see."
+      ],
+      "tip": "Write the official rule and the observed action in two columns before you decide which one the new system should obey.",
+      "takeaways": [
+        "Observe when the behaviour happens, and count something",
+        "Do not shame a workaround at the counter; confirm it later",
+        "Document analysis asks who fills a field and what decision it supports",
+        "A gap between policy and practice is a finding, not an embarrassment to hide"
+      ],
+      "revision": [
+        "Why is 16:30 in a quiet week a poor time to observe registration?",
+        "What three questions should you ask of a field on an existing form?",
+        "Who should resolve a gap between the fee policy and the handwritten note?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What is the best immediate response when you notice an unofficial list at the counter?",
+          "options": [
+            "Announce that the list breaks policy, in front of the queue",
+            "Note it and confirm its purpose later in private",
+            "Ignore it because it is not in the policy",
+            "Photograph students' personal details for your report"
+          ],
+          "correct": 1,
+          "explanation": "The list is evidence. Confirm it privately later. A public confrontation hides the workaround, and copying personal details is a privacy failure."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "If observation and the written policy disagree, the analyst should quietly follow the policy and omit the observation.",
+          "correct": false,
+          "explanation": "The gap is the finding. The authorised stakeholder chooses which rule the new system will enforce."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a difference between the official process and the process you watched called?",
+          "answers": ["a gap", "gap"],
+          "explanation": "A gap is that difference. It becomes a candidate requirement only after a stakeholder resolves it."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A form has no payment-reference field, but clerks write references on paper. What does document analysis show, and what does observation add?",
+          "points": ["the official form cannot store the reference", "lived practice keeps the reference on paper"],
+          "explanation": "The form shows the official limitation. Observation shows the workaround. The pair justifies a requirement to store the reference properly."
+        }
+      ],
+      "summary": "Observation counts the lived process. Document analysis reads the official one. The useful product is a written gap, taken to someone who may decide which rule the system will enforce. Hiding either side produces a specification that fails on Monday."
+    },
+    {
+      "title": "Requirements Specification",
+      "description": "How to write the specification so designers and testers can share it: structure, identifiers, and traceability.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Outline a usable requirements specification",
+        "Apply identifiers, priorities, and sources",
+        "Explain traceability from evidence to requirement to test"
+      ],
+      "introduction": [
+        "A specification is not a diary of every conversation. It is the stable document design and testing will obey. If a fact matters and it is only in someone's notebook, it is not yet specified.",
+        "This lesson describes a structure a second-year project can actually finish, without pretending to be a hundred-page industrial standard."
+      ],
+      "explanation": [
+        "A workable specification has a short purpose, a scope statement that says what is out, a glossary, the functional requirements, the non-functional requirements, and an open-issues list. The glossary matters because module, course, and programme are used loosely on campus. Pick one meaning and stick to it.",
+        "Each requirement carries an identifier, a statement, a priority, a source, and a note on how it will be verified. Source might be interview Bursar 3 March or gap G2. Verification might be test or demonstration. A requirement with no source looks invented. A requirement with no verification will be forgotten at the end.",
+        "Traceability is the chain from evidence to requirement to design to test. You do not need a special tool. A table with those four columns is enough for this course. When a test fails, the chain shows whether the code, the design, or the original evidence was wrong.",
+        "Keep the language consistent and dull. Shall for binding behaviour. The same actor names as the glossary. No jokes, no maybe, no etc. Ambiguity in a specification becomes an argument during testing, and the argument will be settled by whoever is most tired."
+      ],
+      "definitions": [
+        {"term": "Requirements specification", "meaning": "The stable document of in-scope requirements that design and testing use."},
+        {"term": "Glossary", "meaning": "The agreed meanings of terms the specification refuses to leave ambiguous."},
+        {"term": "Source", "meaning": "The evidence a requirement came from, such as an interview or a documented gap."},
+        {"term": "Traceability", "meaning": "The chain linking evidence, requirement, design, and test."}
+      ],
+      "exampleTitle": "One row that would survive a viva",
+      "example": [
+        "FR-02. Statement: the system shall refuse a mobile-money reference that is already stored and inform the clerk. Priority: must. Source: observation 4 March, count of retyped references, confirmed by bursar. Verification: test with two students and one repeated reference. Out of scope: automatic checking with the mobile-money provider.",
+        "A designer can point at FR-02. A tester can write the case from the verification note. A viva question about where it came from has an answer."
+      ],
+      "table": {
+        "caption": "Minimum columns for each requirement",
+        "headers": ["Column", "Example"],
+        "rows": [
+          ["Identifier", "FR-02"],
+          ["Statement", "Refuse a stored duplicate reference and inform the clerk"],
+          ["Priority", "Must"],
+          ["Source", "Observation 4 March, confirmed by the bursar"],
+          ["Verification", "Test with one repeated reference"]
+        ]
+      },
+      "application": [
+        "Use the same identifiers in the design chapter and the test table. Inconsistent numbering is a traceability failure even when the prose is good.",
+        "Put unresolved arguments on the open-issues list instead of burying a compromise inside a vague shall."
+      ],
+      "tip": "If you cannot fill the source column, you are not ready to freeze that requirement.",
+      "takeaways": [
+        "The specification is the stable contract for design and test",
+        "Each requirement needs an identifier, priority, source, and verification",
+        "A glossary stops module and programme from changing meaning mid-report",
+        "Traceability can be a simple four-column table"
+      ],
+      "revision": [
+        "Name five columns you would give every functional requirement.",
+        "Why does a glossary belong in a campus specification?",
+        "What belongs on an open-issues list instead of inside a requirement?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which item makes a requirement traceable back to evidence?",
+          "options": ["A bright heading colour", "A source such as an interview or a gap record", "The programmer's nickname", "An unmarked etc. at the end of the sentence"],
+          "correct": 1,
+          "explanation": "The source column links the statement to evidence. Colour and nicknames do not. Etc. destroys precision."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A specification may leave terms such as module and course undefined if everyone on campus uses them.",
+          "correct": false,
+          "explanation": "Those words are used loosely. A glossary fixes one meaning so design and test do not diverge."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the chain from evidence to requirement to design to test called?",
+          "answers": ["traceability"],
+          "explanation": "Traceability is that chain. A simple table is enough to demonstrate it in a student project."
+        },
+        {
+          "kind": "structured",
+          "prompt": "List two fields, besides the statement itself, that a specification row needs so a tester and a reviewer can use it.",
+          "points": ["an identifier", "a source or a verification method"],
+          "explanation": "The identifier lets the test point back. The source shows evidence, and the verification note tells the tester how the requirement will be judged."
+        }
+      ],
+      "summary": "A requirements specification is a dull, stable contract: glossary, scope, numbered requirements, priorities, sources, and how each one will be verified. Traceability is the chain that lets a failed test point back to evidence instead of to an argument."
+    },
+    {
+      "title": "Requirements Validation",
+      "description": "Checking that the specification is the right one: reviews, prototypes, and the criteria of a good requirement.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Distinguish validation from later system testing",
+        "Apply a checklist to a weak requirement",
+        "Describe a review or prototype session that stakeholders can actually attend"
+      ],
+      "introduction": [
+        "Validation asks whether we wrote the right requirements. Testing, later, asks whether the system meets the requirements we wrote. A perfect program of a wrong requirement is a validated failure you discover too late.",
+        "This lesson shows lightweight checks a student team can run: a checklist, a review meeting, and a paper prototype."
+      ],
+      "explanation": [
+        "A single requirement should be necessary, unambiguous, feasible, prioritised, and verifiable. Necessary means a stakeholder can say what goes wrong if it is dropped. Unambiguous means two readers do not invent two meanings. Verifiable means you already know the test or demonstration. Run the checklist before you invite anyone to a meeting, so you do not spend the meeting on sentences you could have repaired alone.",
+        "A requirements review walks stakeholders through the specification, not through a slide of vision words. Send the document ahead. In the room, read the must items aloud and ask two questions: is this still true, and how would you notice if it were missing. Record defects in the specification the same way testers record faults. A review that ends with looks fine and no notes did not happen.",
+        "Prototypes validate understanding when prose fails. A paper screen of the refusal message, shown to five students, will reveal whether reason codes make sense. You are not user-testing finished software. You are checking that the requirement's outcome is the outcome people recognise.",
+        "Sign-off is a named person accepting a named version of the specification, with the open issues still visible. It is not a promise that nothing will change. It is a promise that design may proceed from this version, and that later changes will be explicit."
+      ],
+      "definitions": [
+        {"term": "Validation", "meaning": "Checking that the requirements describe the system stakeholders actually need."},
+        {"term": "Verification of requirements", "meaning": "Checking that each requirement is well formed and testable, often with a checklist."},
+        {"term": "Requirements review", "meaning": "A meeting in which stakeholders examine the specification and record defects."},
+        {"term": "Sign-off", "meaning": "A named acceptance of a named specification version as the base for design."}
+      ],
+      "exampleTitle": "A checklist catches FR-09",
+      "example": [
+        "Draft FR-09: the system shall handle exceptions appropriately. Necessary? Nobody can say which exception. Unambiguous? No. Verifiable? No. The review does not polish the adverb. It splits the sentence into the two exceptions the clerk actually described: a missing reason code, and a reference that fails a length check.",
+        "The bursar signs version 0.3, with open issue OI-2 still listed: whether pending students may attend. Design may start on the signed items and must not pretend OI-2 was resolved."
+      ],
+      "table": {
+        "caption": "Checklist for one requirement",
+        "headers": ["Test", "Failing example"],
+        "rows": [
+          ["Necessary", "No one can name the harm if it is cut"],
+          ["Unambiguous", "Two readers invent two meanings"],
+          ["Feasible", "It assumes data the university does not have"],
+          ["Verifiable", "No test or demonstration can fail it"]
+        ]
+      },
+      "application": [
+        "Before submission, run the checklist on your five most important requirements and attach the repairs. That appendix shows validation, not just writing.",
+        "If a stakeholder cannot attend, record who did, and do not write the university agreed. Write the bursar agreed version 0.3 on 12 March."
+      ],
+      "tip": "Sign-off names a person and a version. Anything vaguer is a vibe.",
+      "takeaways": [
+        "Validation asks if the requirements are the right ones",
+        "A good requirement is necessary, unambiguous, feasible, and verifiable",
+        "Reviews and prototypes expose mistakes while they are still sentences",
+        "Sign-off accepts a version and leaves open issues visible"
+      ],
+      "revision": [
+        "How is requirements validation different from testing the finished system?",
+        "Apply the verifiable check to the system shall be robust.",
+        "What must a sign-off name?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What question does requirements validation answer?",
+          "options": [
+            "Does the code compile?",
+            "Did we specify the system stakeholders need?",
+            "Which server is cheapest?",
+            "Is the network cable plugged in?"
+          ],
+          "correct": 1,
+          "explanation": "Validation checks the requirements themselves against stakeholder need. Compilation and cables are later, different checks."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A review that produces no notes and ends with looks fine is strong evidence of validation.",
+          "correct": false,
+          "explanation": "A real review records defects or explicit confirmations of specific items. A vague looks fine is not evidence."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name for a named person accepting a named version of the specification?",
+          "answers": ["sign-off", "sign off", "signed off"],
+          "explanation": "Sign-off is that acceptance. It freezes a base for design without pretending every open issue vanished."
+        },
+        {
+          "kind": "structured",
+          "prompt": "The draft says the system shall handle exceptions appropriately. Give two checklist tests it fails, and what you would do next.",
+          "points": ["it is ambiguous or not verifiable", "split it into the specific exceptions stakeholders named"],
+          "explanation": "Appropriately has no single meaning and no test. The repair is to replace it with the concrete cases a review can confirm."
+        }
+      ],
+      "summary": "Validation checks that the specification describes the right system, using a checklist, a review, or a prototype while changes are still cheap. Sign-off names a person and a version. Testing the software comes later and cannot repair a requirement you never checked."
+    }
+  ]
+}

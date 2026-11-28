@@ -3,14 +3,18 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppShell from "@/app/components/shell/AppShell";
-import { loadCourses, type CourseSummary } from "@/lib/learn-api";
+import { loadCourses, loadPerformance, type CourseSummary, type PerformanceSummary } from "@/lib/learn-api";
 
 export default function ProgressPage() {
   const [courses, setCourses] = useState<CourseSummary[]>([]);
+  const [performance, setPerformance] = useState<PerformanceSummary | null>(null);
 
   useEffect(() => {
     loadCourses().then((result) => {
       if (result.ok) setCourses(result.data);
+    });
+    loadPerformance().then((result) => {
+      if (result.ok) setPerformance(result.data);
     });
   }, []);
 
@@ -24,7 +28,44 @@ export default function ProgressPage() {
           <h2>
             {done} of {total} lessons complete
           </h2>
-          <p>Quiz scores will appear here when mock exams are published.</p>
+          <p>
+            {performance?.averageScorePercent != null
+              ? `Average quiz score ${performance.averageScorePercent}% from ${performance.attemptCount} attempt${performance.attemptCount === 1 ? "" : "s"}.`
+              : "Quiz scores appear here after you submit a chapter quiz or mock exam."}
+          </p>
+          {performance ? (
+            <p>
+              {performance.questionsCorrect} of {performance.questionsAnswered} questions marked correct.
+            </p>
+          ) : null}
+        </article>
+        <article className="dash-card">
+          <header className="dash-card-head">
+            <h2>Topic performance</h2>
+            <Link href="/dashboard/quizzes">Quizzes</Link>
+          </header>
+          {performance?.topics.length ? (
+            <ul className="cms-lessons">
+              {performance.topics.map((topic) => (
+                <li key={`${topic.moduleCode}-${topic.title}`}>
+                  <div>
+                    <h3>
+                      {topic.moduleCode ? `${topic.moduleCode} · ` : ""}
+                      {topic.title}
+                    </h3>
+                    <p>
+                      {topic.correct} of {topic.answered} correct · {topic.percent}%
+                    </p>
+                  </div>
+                  <div className="dash-bar" aria-label={`${topic.percent} percent`}>
+                    <span style={{ width: `${topic.percent}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="dash-empty">Topic scores appear after a submitted quiz. Each question is grouped by its chapter.</p>
+          )}
         </article>
         <ul className="cms-grid">
           {courses.map((course) => (

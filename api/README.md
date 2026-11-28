@@ -38,6 +38,22 @@ python -m unittest tests.test_cms_slides tests.test_media tests.test_assist
 
 `python scripts/live_providers.py` is optional. It skips any provider whose key is unset and is not part of the unit tests.
 
+## IT211 course seed
+
+`python -m app.seed.it211` publishes the Systems Analysis and Design course on the existing Bachelor of Science in Computing programme: 8 chapters, 62 lessons, 8 chapter quizzes, one practice exam, and a 45-minute 30-question mock exam. Lessons are published. The command upserts only IT211 rows (matched by programme name, module code, chapter title, lesson title, and stable question titles). It does not delete other programmes, modules, users, or attempts. Run it again after editing the files in `app/seed/it211/data/` to refresh that course in place.
+
+A super administrator must already exist, because lesson and question rows need an author. Create one with `SUPER_ADMIN_NAME`, `SUPER_ADMIN_EMAIL`, and `SUPER_ADMIN_PASSWORD`, or run `python -m app.seed` first when demo users are intentional.
+
+A demo student is created only when `SEED_DEMO_USERS=true` and both `DEMO_STUDENT_EMAIL` and `DEMO_STUDENT_PASSWORD` are set. The password is read from the environment and is never written into the repository. Leave those variables unset in production, and keep `SEED_DEMO_USERS=false`.
+
+On Render, open the API service shell (or a one-off job using the same image and `DATABASE_URL`) after the deploy has run `alembic upgrade head`, then:
+
+```bash
+python -m app.seed.it211
+```
+
+The free Render plan has no shell. In that case run the same command from any host that can reach the database with `DATABASE_URL` rewritten to `postgresql+psycopg://`, and do not point it at a database you do not mean to update.
+
 ## Production
 
 Signup creates students only. The demo super administrator is created only when `SEED_DEMO_USERS=true`. Production leaves that flag `false`.

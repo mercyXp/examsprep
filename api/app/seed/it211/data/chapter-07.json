@@ -1,0 +1,663 @@
+{
+  "position": 7,
+  "title": "System Maintenance and Evaluation",
+  "description": "The long life after go-live: four kinds of maintenance, a fair evaluation, the documents people need, and what performance and reliability mean on a campus.",
+  "lessons": [
+    {
+      "title": "Introduction to System Maintenance",
+      "description": "Why maintenance is the longest phase, and how a live registration system should take change.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain why maintenance starts at go-live and continues",
+        "Describe a controlled path for a change request",
+        "Separate emergency repair from ordinary change"
+      ],
+      "introduction": [
+        "The registration portal will still be running next year, when a new sponsorship rule arrives and a student finds a name the search cannot handle. That work is maintenance. It is not a sign the project failed. It is the phase the life cycle always promised.",
+        "Uncontrolled maintenance is the failure mode: quick edits with no link to a requirement, until nobody knows which build the counter is using."
+      ],
+      "explanation": [
+        "Maintenance keeps a live system correct, fitted to a changing organisation, and cheaper to operate. Requests arrive from fault reports, from new faculty rules, and from clerks who now understand what they wish the screen had done. All of those are legitimate. None of them should skip straight into the database because someone is standing at the counter, except for a true emergency that is written up the same day.",
+        "An ordinary change request restates the need, the priority, and the requirements affected. It then takes a short path through analysis and design, even if the path is a page long. The duplicate-reference rule is not edited in code alone. The specification, the test T-02, and the screen message move together. That is traceability continuing after go-live.",
+        "Emergency repair, such as a crash that stops registration morning, may be fixed first and documented immediately after. The record still names the build, the symptom, and the requirement or defect. A culture that calls every wish an emergency will destroy the specification within a term.",
+        "Capacity for maintenance is a planning issue. A system with no named owner after the student project ends will decay. The faculty needs a person who accepts requests and a place those requests live. Otherwise the owner becomes whoever last had the password."
+      ],
+      "definitions": [
+        {"term": "Maintenance", "meaning": "Work on a live system to correct it, adapt it, or improve it under control."},
+        {"term": "Change request", "meaning": "A recorded ask to alter the live system, with a priority and a link to requirements."},
+        {"term": "Emergency repair", "meaning": "An immediate fix to restore a stopped or dangerous operation, documented the same day."},
+        {"term": "System owner", "meaning": "The person who accepts change requests and guards the live specification."}
+      ],
+      "exampleTitle": "Two requests on the same Tuesday",
+      "example": [
+        "At 08:10 the search crashes on apostrophes and the counter stops. That is an emergency: restore search, then file the defect and add a regression test. At 11:00 a dean asks for hostel allocation inside the portal by Friday. That is not an emergency. It is a change request that belongs in planning, because it widens scope.",
+        "The owner writes both down. Only the crash is patched the same morning."
+      ],
+      "application": [
+        "In a project handover section, name the owner and where requests will be kept. A system without an owner is a demo.",
+        "Treat your own post-submission bug fixes as change requests with a test, so the habit is visible."
+      ],
+      "tip": "If everything is an emergency, nothing is controlled.",
+      "takeaways": [
+        "Maintenance is normal and starts at go-live",
+        "Ordinary changes revisit requirements, design, and tests",
+        "Emergencies are restored first and documented the same day",
+        "A named owner stops the password holder becoming the process"
+      ],
+      "revision": [
+        "Why is a new hostel module not an emergency repair?",
+        "What must move together when the duplicate-reference message changes?",
+        "Who should accept a change request after the builders leave?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which request is an emergency repair?",
+          "options": [
+            "A crash that stops the counter from searching",
+            "A wish for hostel allocation by Friday",
+            "A new colour for the banner",
+            "A report the dean might like next term"
+          ],
+          "correct": 0,
+          "explanation": "A stopped counter is an emergency. The other items are scope or taste and go through ordinary change control."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "After go-live, edits may skip the specification if the developer remembers the change.",
+          "correct": false,
+          "explanation": "Memory is not traceability. The specification, the test, and the code move together."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a recorded ask to alter a live system, with a priority, called?",
+          "answers": ["change request", "a change request"],
+          "explanation": "A change request is that record. It is the front door of ordinary maintenance."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A dean wants a large new feature during registration week. How should it be handled, and how is that different from a crash?",
+          "points": ["as a change request that can wait", "a crash is restored immediately and then documented"],
+          "explanation": "Scope expansion is planned, not patched at the counter. A crash that stops operations is the exception, and it is still written up the same day."
+        }
+      ],
+      "summary": "Maintenance is controlled change to a live system. Ordinary requests revisit the specification and the tests. Emergencies restore service and are documented immediately. A named owner keeps the portal from becoming whoever last edited it."
+    },
+    {
+      "title": "Corrective Maintenance",
+      "description": "Repairing defects so the live system matches the behaviour that was already agreed.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Define corrective maintenance as defect repair",
+        "Trace a live fault back to a test that should have existed",
+        "Avoid expanding scope while fixing a defect"
+      ],
+      "introduction": [
+        "Corrective maintenance fixes defects: the system does not do what the signed specification or the design said. An apostrophe that crashes search, a duplicate reference that is stored anyway, a class list that omits a confirmed student — these are corrections if the target already forbade them.",
+        "A fix that quietly adds a new report is not corrective. It is a different kind of change wearing a convenient name."
+      ],
+      "explanation": [
+        "The trigger is usually a fault report from live use. The owner checks it against the specification. If the specification required the behaviour, the work is corrective. If the specification never mentioned it, the report is a change request of another kind, even if the user calls it a bug. The word bug does not decide the category. The target does.",
+        "A good correction adds the regression test that was missing or that did not match live data. The apostrophe case becomes a unit or system test with the name Banda's so the fault cannot return unseen. The fix also updates the user message if the crash had a raw error. Then the same report is closed against a named build.",
+        "Scope control matters because the person reporting the fault often adds and while you are there. Record the extra wish separately. Corrective work stays small so it can be released safely during term. A defect fix bundled with a redesign is how registration morning gets a surprise.",
+        "Some defects reveal that the requirement was wrong or ambiguous. Then the honest act is to correct the requirement first, with the sponsor, and only then change the system. Patching a reading the bursar does not share creates a second argument on top of the fault."
+      ],
+      "definitions": [
+        {"term": "Corrective maintenance", "meaning": "Changing the live system so it meets a behaviour the specification already required."},
+        {"term": "Defect", "meaning": "A live behaviour that disagrees with the agreed target."},
+        {"term": "Regression test", "meaning": "A test added or repeated to ensure a fixed fault does not return."},
+        {"term": "Scope creep", "meaning": "Adding extra wishes to a change that was supposed to be a repair."}
+      ],
+      "exampleTitle": "The apostrophe, and nothing else",
+      "example": [
+        "Search crashes on Banda's. The specification said names are stored and searchable, so this is corrective. The developer fixes the query, adds a test containing an apostrophe, and releases build 0.4. The clerk also asks for a new hostel field in the same conversation. The owner files that as a separate request and does not put it in build 0.4.",
+        "The fault report is closed with the build number and the test identifier. Next term's name with an apostrophe is no longer a surprise."
+      ],
+      "application": [
+        "When you fix a coursework bug, add the test and resist the extra feature. Mention both decisions in the handover note.",
+        "If users call a missing feature a bug, show them the specification and reclassify the request. The category changes the urgency and the path."
+      ],
+      "tip": "The specification decides whether the work is a repair. The user's tone does not.",
+      "takeaways": [
+        "Corrective maintenance repairs a missed agreed behaviour",
+        "Each fix earns a regression test and a build number",
+        "Extra wishes are split out so the repair stays small",
+        "A wrong requirement is corrected openly before the system is bent to match a guess"
+      ],
+      "revision": [
+        "Why is a hostel field not part of the apostrophe fix?",
+        "What test should exist after the search crash is fixed?",
+        "Who decides if a so-called bug was actually unspecified?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which change is corrective maintenance?",
+          "options": [
+            "Adding hostel allocation that was never specified",
+            "Fixing search so a stored name with an apostrophe can be found",
+            "Repainting the banner",
+            "Replacing the life-cycle model"
+          ],
+          "correct": 1,
+          "explanation": "Search of stored names was already required. Making it true is corrective. Hostel allocation is new scope."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A corrective fix should add a regression test for the fault that escaped.",
+          "correct": true,
+          "explanation": "The regression test is how the same live surprise is prevented from returning in a later build."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the name for adding extra wishes onto a repair?",
+          "answers": ["scope creep"],
+          "explanation": "Scope creep is that expansion. Split the wish into its own change request."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A clerk calls a missing hostel feature a bug. How do you classify it, and what do you compare it with?",
+          "points": ["it is not corrective if it was never specified", "compare the request with the signed specification"],
+          "explanation": "The category follows the target, not the label bug. An unspecified hostel feature is a new change request."
+        }
+      ],
+      "summary": "Corrective maintenance makes the live system do what it was already supposed to do. Confirm the defect against the specification, add a regression test, ship a small build, and park any extra wish. If the specification itself was wrong, change that openly first."
+    },
+    {
+      "title": "Adaptive Maintenance",
+      "description": "Changing the system because the world changed: a new rule, a new sponsor type, a new neighbour.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Define adaptive maintenance as a response to environmental change",
+        "Give a university example that is not a defect",
+        "Show how an adaptive change re-enters requirements"
+      ],
+      "introduction": [
+        "Adaptive maintenance changes a working system because the environment changed. The portal may be correctly implementing last year's fee rule and still be wrong on the day the university recognises a new sponsorship letter.",
+        "Nothing is broken relative to the old target. The target itself has expired. That is why the work is not called corrective."
+      ],
+      "explanation": [
+        "The environment includes regulations, university policy, partner systems, and the devices people actually have. When Finance starts returning a new status, sponsored, the registration rules must adapt or every sponsored student will be refused as unpaid. The change is driven from outside the original specification.",
+        "The path is a change request that writes a new or revised requirement, updates the design, and adds tests. Old tests that encoded unpaid as the only alternative to cleared must be revised deliberately, not accidentally broken. Adaptive work is where regression suites earn their keep: they show which old truths are now false.",
+        "Interfaces to neighbours are a common source. If the mobile-money reference gains two extra characters, input validation and the column length must adapt together. Changing only the screen, or only the column, recreates the fault on the other side. The context diagram gains nothing new if the neighbour was already Finance, but the data dictionary changes.",
+        "Priority follows the outside deadline, not the developer's interest. A policy that applies at the next sitting outranks a tidy refactor. The owner says so in the request. Adaptive maintenance without a date is how policy changes are discovered by the queue."
+      ],
+      "definitions": [
+        {"term": "Adaptive maintenance", "meaning": "Changing a live system to fit a changed environment, policy, or neighbouring system."},
+        {"term": "Environment", "meaning": "The policies, partners, and conditions outside the system boundary that the system must live with."},
+        {"term": "Revised requirement", "meaning": "A signed update to the target so old and new behaviour are not both official."},
+        {"term": "Regression suite", "meaning": "The set of existing tests rerun to see what an adaptive change disturbed."}
+      ],
+      "exampleTitle": "A new fee status called sponsored",
+      "example": [
+        "The bursar announces that ministry-sponsored students return status sponsored, and they may enrol. Last year's specification knew only cleared, pending, and unpaid. The portal is not defective. The owner raises an adaptive request: treat sponsored like cleared for enrolment, show the word sponsored to the clerk, and do not show the ministry letter to other students.",
+        "Tests for unpaid refusals stay. A new test covers sponsored. The activity diagram's decision gains a fourth label. The change is released before the sitting the policy names."
+      ],
+      "application": [
+        "When you discuss future work in a report, label genuine environmental changes as adaptive, not as bugs you might fix.",
+        "Update the diagram and the requirement in the same change. A code-only adaptation will fail the next student who reads the old specification."
+      ],
+      "tip": "If the old tests became wrong because the rule changed, revise the tests on purpose and say why.",
+      "takeaways": [
+        "Adaptive maintenance responds to a changed environment, not to a defect",
+        "The requirement is revised so two targets are not both official",
+        "Old tests are rerun and updated where the rule truly changed",
+        "External deadlines set the priority"
+      ],
+      "revision": [
+        "Why is the sponsored status not a corrective fix?",
+        "Which old tests should remain, and which new test appears?",
+        "What goes wrong if only the screen is lengthened for a longer reference?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "A new university policy adds a fee status the specification never had. What kind of maintenance is required?",
+          "options": ["Corrective", "Adaptive", "A new company logo only", "Ignoring the policy"],
+          "correct": 1,
+          "explanation": "The environment changed. The system must be adapted and the requirement revised. It was not failing the old target."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Adaptive maintenance can leave the old specification unchanged because the code is what matters.",
+          "correct": false,
+          "explanation": "The specification is the target. If it stays old while the code follows a new policy, testers and staff will disagree forever."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call maintenance that fits the system to a new policy or a changed neighbouring system?",
+          "answers": ["adaptive", "adaptive maintenance"],
+          "explanation": "Adaptive maintenance is that response to environmental change."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Sponsored students must be allowed to enrol. What document changes, and what happens to the old unpaid test?",
+          "points": ["the requirement or decision model is revised", "the unpaid test remains because that rule still exists"],
+          "explanation": "The new status is written into the target. Unpaid students are still refused, so that test stays, and a sponsored case is added."
+        }
+      ],
+      "summary": "Adaptive maintenance updates a correct system because policy or a neighbour changed. Revise the requirement, adapt the design and the tests on purpose, and schedule the release to the outside deadline. Do not call the old behaviour a bug."
+    },
+    {
+      "title": "Perfective Maintenance",
+      "description": "Improving a system that already meets its specification: speed, usability, and small tasks the users now understand.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Define perfective maintenance as improvement rather than repair or adaptation",
+        "Give an example that makes a clerk's existing task faster",
+        "Explain why perfective work still needs a requirement and a limit"
+      ],
+      "introduction": [
+        "After a term, clerks can record references correctly and still hate the screen, because it asks for the student number after the reference and they always work the other way round. The specification is met. The policy has not changed. The improvement is perfective maintenance.",
+        "Perfective work is where systems become pleasant. It is also where unlimited wishes go to hide, so it needs a boundary."
+      ],
+      "explanation": [
+        "Perfective maintenance improves performance, usability, or maintainability without changing the agreed business rule. Reordering fields to match the counter conversation, reducing the fee lookup from four seconds to one, or making a module easier for the next developer to change are typical. The refusal reasons stay the same. The improvement is how the existing job feels or how fast it runs.",
+        "It still passes through a change request. The request should cite a measure: five clerks mis-ordered the fields twelve times in a morning, or the lookup exceeds the non-functional target. Without a measure, perfective work is taste, and taste will fill the term. The owner ranks it below adaptive deadlines and below open defects.",
+        "Usability improvements are checked with the same users who felt the pain, on the real task, not with a developer who already knows the screen. If the reordered form does not reduce the mis-keys, it is not finished. Performance improvements are checked against the original non-functional requirement so you do not celebrate a number nobody needed.",
+        "Keep perfective changes from altering rules by accident. A faster lookup that sometimes returns the previous student's status is a defect introduced by an improvement. The regression suite is the guard. Perfective work that will not fund a regression run is too risky for a live counter."
+      ],
+      "definitions": [
+        {"term": "Perfective maintenance", "meaning": "Improving how a correct system performs or is used, without changing the business rule or reacting to a new policy."},
+        {"term": "Maintainability", "meaning": "How safely and cheaply the system can be changed by the people who own it."},
+        {"term": "Measure", "meaning": "The observation that justifies an improvement, such as a count of mis-keys or a response time."},
+        {"term": "Regression", "meaning": "An old behaviour that breaks because a later change disturbed it."}
+      ],
+      "exampleTitle": "Number first, because that is how the counter speaks",
+      "example": [
+        "Observation after go-live: clerks ask for the student number, then the reference, but the form asks for the reference first. They tab backwards and sometimes save the previous student's reference. The rules are right; the order is wrong. The request cites twelve mis-saves in one morning. The form is reordered. T-02 and the success case are rerun. A week later the mis-save count is the evaluation.",
+        "A suggestion to add hostel fields is not accepted into this change. It is not perfective. It is new scope."
+      ],
+      "application": [
+        "If you improve a screen in a project, state the behaviour that must stay identical and the measure that should move. That is the perfective argument.",
+        "Do not label every leftover idea perfective. If the rule changes, it is adaptive or a new requirement."
+      ],
+      "tip": "Improve the job the specification already describes. Do not smuggle a new job into the same release.",
+      "takeaways": [
+        "Perfective maintenance improves use or speed without changing the rule",
+        "A measure justifies the work and later evaluates it",
+        "Users of the task, not only developers, check usability changes",
+        "Regression tests protect the rules an improvement must not alter"
+      ],
+      "revision": [
+        "Why is reordering the clerk's fields perfective rather than corrective?",
+        "What measure would justify the change and later judge it?",
+        "Why rerun the duplicate-reference test after a layout change?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which change is perfective?",
+          "options": [
+            "Reordering fields to match the counter conversation while keeping the same rules",
+            "Adding a fee status the policy just invented",
+            "Fixing a crash that violates the specification",
+            "Building a hostel system"
+          ],
+          "correct": 0,
+          "explanation": "The rules stay. The improvement is usability based on observed mis-keys. The other options are adaptive, corrective, and new scope."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Perfective maintenance may skip regression tests because it does not intend to change rules.",
+          "correct": false,
+          "explanation": "Intention does not prevent regressions. The existing cases are how you prove the rules survived the improvement."
+        },
+        {
+          "kind": "short",
+          "prompt": "What kind of maintenance improves usability or speed without a new business rule?",
+          "answers": ["perfective", "perfective maintenance"],
+          "explanation": "Perfective maintenance is that improvement of a system that already meets its target."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Clerks mis-save because the field order fights the conversation. What do you cite, and which tests must still pass?",
+          "points": ["a count of mis-saves or a similar measure", "the existing reference and enrolment tests"],
+          "explanation": "The measure justifies the perfective change. The old functional tests must pass so the improvement does not quietly change the rules."
+        }
+      ],
+      "summary": "Perfective maintenance makes a correct, still-relevant system faster or easier without changing the rule. Justify it with a measure, check it with the people who do the task, and rerun the tests that protect the behaviour you promised not to touch."
+    },
+    {
+      "title": "Preventive Maintenance",
+      "description": "Work done before a failure: backups, tidy-ups, and fixes aimed at faults that have not happened yet.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Define preventive maintenance as action before a failure",
+        "Give campus examples that are operational rather than feature work",
+        "Balance preventive work against live priorities"
+      ],
+      "introduction": [
+        "Preventive maintenance is the oil change, not the roadside repair. You take a backup and prove you can restore it before the disk fails. You clear a log that will fill during registration week before the week begins.",
+        "It is easy to postpone because nothing is on fire. The fire is the thing you are trying not to have."
+      ],
+      "explanation": [
+        "Preventive work reduces the chance or the impact of a future fault. Restoring a backup onto a spare copy, rotating secrets so a departed student's password dies, archiving old enrolments so this year's search stays fast, and adding a test for a pattern you nearly shipped are all preventive. None of them change the fee rule. All of them protect the live system.",
+        "A backup that has never been restored is a rumour. Preventive maintenance includes the rehearsal. Once a term, someone restores yesterday's registration data to a non-live database and reads a known student. The time taken is written down. If the restore fails, you still have today's database, which is the point of trying it on a quiet afternoon.",
+        "Code-level prevention includes removing a fragile path you know will break on the next policy change, when you can do it safely between sittings. That overlaps maintainability and can look like perfective work. Call it preventive when the motive is a specific future failure, and name that failure. Vague clean-up with no feared fault is optional polishing.",
+        "Schedule preventive work when the counter is quiet, and do not let it displace an open defect or an adaptive deadline. The owner keeps a short list: backup restore, account review, capacity check before registration week. A list that is never scheduled is not preventive. It is a wish."
+      ],
+      "definitions": [
+        {"term": "Preventive maintenance", "meaning": "Work done to reduce the chance or impact of a future failure, before that failure occurs."},
+        {"term": "Restore rehearsal", "meaning": "A planned recovery of a backup to prove the backup can actually be used."},
+        {"term": "Capacity check", "meaning": "A look at space, time, or load before a known peak, while there is still time to act."},
+        {"term": "Quiet window", "meaning": "A period outside peak operations when preventive work can be done safely."}
+      ],
+      "exampleTitle": "The backup is tried on a Thursday",
+      "example": [
+        "Every Thursday in teaching weeks the owner restores the night's backup to a spare database and looks up student 2024-1184. In March the restore takes forty minutes and the spare disk is nearly full. That finding is preventive success: registration week has not started, and there is time to free space. Discovering the same fact on the morning the live disk dies would be corrective, and late.",
+        "The fee rules are untouched. The work is entirely about surviving a failure that has not happened."
+      ],
+      "application": [
+        "Add a preventive item to a handover: who restores a backup, how often, and where the result is noted. A sentence that says backups are taken is weaker than a rehearsal.",
+        "Before you claim the system is reliable, ask when the last restore was proved. If the answer is never, say so."
+      ],
+      "tip": "A backup you have not restored is not yet a backup. It is a file you hope about.",
+      "takeaways": [
+        "Preventive maintenance acts before the failure it fears",
+        "Restore rehearsals matter more than the existence of a backup file",
+        "Name the future fault or the work is only vague tidying",
+        "Schedule it in quiet windows, behind defects and real deadlines"
+      ],
+      "revision": [
+        "Why is a restore rehearsal preventive rather than corrective?",
+        "What should be written down after the Thursday restore?",
+        "When should preventive work yield to an adaptive policy change?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which activity is preventive maintenance?",
+          "options": [
+            "Restoring a backup in a drill before any disk has failed",
+            "Fixing a crash that already stopped the counter",
+            "Adding a new sponsorship status required by policy",
+            "Reordering fields after users mis-keyed"
+          ],
+          "correct": 0,
+          "explanation": "The drill reduces the impact of a future failure. The other activities are corrective, adaptive, and perfective."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Taking backup files is enough, even if nobody has ever restored one.",
+          "correct": false,
+          "explanation": "An untested backup may be unreadable. The rehearsal is the preventive control."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a planned recovery of a backup, done to prove it works, called in this lesson?",
+          "answers": ["restore rehearsal", "a restore rehearsal", "restore drill"],
+          "explanation": "The restore rehearsal is the proof. It belongs on the preventive list, in a quiet window."
+        },
+        {
+          "kind": "structured",
+          "prompt": "The spare disk is nearly full during a Thursday drill. Why is that a success of preventive maintenance, and what do you do before registration week?",
+          "points": ["the problem was found before a live failure", "free space or extend storage while the counter is quiet"],
+          "explanation": "Finding the limit in a drill is the point. You act before peak week, when the same full disk would stop live registration."
+        }
+      ],
+      "summary": "Preventive maintenance spends quiet time reducing future pain: proved restores, capacity checks, and named fragile spots. It does not change business rules. An untested backup and an unscheduled list are not yet prevention."
+    },
+    {
+      "title": "System Evaluation",
+      "description": "Judging the live system against the purpose you wrote at the start, after a real registration period.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Evaluate against original objectives rather than a new story",
+        "Use both measures and stakeholder comments",
+        "Turn an evaluation into the next small plan"
+      ],
+      "introduction": [
+        "Evaluation asks whether the system was worth it. The question is easy to dodge by changing the goals after you see the results. A fair evaluation uses the purpose and the measures from planning and from the non-functional requirements.",
+        "One registration period is enough for a first judgement. Waiting for perfection is a way to avoid the conversation."
+      ],
+      "explanation": [
+        "Start from the written aims. If the aim was fewer retyped references and a visible refusal reason, count both. Compare with the baseline you took before go-live, even if that baseline was a rough tally from observation. A number without a before is harder to interpret, but a before you invent later is dishonest. Say when the baseline is missing.",
+        "Add the stakeholder view without letting it replace the measures. Clerks may feel the week was calmer while the count of duplicate references rose. Both facts belong in the evaluation. The feeling may point to a perfective issue. The count may point to a defect or to training. Evaluation that is only praise, or only a table, will mis-prescribe the next change.",
+        "Separate outcomes you can attribute to the system from outcomes you cannot. A shorter queue might be the portal or a smaller intake. Note the intake size. Also record costs: staff time in parallel running, licence, and the analyst's week. Economic feasibility can be revisited with real figures instead of the original estimates.",
+        "The product is a decision. Continue as is, schedule perfective or corrective work, or plan a further release. Evaluation that ends with a shrug wastes the evidence. The decision becomes the next planning input, which is why the life cycle is drawn as a loop."
+      ],
+      "definitions": [
+        {"term": "Evaluation", "meaning": "A judgement of the live system against its original purpose, using evidence from real use."},
+        {"term": "Baseline", "meaning": "The measurement taken before the change, used as the comparison."},
+        {"term": "Outcome", "meaning": "A result in the organisation, such as fewer retyped references or a shorter queue."},
+        {"term": "Attribution", "meaning": "The care taken not to credit the system for a result caused by something else."}
+      ],
+      "exampleTitle": "After the April sitting",
+      "example": [
+        "Baseline from the old week: clerks retyped references on most pending payments, counted in a two-hour observation. After the portal: retyping fell sharply, and every sampled refusal showed a glossary reason. Queue time also fell, but the intake was smaller, so the evaluation does not claim the portal caused all of the speed. Clerks report the field order still fights the conversation. Decision: keep the release, and schedule the perfective reorder. Do not open a new hostel project on the back of this success."
+      ],
+      "table": {
+        "caption": "Evaluation rows",
+        "headers": ["Aim", "Evidence", "Judgement"],
+        "rows": [
+          ["Fewer retyped references", "Observation before and after", "Met"],
+          ["Visible refusal reason", "Sample of refusals", "Met"],
+          ["Faster queue", "Times fell, intake also fell", "Not fully attributed"],
+          ["Field order", "Clerk comments and mis-saves", "Follow-up perfective work"]
+        ]
+      },
+      "application": [
+        "Close a student report with an evaluation you could actually perform, including one measure you do not yet have and how you would collect it. Pretending you evaluated a system you only prototyped is easy for a marker to see.",
+        "Write the decision in one sentence. Continue, fix, or extend."
+      ],
+      "tip": "Do not move the goalposts. Evaluate the aims you wrote, then decide.",
+      "takeaways": [
+        "Evaluation uses the original aims and a baseline where you have one",
+        "Measures and comments are both evidence and can disagree",
+        "Do not attribute every improvement to the system",
+        "The result is a decision that feeds the next cycle"
+      ],
+      "revision": [
+        "Why is a smaller intake relevant to a claim about queue time?",
+        "What decision fits a met requirement plus a field-order complaint?",
+        "Why not add new success criteria after seeing the results?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What should a fair evaluation compare the system with?",
+          "options": [
+            "The original aims and baseline",
+            "A new set of aims chosen after the results looked good",
+            "The developer's favourite feature",
+            "An unrelated hostel project"
+          ],
+          "correct": 0,
+          "explanation": "The original purpose is the target of evaluation. Changing it afterwards hides whether the project worked."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "If queue time falls and the intake is also smaller, the portal definitely caused the speed-up.",
+          "correct": false,
+          "explanation": "Attribution is incomplete. Both facts are reported, and the claim stays cautious."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the measurement taken before the change, used later as a comparison, called?",
+          "answers": ["baseline", "a baseline"],
+          "explanation": "The baseline is that earlier measurement. Without it, after numbers are harder to interpret."
+        },
+        {
+          "kind": "structured",
+          "prompt": "References are no longer retyped, but clerks still mis-save because of field order. What is the evaluation decision?",
+          "points": ["keep the release because the main aim was met", "schedule perfective work on field order"],
+          "explanation": "The original aim succeeded. The remaining pain is an improvement, not a reason to declare the system a failure or to start unrelated scope."
+        }
+      ],
+      "summary": "Evaluation judges live use against the aims you set, with baselines, comments, and honest limits on what the system caused. It ends in a decision: continue, repair, improve, or extend. That decision is the next turn of the life cycle."
+    },
+    {
+      "title": "System Documentation",
+      "description": "The different documents for clerks, the next developer, and the sponsor, and why one thick file serves none of them.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Separate user, operations, and maintenance documentation",
+        "Write a procedure a Friday clerk can follow",
+        "Explain what must stay aligned with the live build"
+      ],
+      "introduction": [
+        "Documentation is part of the system. A portal with no instruction for a pending payment will be used inventively, and the inventions will disagree. A code base with no note of the Finance interface will be feared by the next developer.",
+        "Different readers need different documents. A single unbound dump of the database schema is not a user guide."
+      ],
+      "explanation": [
+        "User documentation tells a clerk or a student how to complete a task and what a message means. It uses the same words as the interface. The pending-payment procedure is a page: what pending means, what the student may do today, and what the clerk types. Screenshots help only if they match the current build. A picture of a dead screen is worse than prose.",
+        "Operations documentation tells the owner how to start a day, where backups go, who may authorise fallback, and how to tell which build is live. It is the preventive list written as procedures. The restore rehearsal has a page, including the Thursday check for student 2024-1184.",
+        "Maintenance documentation tells the next developer the requirement identifiers, the context diagram, the data dictionary, and how to run the tests. It does not need to narrate every meeting. It does need the decision about sponsored status and the build that introduced it. Out-of-date maintenance notes are how adaptive changes get implemented twice, differently.",
+        "Someone owns updates. When a perfective reorder ships, the user page changes in the same release. Documentation that waits for a quiet month describes a system you no longer run. In a student handover, name the three audiences and include one real procedure, not a promise to write one later."
+      ],
+      "definitions": [
+        {"term": "User documentation", "meaning": "Task instructions and message explanations for the people who operate or use the system."},
+        {"term": "Operations documentation", "meaning": "Procedures for running, backing up, and recovering the live system."},
+        {"term": "Maintenance documentation", "meaning": "The specification, models, and test notes the next changer needs."},
+        {"term": "Data dictionary", "meaning": "The agreed list of stored fields, meanings, and constraints."}
+      ],
+      "exampleTitle": "One page for a Friday clerk",
+      "example": [
+        "Title: Pending mobile-money payment. Meaning: a reference is stored and Finance has not cleared it. Student: may hold a seat only if the faculty rule on the page says so; otherwise explain the refusal sentence. Clerk: do not type the reference twice; if the screen says already used, read the existing student number and call the bursar, do not invent a suffix. Build: this page matches 0.4.",
+        "The developer note is a different page: FR-02, unique constraint on Payment.reference, test T-02. The clerk is not asked to read the constraint name."
+      ],
+      "application": [
+        "Include one user procedure and a short data-dictionary extract in the report. Label the audience at the top of each.",
+        "If screenshots and text disagree, fix them before submission. Disagreement is the documentation defect markers notice first."
+      ],
+      "tip": "Write for one reader at a time. The clerk, the operator, and the next developer do not share a document.",
+      "takeaways": [
+        "User, operations, and maintenance documents serve different readers",
+        "Procedures use the interface's words and the current build",
+        "The data dictionary and requirement identifiers belong with the maintainer",
+        "Documentation updates ship with the change, not a month later"
+      ],
+      "revision": [
+        "Why should the clerk not be given only the data dictionary?",
+        "What does operations documentation say about fallback?",
+        "When is a screenshot a liability?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which document should explain what a clerk does when a reference is already used?",
+          "options": ["User documentation", "A marketing brochure", "Only the UML tool file", "The company vision"],
+          "correct": 0,
+          "explanation": "That is a task procedure for the user at the counter. The maintainer needs the constraint and the test, which is a different document."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "One thick file aimed at nobody in particular is the best system documentation.",
+          "correct": false,
+          "explanation": "Each audience has a job. A mixed dump is ignored by clerks and still misses the maintainer's identifiers."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the agreed list of stored fields, their meanings, and their constraints called?",
+          "answers": ["data dictionary", "a data dictionary"],
+          "explanation": "The data dictionary is the maintainer's map of stored facts. It is not the clerk's script."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A field order changes in a release. Which two documents must change with it, and why not only the code?",
+          "points": ["the user procedure", "otherwise clerks follow a dead screen"],
+          "explanation": "User documentation that shows the old order will recreate the mis-saves. Ship the page with the build. Maintenance notes may also record the perfective request, but the clerk's page is the urgent one."
+        }
+      ],
+      "summary": "Document the system three ways: tasks for users, recovery for operators, and identifiers, models, and tests for the next maintainer. Keep each one matched to the live build. A screenshot of a screen you have already changed is a defect."
+    },
+    {
+      "title": "System Performance and Reliability",
+      "description": "What speed and staying-up mean for registration morning, and how they are measured without empty adjectives.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Define performance and reliability with measures",
+        "Relate both to the non-functional requirements",
+        "Describe a simple load check and a failure target"
+      ],
+      "introduction": [
+        "A correct enrolment that appears after the student has walked away is a performance failure. A correct rule that is down for the whole of Monday morning is a reliability failure. Both can happen in a system that passed functional tests on an empty afternoon.",
+        "This lesson ties those words to numbers you can collect, and to the non-functional requirements that should have set the numbers in advance."
+      ],
+      "explanation": [
+        "Performance is about time and throughput under a stated load. The fee lookup shall return within three seconds for 95 percent of requests while four hundred students are signed in is a performance target. Measuring it once, on a developer's laptop with one user, does not meet the target. A simple load check uses a script or a room of classmates hitting the lookup together, then records the slow tail, not only the average. Averages hide the queue.",
+        "Reliability is about how often the service is there when the timetable says it must be, and how quickly it returns after a fault. A target might be: on registration days from 08:00 to 17:00, unplanned downtime under fifteen minutes, with a named fallback if it exceeds that. Reliability is not a promise that nothing ever crashes. It is a promise about the window and the recovery.",
+        "The two qualities compete with cost. A second server may improve reliability and be unjustified for a pilot school. Say what you are not providing. Preventive maintenance, especially the restore drill and the capacity check, is how reliability is made believable. Performance work that adds indexes or simplifies a lookup is perfective if the rule stays the same and the measure was missed.",
+        "Report both qualities in the evaluation. If the lookup met three seconds except during the finance outage, say that the dependency, not the local query, dominated. Blaming the database for a neighbour's silence leads to the wrong fix. The architecture diagram is useful here: it shows whose slowness you are measuring."
+      ],
+      "definitions": [
+        {"term": "Performance", "meaning": "Response time or throughput under a stated load, judged against a target."},
+        {"term": "Reliability", "meaning": "The degree to which the service is available in a stated window and recoverable after a fault."},
+        {"term": "Load", "meaning": "The concurrent use you claim the measure applies to, such as four hundred signed-in students."},
+        {"term": "Downtime", "meaning": "Time inside the promised window when the service cannot perform its must tasks."}
+      ],
+      "exampleTitle": "The slow tail on Monday",
+      "example": [
+        "Target: 95 percent of fee lookups under three seconds at peak. Measurement: during the pilot, 97 percent were under three seconds, but the slowest 1 percent waited on Finance and took most of a minute. The local application was fast. The evaluation records a dependency delay, not a failed database. Reliability: the portal was usable all morning; one ten-minute Finance gap triggered the rule to stop new confirmations, which was the designed behaviour, not unplanned mystery downtime.",
+        "The average lookup was well under three seconds and would have hidden the Finance tail. The 95th percentile is why the target was written that way."
+      ],
+      "table": {
+        "caption": "Say the number and the condition",
+        "headers": ["Quality", "Weak claim", "Stronger target"],
+        "rows": [
+          ["Performance", "It is fast", "95 percent of lookups under 3 seconds at peak"],
+          ["Reliability", "It does not crash", "Under 15 minutes unplanned downtime from 08:00 to 17:00"],
+          ["Recovery", "We have backups", "Thursday restore proved in under 40 minutes"]
+        ]
+      },
+      "application": [
+        "In an evaluation, report the percentile you promised, not only a flattering average. Mention neighbours separately when they dominate the wait.",
+        "If you never load-tested, say the performance target is unverified. That is more professional than inventing a millisecond."
+      ],
+      "tip": "Averages flatter. Write the target so the slow tail can fail it.",
+      "takeaways": [
+        "Performance is time or throughput under a stated load",
+        "Reliability is availability in a stated window plus recovery",
+        "Measure the slow tail, not only the average",
+        "Separate a neighbour's delay from the local system's delay"
+      ],
+      "revision": [
+        "Why can a system pass functional tests and still fail on Monday morning?",
+        "What is wrong with reporting only the average lookup time?",
+        "How does a Finance outage show up differently from a local crash if the design is clear?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which statement is a performance target?",
+          "options": [
+            "The system shall be fast",
+            "95 percent of fee lookups shall return within three seconds at the stated peak",
+            "The system shall store a reference",
+            "The banner shall be blue"
+          ],
+          "correct": 1,
+          "explanation": "The percentage, the time, and the load make it testable. Fast is a slogan. Storing a reference is functional. Colour is not performance."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "An average response time is enough to show that the slow tail met the target.",
+          "correct": false,
+          "explanation": "Averages can look healthy while the slowest requests, which form the queue, miss the target. Use the percentile you specified."
+        },
+        {
+          "kind": "short",
+          "prompt": "What quality concerns whether the service is up during the promised registration hours and can be recovered?",
+          "answers": ["reliability"],
+          "explanation": "Reliability covers availability in the window and recovery. Speed under load is performance."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Lookups are quick except when Finance is silent. How should the evaluation describe performance, and what should it not blame?",
+          "points": ["local lookups met the target", "do not blame the local database for the neighbour's delay"],
+          "explanation": "Separate the measures. The application met its target; the tail is the external dependency. The architecture tells you which wait you measured."
+        }
+      ],
+      "summary": "Performance and reliability are measured against targets that state a load, a time, and a window. Report the slow tail, rehearse recovery, and do not blame the local database for a neighbour's silence. Functional correctness on a quiet afternoon is not the same result."
+    }
+  ]
+}

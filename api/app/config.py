@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     access_token_minutes: int = 60 * 24 * 7
     cors_origins: str = "http://localhost:3000"
     seed_demo_users: bool = True
+    # Dev-only student created by `python -m app.seed.it211` when both are set
+    # and SEED_DEMO_USERS is true. Leave empty in production.
+    demo_student_email: str = ""
+    demo_student_password: str = ""
     media_root: str = "var/media"
     super_admin_name: str = ""
     super_admin_email: str = ""

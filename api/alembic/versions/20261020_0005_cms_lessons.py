@@ -19,6 +19,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    if "chapters" in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.add_column("modules", sa.Column("description", sa.Text(), nullable=False, server_default=""))
     op.add_column(
         "modules",

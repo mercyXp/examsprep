@@ -19,6 +19,9 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    columns = {column["name"] for column in sa.inspect(op.get_bind()).get_columns("student_profiles")}
+    if "exam_dates" in columns:
+        return
     op.add_column(
         "student_profiles",
         sa.Column("exam_dates", postgresql.JSONB(astext_type=sa.Text()), nullable=False, server_default=sa.text("'[]'::jsonb")),

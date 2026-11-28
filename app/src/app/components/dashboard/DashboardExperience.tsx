@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "@/app/components/shell/AppShell";
 import { getSessionUser, type SessionUser } from "@/lib/auth";
-import { loadCourses, loadExamSchedule, type CourseSummary, type StudentExamSchedule } from "@/lib/learn-api";
+import { loadCourses, loadExamSchedule, loadPerformance, type CourseSummary, type PerformanceSummary, type StudentExamSchedule } from "@/lib/learn-api";
 import { daysUntil, examDateParts, examSittingCaption, formatGoal, remainingLabel, SEMESTER_MODULES } from "@/lib/study";
 
 function firstName(user: SessionUser | null) {
@@ -17,6 +17,7 @@ export default function DashboardExperience() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [schedule, setSchedule] = useState<StudentExamSchedule | null>(null);
+  const [performance, setPerformance] = useState<PerformanceSummary | null>(null);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -28,6 +29,9 @@ export default function DashboardExperience() {
     });
     loadExamSchedule().then((result) => {
       if (result.ok) setSchedule(result.data);
+    });
+    loadPerformance().then((result) => {
+      if (result.ok) setPerformance(result.data);
     });
   }, []);
 
@@ -97,15 +101,15 @@ export default function DashboardExperience() {
             <header>
               <span>Questions Completed</span>
             </header>
-            <strong>0</strong>
-            <p>Practice quizzes aren’t published yet.</p>
+            <strong>{performance?.questionsAnswered ?? 0}</strong>
+            <p>{performance?.questionsAnswered ? "Questions marked on submitted quizzes." : "Practice quizzes appear after you start one."}</p>
           </article>
           <article className="dash-stat is-score">
             <header>
               <span>Average Practice Score</span>
             </header>
-            <strong>—</strong>
-            <p>Scores appear after your first attempt.</p>
+            <strong>{performance?.averageScorePercent != null ? `${performance.averageScorePercent}%` : "—"}</strong>
+            <p>{performance?.attemptCount ? `Across ${performance.attemptCount} submitted attempt${performance.attemptCount === 1 ? "" : "s"}.` : "Scores appear after your first attempt."}</p>
           </article>
         </section>
 

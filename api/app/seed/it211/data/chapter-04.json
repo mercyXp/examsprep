@@ -1,0 +1,641 @@
+{
+  "position": 4,
+  "title": "System Modelling and UML",
+  "description": "Pictures that make a system discussable: why models exist, what UML is for, and the diagrams a second-year analyst is expected to read and sketch.",
+  "lessons": [
+    {
+      "title": "Introduction to System Modelling",
+      "description": "Why analysts draw models, what a model leaves out, and how to keep a diagram honest.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain why a model is used instead of only prose",
+        "Describe what a useful model omits",
+        "Check a model against the people who do the work"
+      ],
+      "introduction": [
+        "A registration process written only as paragraphs is hard to argue about. People get lost by the second page and nod as if they agreed. A model is a deliberate simplification that lets a clerk point at a box and say that step does not happen.",
+        "This lesson is about the habit of modelling. The later lessons teach particular diagrams. The habit matters more than any one notation."
+      ],
+      "explanation": [
+        "A model represents selected aspects of a system so that a question can be answered. A model of who is involved answers a different question from a model of which data are stored. Trying to answer both on one crowded picture usually answers neither. Choose the question first, then the diagram.",
+        "Every model omits. A use case diagram omits the order of clicks. A class diagram omits the lunch break. Omission is not a mistake if the reader knows the question the model claims to answer. It is a mistake if the diagram pretends to be the whole system.",
+        "Models are checked with stakeholders, just as requirements are. The analyst reads the picture back in ordinary language. The student asks for a place. The system checks fees and prerequisites. The student receives a reason or a confirmation. If the clerk says the finance check is a phone call, not an automatic step, the model changes. A beautiful diagram that nobody in the office recognises is decoration.",
+        "Keep models consistent with the glossary and the requirement identifiers. If the diagram says Course and the specification says Module, you have two systems. Pick one word. When the specification changes, change the diagram in the same edit. An outdated model is worse than none, because people trust it."
+      ],
+      "definitions": [
+        {"term": "Model", "meaning": "A simplified representation of selected aspects of a system, drawn to answer a stated question."},
+        {"term": "Notation", "meaning": "The agreed symbols and rules used to draw a particular kind of model."},
+        {"term": "Viewpoint", "meaning": "The question a model answers, such as behaviour, structure, or data flow."},
+        {"term": "Consistency", "meaning": "Using the same names and facts across the specification and the diagrams."}
+      ],
+      "exampleTitle": "One process, two honest models",
+      "example": [
+        "Question one: who starts registration and what do they want? A use case diagram names the student, the clerk, and a few goals. Question two: what data must we remember? An entity diagram names Student, Module, and Enrolment. Neither picture shows the colour of the button. That omission is correct, because neither question asked about colour."
+      ],
+      "diagram": "Question: who wants what?\n  [Student] ---> (Request a module)\n  [Clerk]   ---> (Record a payment)\n\nQuestion: what do we store?\n  Student ---- Enrolment ---- Module\n\nDo not merge these into one picture and call it the system.",
+      "application": [
+        "Start every diagram in your report with one sentence: this model answers... If you cannot write the sentence, you are not ready to draw.",
+        "Read the diagram aloud to someone who does the job. Note their corrections on the picture, not only in your memory."
+      ],
+      "tip": "A model that omits on purpose is a tool. A model that omits by accident is a trap.",
+      "takeaways": [
+        "Choose the question before you choose the diagram",
+        "Omission is acceptable when the viewpoint is stated",
+        "Stakeholders must recognise the model in ordinary language",
+        "Names must match the glossary or the models will drift"
+      ],
+      "revision": [
+        "Why is a single diagram of the whole system usually a bad aim?",
+        "What should you do when a clerk disagrees with a box?",
+        "Give two questions that deserve two different models of registration."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What should an analyst choose before drawing?",
+          "options": [
+            "The question the model must answer",
+            "The most complicated notation available",
+            "A colour scheme",
+            "The programming language"
+          ],
+          "correct": 0,
+          "explanation": "The question decides the viewpoint and therefore the kind of diagram. Notation without a question produces clutter."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A useful model is allowed to leave things out.",
+          "correct": true,
+          "explanation": "A model is a simplification. It should omit whatever is irrelevant to its stated question."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the agreed set of symbols for a kind of diagram called?",
+          "answers": ["notation", "a notation"],
+          "explanation": "Notation is the symbol system. UML is a family of notations. A model is a particular drawing that uses one."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A diagram uses Course while the specification says Module. Why is that harmful, and what should you do?",
+          "points": ["readers may think they are different things", "pick one glossary term and use it everywhere"],
+          "explanation": "Inconsistent names break the chain between requirements and models. Align both documents to the glossary."
+        }
+      ],
+      "summary": "A model is a simplification aimed at one question. Say what you omitted, use one glossary, and let the people who do the work correct the picture. Later lessons apply that habit to UML and to data-flow and context diagrams."
+    },
+    {
+      "title": "Unified Modelling Language (UML)",
+      "description": "What UML is for, which diagrams this course uses, and how not to drown in the full catalogue.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe UML as a shared modelling language rather than a method",
+        "Match four diagrams to the questions they answer",
+        "Avoid treating every UML diagram as mandatory"
+      ],
+      "introduction": [
+        "The Unified Modelling Language is a standard set of diagram types for describing software-intensive systems. It is a language, not a project method. Using UML does not tell you whether to use waterfall or agile. It tells you how to draw once you know the question.",
+        "The full language has more diagrams than a second-year project needs. This course expects you to be competent with use case, class, sequence, and activity diagrams, and to know that other diagrams exist."
+      ],
+      "explanation": [
+        "UML became a shared notation so that an analyst in Lusaka and a developer reading the same specification can point at the same kind of arrow. Shared notation reduces arguments about symbols. It does not reduce arguments about the facts. A wrong use case drawn in perfect UML is still wrong.",
+        "Structure diagrams describe what the system is made of. The class diagram is the one you will use most: it shows concepts and their relationships. Behaviour diagrams describe what happens. Use case diagrams show goals. Sequence diagrams show the order of messages. Activity diagrams show the flow of a process, including decisions.",
+        "You do not earn marks for the number of diagram types. You earn them for a small set that agrees with the requirements. If FR-04 is about a refusal reason, the use case, the sequence of the refusal, and the class that stores the reason should all mention that reason. Three consistent diagrams beat eight decorative ones.",
+        "Tools can draw UML. They can also tempt you to add every optional adornment. For this course, clear boxes, named associations, and a legend beat a diagram that only the tool understands. Hand-drawn clarity is acceptable when the notation is correct."
+      ],
+      "definitions": [
+        {"term": "UML", "meaning": "A standard language of diagram types for describing the structure and behaviour of a system."},
+        {"term": "Structure diagram", "meaning": "A UML diagram that shows what things exist and how they relate, such as a class diagram."},
+        {"term": "Behaviour diagram", "meaning": "A UML diagram that shows what happens, such as a use case, sequence, or activity diagram."},
+        {"term": "Legend", "meaning": "A small key on the diagram that reminds the reader what the symbols mean."}
+      ],
+      "exampleTitle": "Which UML diagram for which sentence",
+      "example": [
+        "The student requests a module is a use case. Student, Enrolment, and Module are classes. The student submits, the system checks fees, then the system replies is a sequence. If the fee is pending, follow a different path is an activity. Writing all four for every sentence would be waste. Writing the one that answers the current question is the skill."
+      ],
+      "diagram": "UML in this course\n\nBehaviour                         Structure\n  Use case   -> goals of actors      Class -> concepts we store\n  Sequence   -> order of messages\n  Activity   -> steps and decisions\n\nA method (waterfall, agile) is NOT a UML diagram.",
+      "table": {
+        "caption": "Pick the diagram from the question",
+        "headers": ["Question", "Diagram"],
+        "rows": [
+          ["Who wants which goal?", "Use case"],
+          ["Which concepts and links do we store?", "Class"],
+          ["In what order are messages sent?", "Sequence"],
+          ["Which decision splits the path?", "Activity"]
+        ]
+      },
+      "application": [
+        "In the report, caption each figure with the question it answers and the requirement identifiers it supports. That caption is what stops UML from looking pasted in.",
+        "If you use a drawing tool, export something a marker can read in black and white. Pale yellow notes on a white background disappear in print."
+      ],
+      "tip": "UML is a language. Speaking it fluently still requires something true to say.",
+      "takeaways": [
+        "UML standardises diagrams; it does not choose your project method",
+        "Class diagrams show structure; use case, sequence, and activity show behaviour",
+        "Use a few diagrams that agree with the requirements",
+        "A legend and plain language beat ornamental notation"
+      ],
+      "revision": [
+        "Why is UML not a life-cycle model?",
+        "Which diagram shows the order of messages?",
+        "What should a figure caption include besides the diagram type?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which statement about UML is accurate?",
+          "options": [
+            "It is a project management method that replaces the SDLC",
+            "It is a shared notation for structure and behaviour diagrams",
+            "It requires every project to draw every diagram type",
+            "It proves that the requirements are correct"
+          ],
+          "correct": 1,
+          "explanation": "UML is a modelling language. Correct symbols can still describe the wrong system, and you draw only the diagrams you need."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A class diagram is a behaviour diagram.",
+          "correct": false,
+          "explanation": "A class diagram shows structure. Use case, sequence, and activity diagrams show behaviour."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call a small key on a diagram that explains the symbols?",
+          "answers": ["legend", "a legend"],
+          "explanation": "A legend makes the notation readable for a marker or a clerk who does not draw UML every day."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Name the diagram you would draw for stored concepts, and the diagram you would draw for the order of a fee check. Say why they are not the same picture.",
+          "points": ["class diagram for concepts", "sequence diagram for message order"],
+          "explanation": "Structure and the order of interaction are different viewpoints. Combining them usually hides both."
+        }
+      ],
+      "summary": "UML gives analysts and developers a shared set of diagrams. In this course the useful core is use case, class, sequence, and activity. Draw the ones that answer a real question and that use the same words as the specification."
+    },
+    {
+      "title": "Use Case Diagrams",
+      "description": "Actors, goals, and the system boundary, with a worked registration diagram.",
+      "durationMinutes": 20,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Identify actors and use cases from a short scenario",
+        "Draw a use case diagram with a system boundary",
+        "Explain what a use case diagram deliberately does not show"
+      ],
+      "introduction": [
+        "A use case is a goal an actor achieves with the system, told at a level a sponsor can recognise. Request a module is a use case. Click the third button is not.",
+        "The diagram that collects those goals is often the first model stakeholders will look at. It is worth drawing slowly."
+      ],
+      "explanation": [
+        "An actor is a role outside the system: Student, Clerk, or an external results service. A particular person can play more than one role on different days. Draw the role, not Kwame from the office. The system boundary is a box. Use cases sit inside it. Actors sit outside and connect to the use cases they participate in.",
+        "Name use cases as verb phrases from the actor's goal: Record payment, Request module, Publish class list. If two names differ only by a button, they are probably one use case. Include and extend relationships exist in UML. Use them sparingly. A student diagram that is mostly include arrows has usually been over-modelled. Prefer a clean list of goals.",
+        "The diagram does not show order, fields, or exceptions. Those belong in a use case narrative or in a sequence diagram. A short narrative for Request module might say: the student chooses a module; the system checks fees and prerequisites; the system confirms or shows one reason. The diagram and the narrative work as a pair.",
+        "Check actors against stakeholders, but do not make every stakeholder an actor. The vice-chancellor may care about the project and never interact with the system. An actor needs a goal they achieve through the system. If you cannot name that goal, remove the stick figure."
+      ],
+      "definitions": [
+        {"term": "Use case", "meaning": "A goal an actor completes with the help of the system, described at business level."},
+        {"term": "Actor", "meaning": "A role outside the system that starts or takes part in a use case."},
+        {"term": "System boundary", "meaning": "The box that separates use cases inside the system from actors outside it."},
+        {"term": "Use case narrative", "meaning": "The step-by-step prose that accompanies one use case, including the main failure path."}
+      ],
+      "exampleTitle": "Registration goals, not screens",
+      "example": [
+        "Actors: Student and Clerk. Use cases inside the boundary: Request module, View fee status, Record payment, Review refusal. The student connects to Request module and View fee status. The clerk connects to Record payment and Review refusal. Publish timetable is omitted because this release does not include it, and the scope statement already says so.",
+        "Narrative fragment for Request module: student selects a module; system checks fee status and prerequisites; system either confirms or shows one reason. No button names appear."
+      ],
+      "diagram": "                 Registration\n   +--------------------------------------+\n   |  (Request module)                    |\n   |  (View fee status)                   |\n   |  (Record payment)                    |\n   |  (Review refusal)                    |\n   +--------------------------------------+\nStudent ---- Request module, View fee status\nClerk   ---- Record payment, Review refusal\n\nOutside the box: actors. Inside: goals, not screens.",
+      "application": [
+        "Pair every use case ellipse in your report with five lines of narrative. A diagram without the narrative cannot be tested.",
+        "If you are tempted to draw Click login, ask what goal the login serves. Authentication may be a step inside Request module, not a separate business goal."
+      ],
+      "tip": "Verb phrase, actor's goal, inside the boundary. If the name is a screen widget, start again.",
+      "takeaways": [
+        "Actors are roles outside the boundary; use cases are goals inside it",
+        "Name use cases as verb phrases a sponsor would recognise",
+        "The diagram omits order and fields; the narrative carries them",
+        "Not every stakeholder is an actor"
+      ],
+      "revision": [
+        "Why is Click the submit button a poor use case name?",
+        "What does the system boundary separate?",
+        "Where do you describe the prerequisite failure if not on the ellipse?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which name is the best use case?",
+          "options": ["Button3", "Request module", "PostgreSQL", "The dean is busy"],
+          "correct": 1,
+          "explanation": "Request module is an actor's goal. The other lines are a widget, a technology, and a complaint."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A use case diagram should show the order of database messages.",
+          "correct": false,
+          "explanation": "Order of messages belongs on a sequence diagram. The use case diagram shows goals and who participates."
+        },
+        {
+          "kind": "short",
+          "prompt": "What do we call the box that encloses the use cases and excludes the actors?",
+          "answers": ["system boundary", "boundary"],
+          "explanation": "The system boundary is that box. Actors remain outside because they are not part of the system being built."
+        },
+        {
+          "kind": "structured",
+          "prompt": "A vice-chancellor sponsors the project but never uses the system. Should they appear as an actor? Explain using the definition of an actor.",
+          "points": ["no, not as an actor", "an actor must have a goal achieved through the system"],
+          "explanation": "Sponsorship is not interaction. Without a goal achieved via the system, the vice-chancellor is a stakeholder, not an actor on this diagram."
+        }
+      ],
+      "summary": "A use case diagram places actor roles outside a boundary and their goals inside it. Keep the names at business level, put steps and failures in a short narrative, and do not promote every stakeholder to a stick figure."
+    },
+    {
+      "title": "Class Diagrams",
+      "description": "Concepts, attributes, and associations, applied to students, modules, and enrolments.",
+      "durationMinutes": 20,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Identify classes from nouns that the system must remember",
+        "Show attributes and a simple association with multiplicity",
+        "Reject a class that is really a screen or a report"
+      ],
+      "introduction": [
+        "A class diagram shows the concepts the system must remember and how they relate. It is not a picture of web pages. Student and Enrolment can be classes. Home page cannot, unless you are modelling the content-management product itself.",
+        "This lesson stays with the fragment you need: classes, a few attributes, associations, and multiplicity. You can add operations later if a design truly needs them."
+      ],
+      "explanation": [
+        "Find candidate classes by listing nouns in the requirements that have identity and attributes the system stores. Student has a number and a name. Module has a code and a capacity. Enrolment links a student to a module and stores a status. Payment may be its own class if a student can have many payments with references. A noun that is only an action, such as refusal, might be a status on Enrolment rather than a class, if it has no independent life.",
+        "An attribute is a fact about one object. studentNumber belongs on Student. Putting it on Enrolment as well, with no reason, invites contradiction. An association is a named link. A student has many enrolments; an enrolment refers to one module. Multiplicity records those numbers: 1, 0..1, or *. Write the multiplicity at the end you mean. A common error is to swap them and claim a module belongs to only one student.",
+        "Keep the diagram conceptual at first. Do not turn every foreign key into a class named StudentModuleId. That is a table design sneaking in early. Also resist classes named Manager, System, or Screen. They rarely have a clear identity in the problem.",
+        "Check the diagram against functional requirements. If FR-02 says a reference is stored against a payment, Payment needs an attribute reference, and the association shows which student it belongs to. If the diagram cannot host a must requirement, the diagram is unfinished, not the requirement."
+      ],
+      "definitions": [
+        {"term": "Class", "meaning": "A concept with identity, whose objects the system must distinguish and describe."},
+        {"term": "Attribute", "meaning": "A fact stored about each object of a class."},
+        {"term": "Association", "meaning": "A named relationship between classes."},
+        {"term": "Multiplicity", "meaning": "How many objects of one class may link to one object of another, such as 1 or *."}
+      ],
+      "exampleTitle": "Three classes that carry the requirements",
+      "example": [
+        "Student (studentNumber, name). Module (code, title, capacity). Enrolment (status, reason). Payment (reference, state) associates with Student. Enrolment associates Student 1..* to Module *. One student has many enrolments. Each enrolment is for one module, drawn as Enrolment linked to one Module. Reason lives on Enrolment because FR-04 stores one reason per refusal, not a separate Reason object with its own life.",
+        "HomePage is rejected as a class. It is an interface, and it will appear in a screen sketch instead."
+      ],
+      "diagram": "Student                  Enrolment                 Module\n+ studentNumber       + status                  + code\n+ name                + reason                  + title\n                                                + capacity\nStudent 1 ---- * Enrolment * ---- 1 Module\n\nPayment\n+ reference\n+ state\nStudent 1 ---- * Payment\n\nRejected: HomePage, System, Button",
+      "application": [
+        "Underline stored nouns in your requirements and try each as a class. Cross out the ones that are really steps or screens, and say why in a sentence.",
+        "Read multiplicities aloud: one student, many enrolments; one enrolment, one module. If the sentence sounds absurd, the numbers are reversed."
+      ],
+      "tip": "If you cannot give an object a real campus example, it is probably not a class.",
+      "takeaways": [
+        "Classes are remembered concepts, not screens",
+        "Attributes belong on the class they describe",
+        "Multiplicity is a sentence you should be able to read aloud",
+        "A must requirement that fits nowhere means the diagram is incomplete"
+      ],
+      "revision": [
+        "Why is Enrolment often a class rather than only a line between Student and Module?",
+        "Where should a payment reference live in the example?",
+        "Give one noun you would reject as a class, and why."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which candidate is the best class for a registration system?",
+          "options": ["Submit button", "Enrolment", "The word fast", "Home page"],
+          "correct": 1,
+          "explanation": "Enrolment has identity and stored facts such as status. The others are an interface widget, a quality, and a screen."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Multiplicity records how many objects may participate in an association.",
+          "correct": true,
+          "explanation": "Marks such as 1 and * say how many. Swapping them changes the meaning of the business rule."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a fact stored about each object of a class called?",
+          "answers": ["attribute", "an attribute"],
+          "explanation": "Attributes are those facts, such as studentNumber on Student. They are not the same as associations."
+        },
+        {
+          "kind": "structured",
+          "prompt": "FR-04 stores one refusal reason per enrolment. Where does it belong on the class diagram, and why not as a screen name?",
+          "points": ["as an attribute of Enrolment", "a screen is not a stored concept"],
+          "explanation": "The reason is a fact about that enrolment. A screen may display it later, but the class diagram records what is remembered."
+        }
+      ],
+      "summary": "A class diagram names the concepts worth remembering, the attributes that describe them, and the associations with multiplicities you can read as sentences. Screens, buttons, and vague nouns stay off the picture. Every must requirement should have a home on it."
+    },
+    {
+      "title": "Sequence Diagrams",
+      "description": "The order of messages between an actor and the system, including one refusal path.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Read a sequence diagram from top to bottom",
+        "Draw the messages for a successful module request",
+        "Show one alternative when a check fails"
+      ],
+      "introduction": [
+        "Use cases name goals. Sequence diagrams show the order of messages that achieve one goal. Time runs downward. If the fee check happens before the seat check, the diagram must say so, because the order is the design of the conversation.",
+        "You will draw a straight success path and one alternative. That is enough to demonstrate you understand the notation."
+      ],
+      "explanation": [
+        "Participants are shown as vertical lifelines: Student, Registration, Finance. A message is an arrow from one lifeline to another, named as a request or a reply. The student sends request(module). Registration sends feeStatus(student) to Finance and later sends confirmed or refused(reason) back to the student. The vertical order is the time order. Crossing arrows to look artistic is a defect.",
+        "Keep the diagram about one scenario. The success scenario ends with confirmed. A second diagram, or a clearly marked alternative fragment, shows refused when the prerequisite fails. Cramming every exception onto one picture makes the order unreadable, which defeats the diagram.",
+        "Messages should use the same nouns as the class diagram. If the class is Module, the message should not say courseCode unless the glossary made them synonyms. Return values matter: refused(reason) shows that FR-04 is present in the interaction, not only in a paragraph.",
+        "Do not draw the database as five internal calls unless the design of those calls is the question. For analysis, Student and Registration and Finance are enough. Internal objects can wait for a later design diagram."
+      ],
+      "definitions": [
+        {"term": "Lifeline", "meaning": "The vertical line representing one participant through time on a sequence diagram."},
+        {"term": "Message", "meaning": "A named arrow from one lifeline to another, requesting or returning something."},
+        {"term": "Scenario", "meaning": "One path through a use case, such as success or a particular failure."},
+        {"term": "Alternative", "meaning": "A marked branch for a different outcome, such as a refusal."}
+      ],
+      "exampleTitle": "Request module, then the refusal",
+      "example": [
+        "Success, top to bottom: Student sends request(IT211) to Registration. Registration sends feeStatus to Finance. Finance returns cleared. Registration sends seatCheck to itself or to a catalogue lifeline and receives available. Registration returns confirmed to Student.",
+        "Alternative: Finance returns unpaid. Registration returns refused(fees) immediately and does not pretend the seat was checked. The reason code fees is the same word FR-04's list will use."
+      ],
+      "diagram": "Student        Registration         Finance\n  |               |                  |\n  | request(IT211)|                  |\n  |-------------->| feeStatus        |\n  |               |----------------->|\n  |               |<----- unpaid ----|\n  |<-- refused(fees)                 |\n  |               |                  |\nTime runs downward. The seat check does not happen on this path.",
+      "application": [
+        "Draw the success scenario and one failure you actually specified. Label the failure with the requirement identifier.",
+        "If your arrows point upward to show a later step, redraw them. Reviewers read downward and will mis-sequence the system."
+      ],
+      "tip": "One scenario per diagram. Name the return value so the requirement is visible on the arrow.",
+      "takeaways": [
+        "Time runs down the page; arrows are messages",
+        "Model one scenario, plus a clearly separated alternative",
+        "Use the same nouns as the class diagram and glossary",
+        "A returned reason shows a requirement in the interaction"
+      ],
+      "revision": [
+        "What does the vertical direction represent?",
+        "Why not put every exception on one sequence diagram?",
+        "Which message in the example carries the refusal reason?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "How do you read the order of messages on a sequence diagram?",
+          "options": ["From the brightest colour", "From top to bottom", "From the largest box", "Alphabetically"],
+          "correct": 1,
+          "explanation": "Time increases downward. The upper message happens first."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A sequence diagram is a good place to show every possible error at once.",
+          "correct": false,
+          "explanation": "One scenario, with a separate alternative if needed, keeps the order readable."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the vertical line that represents a participant over time called?",
+          "answers": ["lifeline", "a lifeline"],
+          "explanation": "A lifeline is that vertical line. Messages travel between lifelines."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Fees are unpaid. Which message should Registration send the student, and which check should it skip? Refer to the worked example.",
+          "points": ["refused with a fees reason", "do not continue as if the seat check succeeded"],
+          "explanation": "The alternative returns refused(fees) and stops. Pretending the rest of the success path ran would hide the failure."
+        }
+      ],
+      "summary": "Sequence diagrams order messages down the page for one scenario. Name the messages with glossary words, return the values your requirements promise, and put a second outcome in a separate alternative rather than in a tangle."
+    },
+    {
+      "title": "Activity Diagrams",
+      "description": "Steps, decisions, and parallel work, drawn so a clerk can follow a registration path.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Use actions, decisions, and flows on an activity diagram",
+        "Show a merge after alternative paths",
+        "Choose an activity diagram when the question is about workflow"
+      ],
+      "introduction": [
+        "Some questions are about workflow: what is checked first, what happens on a no, and where the paths meet again. An activity diagram answers those questions more directly than a sequence of messages between named objects.",
+        "If you have drawn a flowchart in another module, the idea is familiar. UML adds a few disciplined symbols so the drawing stays shareable."
+      ],
+      "explanation": [
+        "An action is a rounded step: Check fee status, Check prerequisite, Confirm enrolment. A decision is a diamond with a question and outgoing flows labelled with the answers, such as cleared and unpaid. Every decision needs at least two labelled outcomes. An unlabelled no is how paths get lost.",
+        "Flows join as well as split. After a refusal path records a reason and a success path confirms the seat, both might end, or both might write an audit row. Show the join if the work really merges. Do not join paths that do not share a step, or the clerk will think a refused student still receives a seat.",
+        "A start node and an end node make the diagram a complete story. Swimlanes can show who does the step, for example Student, System, and Clerk. Lanes help when responsibility is the question. They clutter the picture when you only needed the decision. Choose them on purpose.",
+        "Activity diagrams complement sequence diagrams. Use the activity diagram for Check fees, then prerequisites, then seats, with the unpaid exit. Use the sequence diagram when you care which participant sends feeStatus. Drawing both identically is wasted effort. Drawing them in contradiction is a defect."
+      ],
+      "definitions": [
+        {"term": "Action", "meaning": "A single step on an activity diagram, drawn so a reader can see the work done."},
+        {"term": "Decision", "meaning": "A branch where one question sends the flow down labelled alternative paths."},
+        {"term": "Flow", "meaning": "The arrow that shows which step follows which."},
+        {"term": "Swimlane", "meaning": "A column or row that shows which role is responsible for a set of actions."}
+      ],
+      "exampleTitle": "The unpaid path must not confirm a seat",
+      "example": [
+        "Start. Action: receive module request. Decision: fee status. If unpaid, action: record reason fees, then end. If cleared, decision: prerequisite met? If no, record that reason and end. If yes, action: confirm seat, then end.",
+        "There is no arrow from record reason back to confirm seat. That missing arrow is the control. A reviewer should be able to see it in one look."
+      ],
+      "diagram": "(start)\n   |\nReceive request\n   |\n<fee status?>\n   |cleared            |unpaid\n   v                   v\n<prerequisite?>     Record reason fees --> (end)\n   |yes      |no\n   v         v\nConfirm    Record reason prerequisite --> (end)\n   |\n (end)\n\nNo arrow from a reason back to Confirm.",
+      "application": [
+        "When a requirement says a check prevents another step, make the prevention visible as a missing path, not only as a sentence under the figure.",
+        "Label every decision outcome with words from the glossary: cleared, pending, unpaid. Do not use yes if the real statuses are richer."
+      ],
+      "tip": "If two paths must not meet, do not draw the join that would reunite them.",
+      "takeaways": [
+        "Actions, labelled decisions, and flows describe a workflow",
+        "Every decision branch needs a label",
+        "Joins are only for steps the paths truly share",
+        "Activity diagrams and sequence diagrams should not contradict each other"
+      ],
+      "revision": [
+        "When would you choose an activity diagram instead of a sequence diagram?",
+        "Why must decision outcomes be labelled?",
+        "What would a join into Confirm seat after a refusal imply, wrongly?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What does a diamond represent on an activity diagram in this lesson?",
+          "options": ["A database table", "A decision with alternative flows", "An actor", "A class attribute"],
+          "correct": 1,
+          "explanation": "The diamond is the decision. Outgoing flows carry the alternative answers, and they must be labelled."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A refused request should still flow into the confirm-seat action if the diagram looks neater that way.",
+          "correct": false,
+          "explanation": "A join into confirmation would mean refused students are seated. Neatness does not outrank the rule."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a column that shows which role performs a set of actions called?",
+          "answers": ["swimlane", "a swimlane", "swim lane"],
+          "explanation": "Swimlanes assign responsibility. Use them when who does the step is part of the question."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Sketch in words the unpaid branch and say why it must end without confirmation.",
+          "points": ["record a fees reason", "do not confirm a seat"],
+          "explanation": "The unpaid decision leads to recording the reason and stopping. Confirmation is only on the cleared path that also passes later checks."
+        }
+      ],
+      "summary": "Activity diagrams show workflow: steps, labelled decisions, and only those joins that really happen. Use one when the question is about the path a request takes, and make forbidden outcomes visible by refusing to draw them."
+    },
+    {
+      "title": "Data Flow Diagrams",
+      "description": "Processes, data stores, and external entities in a notation that is not UML, and still essential.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Name the symbols of a basic data flow diagram",
+        "Distinguish a data flow from a process",
+        "Explain how a DFD differs from a use case diagram"
+      ],
+      "introduction": [
+        "A data flow diagram, or DFD, asks where data moves. It is older than UML and still the clearest picture when the question is which process updates which store. Many African university syllabi, including this one, expect it alongside UML.",
+        "Do not call a DFD a UML diagram. The viewpoints can complement each other. The notations are different."
+      ],
+      "explanation": [
+        "Four symbols are enough here. An external entity is a source or sink outside the system, such as Student or Sponsor. A process is a named transformation, numbered and verb-led: 1.0 Check fee status. A data store is where data rest, such as D1 Enrolments. A data flow is a named arrow carrying data, not a person walking. The arrow is labelled with the data: fee status, not goes to.",
+        "Processes transform. Stores do not. If your diagram shows a store doing the checking, you have mixed the symbols. Flows do not connect two external entities directly if the system is not involved, because that movement is outside the scope. Flows also should not connect two stores without a process between them. Data do not jump from one file to another by themselves.",
+        "Level the diagram. A context diagram, taught next, is the top. A level-1 DFD explodes the system into a handful of processes. Stop when a process maps cleanly onto a requirement. Seven processes named Do registration work are one process hiding.",
+        "Compare with use cases. A use case says the clerk wants to record a payment. A DFD says the process Record payment writes a Payment reference into store D2 and reads Student from D1. Goals and data movement are different questions. Use both when the specification is about a process that changes stored data."
+      ],
+      "definitions": [
+        {"term": "Data flow diagram", "meaning": "A picture of processes, stores, external entities, and the data that move between them."},
+        {"term": "Process", "meaning": "A transformation that uses incoming data to produce outgoing data."},
+        {"term": "Data store", "meaning": "A place where data rest between processes."},
+        {"term": "External entity", "meaning": "A person, role, or organisation outside the system that supplies or receives data."}
+      ],
+      "exampleTitle": "Recording a reference",
+      "example": [
+        "External entity Clerk sends payment reference and student number to process 1.0 Record payment. The process reads D1 Students to confirm the student exists and writes D2 Payments. It sends receipt details back to the Clerk. There is no arrow straight from D1 to D2.",
+        "The label on each arrow is a noun phrase for data. An arrow labelled quickly would be rejected, because quickly is not data."
+      ],
+      "diagram": "Clerk\n  | payment reference, student number\n  v\n1.0 Record payment ----writes----> D2 Payments\n  ^                         reads\n  | student record           |\n  +---------------------- D1 Students\n\nNo flow joins D1 to D2 directly.\nClerk is an external entity, not a process.",
+      "application": [
+        "Number processes and name stores with D identifiers so you can refer to them in the text. Untethered clouds are hard to review.",
+        "If a flow has no data name, you do not yet know what moves. Do not leave it as a bare arrow."
+      ],
+      "tip": "Arrows carry data. If you cannot name the data, you do not yet have a flow.",
+      "takeaways": [
+        "DFDs show processes, stores, external entities, and named data flows",
+        "Stores do not transform data, and two stores do not connect directly",
+        "A DFD is not a UML use case diagram",
+        "Level the diagram until each process matches a clear piece of work"
+      ],
+      "revision": [
+        "Why is an arrow labelled quickly invalid?",
+        "What is wrong with a flow directly from one data store to another?",
+        "Which symbol is the Clerk: process, store, or external entity?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What should a data-flow arrow be labelled with?",
+          "options": ["The programmer's name", "The data being carried", "The word fast", "A UML stereotype"],
+          "correct": 1,
+          "explanation": "A flow carries data and should be named with that data, such as fee status or payment reference."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A data store may check prerequisites without a process.",
+          "correct": false,
+          "explanation": "Checking is a transformation, so it belongs in a process. Stores hold data between processes."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the symbol for a person or organisation outside the system that supplies data?",
+          "answers": ["external entity", "an external entity"],
+          "explanation": "An external entity is outside the system. It is not a process and not a data store."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Describe the flows for recording a payment reference, including the store that is written and why the student store is only read.",
+          "points": ["write the payments store", "read the students store to confirm identity"],
+          "explanation": "The process writes Payments with the new reference and reads Students to check the student exists. It does not need to rewrite the student record to store a payment."
+        }
+      ],
+      "summary": "A data flow diagram shows how named data move between external entities, processes, and stores. Processes transform, stores remember, and arrows carry data rather than people. Use it beside UML when the question is movement of data, and do not pretend it is a use case diagram."
+    },
+    {
+      "title": "Context Diagrams",
+      "description": "The single-process picture of the system and its neighbours, used to agree the boundary.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Draw a context diagram with one process and its external entities",
+        "Use the diagram to agree what is outside the project",
+        "Explode the context diagram into a level-1 DFD without changing the boundary"
+      ],
+      "introduction": [
+        "Before anyone argues about internal files, they should agree who the system talks to. A context diagram is a data flow diagram with exactly one process: the system itself. Everything else is an external entity.",
+        "It is the simplest model in this chapter and the one that prevents scope arguments, if you draw it early and keep it."
+      ],
+      "explanation": [
+        "Draw one process, often numbered 0, named for the system: 0 Registration. Place external entities around it. Draw named flows in and out. Student sends module request and receives confirmation or reason. Clerk sends payment reference and receives receipt details. Finance, if it is a separate system you will not rebuild, is an external entity that receives a status query and returns fee status.",
+        "Anything inside the process is out of sight on purpose. No data stores appear on a strict context diagram, because stores are internal. If a sponsor insists a workbook is visible, ask whether that workbook is inside the new system or an external neighbour. The answer is a scope decision.",
+        "The context diagram and the requirements scope section must match. If the diagram shows Sponsor as an entity with a flow called award letter, the specification cannot also say sponsors are out of scope. Either add the requirement or remove the flow. This is the same consistency rule as the glossary.",
+        "When you draw the level-1 DFD, the external entities and the flows that cross the boundary stay the same. You only reveal internal processes and stores. If level 1 suddenly talks to the library and the context diagram did not, you have widened the scope in a picture instead of in a decision."
+      ],
+      "definitions": [
+        {"term": "Context diagram", "meaning": "A data flow diagram with a single process representing the whole system and its external flows."},
+        {"term": "Level-1 DFD", "meaning": "The next diagram, which shows the main internal processes while preserving the context boundary."},
+        {"term": "Boundary flow", "meaning": "A data flow that crosses between an external entity and the system."},
+        {"term": "Scope", "meaning": "The agreed edge of the system, which the context diagram makes visible."}
+      ],
+      "exampleTitle": "Registration and three neighbours",
+      "example": [
+        "Process 0 Registration. Student exchanges module request and decision. Clerk exchanges payment reference and receipt. Finance exchanges fee query and fee status. There is no Library entity, because library fines are out of scope for this release. There is no data store on the picture.",
+        "The level-1 diagram may show Check fees, Record payment, and Decide enrolment, plus stores. It still talks only to Student, Clerk, and Finance, with the same data names."
+      ],
+      "diagram": "Student --module request--> [ 0 Registration ] --decision--> Student\nClerk --payment reference--> [ 0 Registration ] --receipt--> Clerk\n[ 0 Registration ] --fee query--> Finance\nFinance --fee status--> [ 0 Registration ]\n\nNot shown: Library, Hostel, data stores.\nOne process only.",
+      "application": [
+        "Put the context diagram in the scope section of the report, not buried in an appendix. It is how a reader sees the boundary in one glance.",
+        "When someone asks for a new interface mid-project, add the entity on a copy of the context diagram and ask whether the scope change is accepted. The picture makes the growth obvious."
+      ],
+      "tip": "If the context diagram grows a second project, the scope has changed whether or not the text admits it.",
+      "takeaways": [
+        "A context diagram has one process and only external neighbours",
+        "Flows across the boundary are named data",
+        "Internal stores do not appear at this level",
+        "A lower-level DFD must preserve the same external entities and flows"
+      ],
+      "revision": [
+        "Why is Finance an external entity if we do not rebuild the finance system?",
+        "What is wrong with drawing a data store on the context diagram?",
+        "How should a level-1 DFD treat the neighbours agreed on the context diagram?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "How many processes does a context diagram show?",
+          "options": ["None", "Exactly one, representing the system", "One per use case", "One per database table"],
+          "correct": 1,
+          "explanation": "The single process is the whole system. Detail waits for a lower-level data flow diagram."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A level-1 DFD may introduce a new external entity that was not on the context diagram, without a scope change.",
+          "correct": false,
+          "explanation": "New neighbours are scope changes. The lower-level diagram should preserve the agreed boundary."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a data flow diagram with a single process for the whole system called?",
+          "answers": ["context diagram", "a context diagram"],
+          "explanation": "That single-process picture is the context diagram. It agrees the boundary before internal design."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Library fines are out of scope, but a teammate draws the library on the context diagram. What is inconsistent, and what are the two honest repairs?",
+          "points": ["the diagram and the scope statement disagree", "remove the library or formally expand scope"],
+          "explanation": "Either the picture or the scope text must change. Leaving both is how a second project sneaks in."
+        }
+      ],
+      "summary": "The context diagram is the system's boundary drawn as one process and its named external flows. It must match the written scope. More detailed data flow diagrams may open the box, but they may not quietly add neighbours."
+    }
+  ]
+}

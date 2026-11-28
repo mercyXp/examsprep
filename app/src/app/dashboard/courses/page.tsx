@@ -30,7 +30,11 @@ export default function CoursesPage() {
         </label>
         {!ready ? <p className="dash-empty">Loading courses…</p> : null}
         {error ? <p className="cms-error">{error}</p> : null}
-        {ready && !shown.length ? <p className="dash-empty">No published modules are available yet.</p> : null}
+        {ready && !shown.length ? (
+          <p className="dash-empty">
+            No published modules are on your plan yet. <Link href="/dashboard/programmes">Browse programmes</Link> and then add a module in Settings.
+          </p>
+        ) : null}
         <ul className="cms-grid">
           {shown.map((course) => (
             <li key={course.id} className="dash-card">

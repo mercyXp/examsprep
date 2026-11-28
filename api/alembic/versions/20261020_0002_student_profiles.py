@@ -19,6 +19,9 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    # The initial migration creates the current models, including this table.
+    if "student_profiles" in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.create_table(
         "student_profiles",
         sa.Column("user_id", sa.Uuid(), nullable=False),

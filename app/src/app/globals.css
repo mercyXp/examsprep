@@ -4289,6 +4289,18 @@ html[data-theme="dark"] .dash-kicker.is-live {
   cursor: not-allowed;
 }
 
+.dash-card textarea,
+.lp-quiz textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
 .dash-actions {
   display: grid;
   gap: 8px;

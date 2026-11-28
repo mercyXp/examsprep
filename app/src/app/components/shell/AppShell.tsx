@@ -13,6 +13,7 @@ type Variant = "student" | "admin";
 
 const STUDENT_NAV: { href: string; label: string; icon: NavIconName }[] = [
   { href: "/dashboard", label: "Dashboard", icon: "home" },
+  { href: "/dashboard/programmes", label: "Programmes", icon: "programs" },
   { href: "/dashboard/courses", label: "My Courses", icon: "book" },
   { href: "/dashboard/planner", label: "Study Planner", icon: "cal" },
   { href: "/dashboard/quizzes", label: "Quizzes & Mock Exams", icon: "quiz" },

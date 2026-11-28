@@ -22,6 +22,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    if "wallet_links" in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.create_table(
         "wallet_links",
         sa.Column("user_id", sa.Uuid(), nullable=False),

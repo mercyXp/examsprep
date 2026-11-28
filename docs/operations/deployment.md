@@ -55,6 +55,8 @@ Do not put `FIRECRAWL_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, or 
 
 The free Render plan has no shell. `alembic upgrade head` runs in the build command. Catalogue and role rows come from a database restore, or from `SEED_DEMO_USERS=false python -m app.seed` on a host that has a shell.
 
+After migrations and a super administrator exist, load the published IT211 course with `python -m app.seed.it211` in the API shell or a one-off command that has the service's `DATABASE_URL`. The command is safe to repeat: it upserts only that course and does not create the dev demo student unless `SEED_DEMO_USERS=true` and both `DEMO_STUDENT_EMAIL` and `DEMO_STUDENT_PASSWORD` are set. Leave those unset in production. Details are in the API README.
+
 ## Frontend
 
 Keep the App Router app on Vercel. Set one server variable, then redeploy:

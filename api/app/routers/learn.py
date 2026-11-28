@@ -20,10 +20,11 @@ from app.course_selection import (
     select_module,
 )
 from app.db import get_session
-from app.models import AcademicYear, Chapter, Lesson, LessonProgress, LessonVersion, Module, Semester, User
+from app.cms import slides_plain_text
+from app.models import AcademicYear, Chapter, Lesson, LessonProgress, LessonVersion, Module, Programme, Quiz, Semester, User
 from app.profile import ensure_profile
 from app.models.comms import AnnouncementRead
-from app.models.enums import ContentStatus
+from app.models.enums import ContentStatus, ProgrammeStatus
 from app.security import STAFF_ROLES, require_user, role_slugs
 
 router = APIRouter(prefix="/api/learn", tags=["learn"])
@@ -38,6 +39,10 @@ class ProgressIn(BaseModel):
 
 class SelectionIn(BaseModel):
     code: str = Field(min_length=2, max_length=32)
+
+
+class ProgrammeIn(BaseModel):
+    name: str = Field(min_length=2, max_length=180)
 
 
 def load_lesson(session: Session, lesson_id: uuid.UUID) -> Lesson | None:
@@ -121,6 +126,67 @@ def progress_out(row: LessonProgress | None) -> dict[str, Any]:
 
 def student_slides(version: LessonVersion | None) -> list:
     return list(version.slides or []) if version else []
+
+
+def lesson_plain_text(lesson: Lesson, version: LessonVersion | None) -> str:
+    """Teaching text for offline download and text-to-speech. No slide chrome."""
+    parts: list[str] = [lesson.title.strip()]
+    if lesson.description:
+        parts.append(lesson.description.strip())
+    objectives = [str(item).strip() for item in (lesson.objectives or []) if str(item).strip()]
+    if objectives:
+        parts.append("Learning objectives")
+        parts.extend(objectives)
+    body = slides_plain_text(student_slides(version))
+    if body:
+        parts.append(body)
+    return "\n".join(parts).strip()
+
+
+def _programme_payload(programme: Programme, selected_name: str | None) -> dict[str, Any]:
+    raw_status = programme.status
+    status_value = raw_status.value if isinstance(raw_status, ProgrammeStatus) else str(raw_status)
+    return {
+        "id": str(programme.id),
+        "name": programme.name,
+        "slug": programme.slug,
+        "category": programme.category,
+        "status": status_value,
+        "durationYears": programme.duration_years,
+        "blurb": programme.blurb or "",
+        "selectable": status_value == ProgrammeStatus.AVAILABLE.value,
+        "selected": programme.name == selected_name,
+    }
+
+
+@router.get("/programmes")
+def list_programmes(user: User = Depends(require_user), session: Session = Depends(get_session)) -> dict[str, Any]:
+    profile = ensure_profile(session, user)
+    rows = list(
+        session.scalars(
+            select(Programme).where(Programme.status != ProgrammeStatus.ARCHIVED).order_by(Programme.name)
+        )
+    )
+    return {"ok": True, "items": [_programme_payload(row, profile.programme) for row in rows]}
+
+
+@router.put("/programme")
+def select_programme(
+    body: ProgrammeIn,
+    user: User = Depends(require_user),
+    session: Session = Depends(get_session),
+) -> dict[str, Any]:
+    _require_student(user)
+    name = body.name.strip()
+    programme = session.scalar(select(Programme).where(Programme.name == name))
+    if programme is None or programme.status == ProgrammeStatus.ARCHIVED:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Programme not found.")
+    if programme.status != ProgrammeStatus.AVAILABLE:
+        raise HTTPException(status.HTTP_409_CONFLICT, "That programme is not open for study yet.")
+    profile = ensure_profile(session, user)
+    profile.programme = programme.name
+    session.flush()
+    return {"ok": True, "item": _programme_payload(programme, profile.programme)}
 
 
 @router.get("/exam-schedule")
@@ -357,6 +423,13 @@ def module_overview(module_id: uuid.UUID, user: User = Depends(require_user), se
         )
     total = len(lessons)
     done = sum(1 for item in lessons if item.id in progress_rows and progress_rows[item.id].completed_at)
+    quizzes = list(
+        session.scalars(
+            select(Quiz)
+            .where(Quiz.module_id == module.id, Quiz.status == ContentStatus.PUBLISHED, Quiz.published_version_id.is_not(None))
+            .order_by(Quiz.title)
+        )
+    )
     return {
         "ok": True,
         "item": {
@@ -370,6 +443,14 @@ def module_overview(module_id: uuid.UUID, user: User = Depends(require_user), se
             "completedLessons": done,
             "progressPercent": int(round((done / total) * 100)) if total else 0,
             "chapters": chapter_payload,
+            "quizzes": [
+                {
+                    "id": str(quiz.id),
+                    "title": quiz.title,
+                    "kind": quiz.kind.value,
+                }
+                for quiz in quizzes
+            ],
         },
     }
 
@@ -419,6 +500,29 @@ def get_lesson(
             "nextLessonId": str(next_lesson.id) if next_lesson else None,
             "previousLessonId": str(prev_lesson.id) if prev_lesson else None,
             "progress": progress_out(progress),
+            "plainText": lesson_plain_text(lesson, version),
+        },
+    }
+
+
+@router.get("/lessons/{lesson_id}/text")
+def lesson_text(
+    lesson_id: uuid.UUID,
+    preview: bool = False,
+    user: User = Depends(require_user),
+    session: Session = Depends(get_session),
+) -> dict[str, Any]:
+    lesson = published_lesson(session, lesson_id, user, preview=preview)
+    version = lesson.published_version
+    if preview and (version is None or not version.slides):
+        versions = sorted(lesson.versions, key=lambda item: item.version_number)
+        version = versions[-1] if versions else None
+    return {
+        "ok": True,
+        "item": {
+            "id": str(lesson.id),
+            "title": lesson.title,
+            "plainText": lesson_plain_text(lesson, version),
         },
     }
 

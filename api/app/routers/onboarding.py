@@ -4,6 +4,8 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from sqlalchemy import select
+
 from app.course_selection import (
     CourseSelectionError,
     accept_onboarding_codes,
@@ -11,7 +13,8 @@ from app.course_selection import (
     published_codes,
 )
 from app.db import get_session
-from app.models import User
+from app.models import Programme, User
+from app.models.enums import ProgrammeStatus
 from app.profile import DEFAULT_EXAM, ensure_profile, user_out
 from app.schemas import OnboardingIn, UserOut
 from app.security import require_user
@@ -21,6 +24,17 @@ router = APIRouter(prefix="/api/onboarding", tags=["onboarding"])
 ALLOWED_PACES = {"relaxed", "balanced", "intensive"}
 ALLOWED_DAYS = {"mon", "tue", "wed", "thu", "fri", "sat", "sun"}
 ALLOWED_PROGRAMMES = {"Bachelor of Science in Computing"}
+
+
+def programme_is_open(session: Session, name: str | None) -> bool:
+    if not name:
+        return False
+    if name in ALLOWED_PROGRAMMES:
+        return True
+    row = session.scalar(
+        select(Programme).where(Programme.name == name, Programme.status == ProgrammeStatus.AVAILABLE)
+    )
+    return row is not None
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -125,7 +139,7 @@ def save_onboarding(
         profile.revision_start = body.revision_start
     advancing = body.complete or (body.onboarding_step is not None and body.onboarding_step >= 3)
     if advancing and (
-        profile.programme not in ALLOWED_PROGRAMMES
+        not programme_is_open(session, profile.programme)
         or profile.year_of_study is None
         or profile.semester_of_study is None
     ):

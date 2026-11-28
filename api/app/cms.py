@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import HTTPException, status
 
 BLOCK_TYPES = {"text", "code", "image", "callout", "check", "video", "audio", "table", "math", "flashcard", "quiz", "game"}
-QUIZ_KINDS = {"mcq", "blank"}
+QUIZ_KINDS = {"mcq", "blank", "true_false", "structured"}
 GAME_KINDS = {"matching", "drag"}
 TEXT_VARIANTS = {"heading", "paragraph", "list", "definition", "quote"}
 TEXT_FONTS = {"sans", "serif", "mono"}
@@ -271,15 +271,16 @@ def clean_block(raw: Any) -> dict[str, Any]:
         }
     if block_type == "quiz":
         kind = as_choice(raw.get("kind"), "quiz kind", QUIZ_KINDS, "mcq")
-        options = clean_options(raw.get("options"), minimum=0 if kind == "blank" else 2)
+        choice_kind = kind in {"mcq", "true_false"}
+        options = clean_options(raw.get("options"), minimum=2 if choice_kind else 0)
         return {
             "id": block_id,
             "type": "quiz",
             "kind": kind,
             "prompt": as_str(raw.get("prompt"), "question", required=False, max_len=2000),
             "options": options,
-            "correctId": chosen_correct_id(raw, options) if kind == "mcq" else "",
-            "answer": as_str(raw.get("answer"), "answer", required=False, max_len=400),
+            "correctId": chosen_correct_id(raw, options) if choice_kind else "",
+            "answer": as_str(raw.get("answer"), "answer", required=False, max_len=4000),
             "explanation": as_str(raw.get("explanation"), "explanation", required=False, max_len=4000),
             **extra,
         }
@@ -387,6 +388,9 @@ def slides_plain_text(slides: list[dict[str, Any]]) -> str:
                 lines.append(str(block.get("text") or ""))
             elif kind == "check":
                 lines.append(str(block.get("prompt") or ""))
+                lines.extend(str(option.get("label") or "") for option in block.get("options") or [])
+                if block.get("explanation"):
+                    lines.append(str(block.get("explanation")))
             elif kind == "image":
                 lines.append(str(block.get("alt") or block.get("caption") or block.get("url") or ""))
             elif kind == "video":
@@ -394,7 +398,13 @@ def slides_plain_text(slides: list[dict[str, Any]]) -> str:
             elif kind == "audio":
                 lines.append(str(block.get("title") or block.get("transcript") or ""))
             elif kind == "table":
-                lines.append(str(block.get("caption") or " ".join(block.get("headers") or [])))
+                if block.get("caption"):
+                    lines.append(str(block.get("caption")))
+                headers = [str(item) for item in block.get("headers") or []]
+                if headers:
+                    lines.append(" | ".join(headers))
+                for row in block.get("rows") or []:
+                    lines.append(" | ".join(str(cell) for cell in row))
             elif kind == "math":
                 lines.append(str(block.get("latex") or ""))
             elif kind == "flashcard":
@@ -402,7 +412,11 @@ def slides_plain_text(slides: list[dict[str, Any]]) -> str:
                 lines.append(str(block.get("back") or ""))
             elif kind == "quiz":
                 lines.append(str(block.get("prompt") or ""))
-                lines.append(str(block.get("answer") or ""))
+                lines.extend(str(option.get("label") or "") for option in block.get("options") or [])
+                if block.get("answer"):
+                    lines.append(str(block.get("answer")))
+                if block.get("explanation"):
+                    lines.append(str(block.get("explanation")))
             elif kind == "game":
                 lines.append(str(block.get("title") or block.get("prompt") or ""))
                 for pair in block.get("pairs") or []:

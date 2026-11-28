@@ -18,6 +18,8 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
+    if "program_modules" in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.create_table(
         "program_modules",
         sa.Column("id", sa.Uuid(), nullable=False),

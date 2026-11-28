@@ -456,13 +456,17 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
             <button type="button" onClick={() => setShortcuts((open) => !open)}>
               Keyboard Shortcuts
             </button>
+            <button type="button" onClick={() => downloadLessonText(lesson)}>
+              Download notes
+            </button>
+            <button type="button" onClick={() => speakLesson(lesson.plainText || lesson.title)}>
+              Listen
+            </button>
             {resources[0]?.url ? (
               <a href={resources[0].url} target="_blank" rel="noreferrer">
-                Download
+                Resource
               </a>
-            ) : (
-              <span className="cms-muted">Download</span>
-            )}
+            ) : null}
             <label className="learn-switch">
               Focus Mode
               <input type="checkbox" checked={focusMode} onChange={(event) => setFocusMode(event.target.checked)} />
@@ -551,6 +555,24 @@ export default function LessonPlayer({ lessonId }: { lessonId: string }) {
       </div>
     </AppShell>
   );
+}
+
+function downloadLessonText(lesson: StudentLesson) {
+  const text = lesson.plainText?.trim() || `${lesson.title}\n\n${lesson.description}`;
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const slug = lesson.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "lesson";
+  link.href = url;
+  link.download = `${slug}.txt`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function speakLesson(text: string) {
+  if (!text.trim() || typeof window === "undefined" || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 }
 
 function requiredChecksPassed(lesson: StudentLesson | null, checks: LessonProgress["checkResults"]) {

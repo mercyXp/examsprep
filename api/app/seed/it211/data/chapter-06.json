@@ -1,0 +1,670 @@
+{
+  "position": 6,
+  "title": "System Implementation and Testing",
+  "description": "Putting a designed registration system into use: conversion choices, and tests that are allowed to fail.",
+  "lessons": [
+    {
+      "title": "Introduction to System Implementation",
+      "description": "What go-live actually includes, and the decisions that must be made before the first Monday.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe implementation as more than installing software",
+        "List the decisions required before conversion",
+        "Explain the analyst's role during go-live"
+      ],
+      "introduction": [
+        "Implementation, in the narrow sense of this chapter, is the move from a tested release to live registration. The code may already exist. The risky work is data, people, timing, and a way back.",
+        "A faculty that treats go-live as a surprise email on Sunday night will spend Monday rebuilding trust. This lesson lists what must be decided first. The next lessons compare the conversion strategies themselves."
+      ],
+      "explanation": [
+        "Before conversion, the team needs a chosen release, a cleaned set of opening data, trained clerks, a published timetable for students, and a fallback. Each of those can fail independently. Training without clean data produces confident people typing into a contradictory store. Clean data without training produces a correct store and a queue of people afraid to touch it.",
+        "The analyst does not vanish when developers finish. The analyst checks that the live rules match the signed specification, that the messages on the screens are the ones that were reviewed, and that the people at the counter know the pending-payment rule. The analyst also watches the first real hour and logs defects without redesigning the system in the corridor.",
+        "Timing is academic, not abstract. Registration week, a results board, and a fee deadline are poor moments for an untried conversion. If the only window is risky, the plan should say so and shrink the scope, for example by converting continuing students first. Pretending a window is calm does not make it calm.",
+        "Communication is a deliverable. Students need to know which channel is official on Monday morning. If both the workbook and the portal accept enrolments, you have not converted. You have opened a second queue."
+      ],
+      "definitions": [
+        {"term": "Go-live", "meaning": "The moment the new system becomes the one used for real operations."},
+        {"term": "Opening data", "meaning": "The cleaned records the live system starts with, such as current students and modules."},
+        {"term": "Fallback", "meaning": "A prepared return to a safe older method if the new release fails."},
+        {"term": "Conversion", "meaning": "The planned switch from the old way of working to the new system."}
+      ],
+      "exampleTitle": "A Sunday checklist that is already too late",
+      "example": [
+        "On Sunday evening the portal is installed, but forty duplicate student numbers remain, the Friday clerks were not trained, and the workbook is still editable. Monday is not a go-live. It is an experiment on a queue. The analyst should have stopped the switch on Friday, when those three gaps were still visible.",
+        "A honest status on Friday would have said: software ready, data not ready, people not ready. Conversion waits."
+      ],
+      "table": {
+        "caption": "Ready for Monday?",
+        "headers": ["Item", "Not ready if"],
+        "rows": [
+          ["Release", "Must requirements still fail tests"],
+          ["Data", "Duplicates or blank programmes remain"],
+          ["People", "Counter staff have not practised the pending rule"],
+          ["Fallback", "Nobody may authorise a return to paper"]
+        ]
+      },
+      "application": [
+        "End an implementation chapter with a go-live checklist tied to owners and dates. A checklist without names will not be done.",
+        "If your project cannot train real clerks, write the training outline anyway and label who would attend. That shows you understand the work."
+      ],
+      "tip": "Do not open a second official channel. Conversion means one place where enrolment is true.",
+      "takeaways": [
+        "Go-live needs a release, clean data, trained people, and a fallback",
+        "The analyst checks rules and messages, and watches the first hour",
+        "Academic deadlines make timing part of the risk",
+        "Two systems both accepting enrolments means conversion has not happened"
+      ],
+      "revision": [
+        "Name four things that must be ready besides the software install.",
+        "Why is Sunday night a weak moment to discover duplicate student numbers?",
+        "What should the analyst do during the first live hour, and what should they not redesign on the spot?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which situation means conversion has not really happened?",
+          "options": [
+            "Clerks were trained and the workbook is read-only",
+            "Both the old workbook and the new portal still accept new enrolments",
+            "A fallback owner has been named",
+            "Opening data were cleaned on Friday"
+          ],
+          "correct": 1,
+          "explanation": "Two writable official channels split the truth. Conversion requires one place where a new enrolment is recorded."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Installation of the software is sufficient for go-live.",
+          "correct": false,
+          "explanation": "Data, training, communication, and a fallback are part of implementation. Software alone does not switch the organisation."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the prepared way back to a safe older method called?",
+          "answers": ["fallback", "a fallback"],
+          "explanation": "A fallback is planned before Monday. Inventing one during a failure is much harder."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Data are dirty and clerks are untrained, but the software is installed. What is the status, and what should happen to Monday's switch?",
+          "points": ["the organisation is not ready", "delay the conversion"],
+          "explanation": "Software readiness is only one line on the checklist. The switch waits until data and people are ready, or the queue becomes the test environment."
+        }
+      ],
+      "summary": "Implementation for go-live is a checklist: a passing release, clean opening data, trained staff, a single official channel, and a named fallback. The analyst guards the agreed rules and resists corridor redesign during the first hour."
+    },
+    {
+      "title": "System Conversion Strategies",
+      "description": "The four classic ways to switch, and the questions that choose among them.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Name direct, parallel, phased, and pilot conversion",
+        "Compare them using risk, cost, and the registration calendar",
+        "Justify one strategy for a stated campus constraint"
+      ],
+      "introduction": [
+        "Conversion strategy is the plan for how the old way stops and the new way starts. There are four classics in this syllabus: direct, parallel, phased, and pilot. They trade risk against cost and time in different ways.",
+        "Later lessons take each strategy apart. Here you learn to tell them apart and to ask the questions that make a choice defensible."
+      ],
+      "explanation": [
+        "Direct conversion switches everyone to the new system at one moment and retires the old one. It is simple and unforgiving. Parallel conversion runs both for a period and compares results. It is safer and expensive, and it confuses students if both channels accept new requests. Phased conversion switches a slice at a time, by module, by faculty, or by process. Pilot conversion tries the new system with one group, learns, and then widens.",
+        "The choice depends on the cost of failure, the ability to run two processes, and whether the work can be sliced. A fee total that must be right on a statutory deadline leans away from a reckless direct cutover. A new optional feedback form can be piloted with one class. Registration for a whole university rarely fits a casual direct switch in the busiest week.",
+        "Strategies can combine carefully. A pilot faculty may run parallel for three days, then direct, while other faculties wait. That is a plan only if the combinations are named. A slide that lists all four words without a recommendation is not a strategy.",
+        "Whatever you choose, write the fallback, the person who may invoke it, and the measure that would trigger it, such as the portal being unusable for thirty minutes or class lists disagreeing with the old book by more than a stated tolerance."
+      ],
+      "definitions": [
+        {"term": "Direct conversion", "meaning": "A single cutover in which the old system stops when the new one starts."},
+        {"term": "Parallel conversion", "meaning": "Running old and new together for a comparison period."},
+        {"term": "Phased conversion", "meaning": "Switching slice by slice, for example by faculty or by process."},
+        {"term": "Pilot conversion", "meaning": "Trying the new system with one group before a wider switch."}
+      ],
+      "exampleTitle": "Choosing under a real calendar",
+      "example": [
+        "The university can pilot IT211 enrolment in the School of Computing a week before the main registration, with the workbook kept as fallback for that school only. Other schools stay on the old process until the pilot's refusal reasons and payment references match the clerks' checks. That is a pilot, followed by phased rollout by school, not a direct university-wide cutover.",
+        "The recommendation names the trigger to stop: if references cannot be recorded, the pilot school returns to the workbook the same morning."
+      ],
+      "table": {
+        "caption": "A first comparison",
+        "headers": ["Strategy", "Risk if it fails", "Extra cost"],
+        "rows": [
+          ["Direct", "High, no live old system", "Lowest"],
+          ["Parallel", "Lower, comparison possible", "Staff run two processes"],
+          ["Phased", "Limited to the current slice", "Longer calendar"],
+          ["Pilot", "Limited to the trial group", "Time to learn before the rest"]
+        ]
+      },
+      "application": [
+        "In a report, pick one primary strategy and justify it with the cost of a wrong class list. Listing definitions without a choice does not answer the design question.",
+        "State the trigger that invokes fallback in one sentence a dean could use."
+      ],
+      "tip": "A strategy is a choice with a reason. Four definitions are only a glossary.",
+      "takeaways": [
+        "Direct, parallel, phased, and pilot switch in different shapes",
+        "Risk, staffing, and whether the work can be sliced drive the choice",
+        "Combinations must be named, not implied",
+        "Every strategy still needs a fallback trigger"
+      ],
+      "revision": [
+        "Which strategy retires the old system at the same moment the new one starts?",
+        "Why is a university-wide direct cutover in registration week hard to defend?",
+        "What is the difference between a pilot and a phase?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which strategy tries the system with one group before everyone else switches?",
+          "options": ["Direct", "Pilot", "A glossary", "Normalisation"],
+          "correct": 1,
+          "explanation": "A pilot limits the first live use to a chosen group so the organisation can learn before a wider conversion."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Parallel conversion is usually cheaper than direct conversion because both systems are run.",
+          "correct": false,
+          "explanation": "Running both costs staff time and attention. Parallel spends money and effort to buy a comparison and a softer landing."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the strategy that switches slice by slice, such as one faculty at a time?",
+          "answers": ["phased", "phased conversion"],
+          "explanation": "Phased conversion moves one slice at a time so a failure is contained."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Recommend a strategy for trying registration in one school first, and name a fallback trigger.",
+          "points": ["pilot conversion", "a trigger such as being unable to record references"],
+          "explanation": "One school first is a pilot. The trigger must be concrete enough that a dean can authorise a return to the old process the same morning."
+        }
+      ],
+      "summary": "The four conversion strategies trade risk, cost, and time. Choose using the calendar and the cost of a wrong enrolment, name any combination honestly, and attach a fallback trigger. The following lessons examine each strategy on its own."
+    },
+    {
+      "title": "Direct Conversion",
+      "description": "The single cutover: when it is justified, and the failure mode that makes it famous.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Describe direct conversion and its operating picture",
+        "Give conditions where the risk is acceptable",
+        "State the preparations that make a direct cutover survivable"
+      ],
+      "introduction": [
+        "Direct conversion is the cleanest story. At an agreed minute the old workbook becomes read-only and the portal becomes the only place a new enrolment can be recorded. There is no second live process to compare.",
+        "That cleanliness is the danger. If the portal cannot record a reference at 08:05, the queue has nowhere official to go unless the fallback was real."
+      ],
+      "explanation": [
+        "Operationally, direct conversion needs a freeze: a last export from the old system, a load into the new one, a short reconciliation, then the switch. New transactions during the freeze must be captured on a list and entered immediately afterwards, or they will exist only on paper that nobody owns. The length of the freeze is a design parameter. A freeze across a whole morning of registration is usually intolerable.",
+        "Direct conversion fits when the old and new cannot meaningfully run together, when the system is small, or when the old system is already dead. A brand-new optional form with no old data is nearly direct by nature. A university-wide fee ledger is a poor candidate, because a silent error becomes a statutory problem before anyone compares totals.",
+        "The preparations that make direct survivable are rehearsal, a reconciliation count, and an immediate fallback. Rehearsal means the team has performed the freeze and load on a copy. Reconciliation means student counts and module counts match before the workbook is locked. Fallback means someone can unlock the old channel quickly, and everyone knows that a double write must then be prevented.",
+        "Do not choose direct because it is fewer slides. Choose it when the cost of running two systems exceeds the cost of a contained failure, and when you have rehearsed the failure."
+      ],
+      "definitions": [
+        {"term": "Direct conversion", "meaning": "Stopping the old system as the new one becomes the only live channel."},
+        {"term": "Freeze", "meaning": "A short period when new transactions are held so data can be moved and checked."},
+        {"term": "Reconciliation", "meaning": "A comparison of counts or totals between old and new before the old channel is locked."},
+        {"term": "Cutover", "meaning": "The moment of the switch itself."}
+      ],
+      "exampleTitle": "A rehearsed thirty-minute freeze",
+      "example": [
+        "At 06:30 the workbook is locked. Counts of continuing students and of modules are compared to the loaded database. They match. A paper list catches any student who arrives during the freeze. At 07:00 the portal opens and the paper list is entered first. If the portal cannot save a reference by 07:20, the named registrar reopens the workbook and the portal stops accepting enrolments.",
+        "That is direct conversion with a spine. The same switch at 08:00 with no rehearsal is a different, weaker plan."
+      ],
+      "application": [
+        "If you recommend direct conversion, specify the freeze length and the reconciliation. Without those, the recommendation is a slogan.",
+        "Explain why registration week may still rule the strategy out even if the software tests passed."
+      ],
+      "tip": "Direct conversion without a rehearsal is hope. Rehearse the load and the fallback.",
+      "takeaways": [
+        "Direct conversion retires the old channel at cutover",
+        "A short freeze and a reconciliation make the load trustworthy",
+        "It fits small or already-dead old systems better than a live fee ledger",
+        "Fallback must be able to reopen the old channel without creating two truths for long"
+      ],
+      "revision": [
+        "What happens to students who arrive during the freeze?",
+        "Why is a fee ledger a weak candidate for casual direct conversion?",
+        "What three preparations make a direct cutover survivable?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What is the distinctive feature of direct conversion?",
+          "options": [
+            "Old and new run together for a month",
+            "The old channel stops when the new one becomes the only live system",
+            "One module is switched each year with no end date",
+            "No data are loaded"
+          ],
+          "correct": 1,
+          "explanation": "Direct conversion is a single cutover. The old system does not stay live as a second official channel."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A reconciliation of counts should happen before the old channel is locked.",
+          "correct": true,
+          "explanation": "Once the old system is locked and the queue starts, a wrong load is much harder to unwind. Compare first."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the short period called when new transactions are held so data can be moved?",
+          "answers": ["freeze", "a freeze", "data freeze"],
+          "explanation": "The freeze creates a stable moment for the load and the reconciliation."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Give two preparations you would insist on before a direct cutover of registration, and the risk if both are skipped.",
+          "points": ["rehearsal or reconciliation", "a wrong or unrehearsed load hits the live queue"],
+          "explanation": "Rehearsal and a count comparison expose a bad load while you can still stop. Skipping them turns the first real queue into the test."
+        }
+      ],
+      "summary": "Direct conversion is a single cutover. It is justifiable for a small or replaceable process when the freeze is short, the counts reconcile, and a named person can restore the old channel. It is a poor default for a busy, high-stakes ledger."
+    },
+    {
+      "title": "Parallel Conversion",
+      "description": "Running old and new together long enough to compare, and the new problems that comparison creates.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Describe how parallel conversion operates day to day",
+        "Explain the cost and the risk of two official truths",
+        "Define a comparison rule that ends the parallel period"
+      ],
+      "introduction": [
+        "Parallel conversion keeps the old process alive while the new system also runs, so results can be compared. It is the strategy people choose when a wrong class list or a wrong fee total is expensive.",
+        "The hidden cost is not only time. If both channels can change the enrolment, you no longer know which one is true. Parallel conversion has to say which channel wins."
+      ],
+      "explanation": [
+        "In a strict parallel run, every new enrolment is recorded in both places, or recorded in one and copied to the other under a stated rule. At the end of each day someone compares counts and a sample of students. Differences are defects or process mistakes, and they are logged. The old system remains the authority until the comparison stays inside a tolerance for an agreed number of days.",
+        "Authority must be single even while work is double. For registration, a sound rule is: the workbook remains authoritative during the parallel week; the portal is a shadow that must match. Students are not asked to submit twice. Clerks enter once in the workbook and a runner or an integration copies into the portal. Asking students to use both creates the second queue you were trying to avoid.",
+        "The cost is staff attention on the busiest week. Parallel conversion during peak registration can be worse than a rehearsed direct switch if the clerks cannot keep up. Sometimes the parallel run belongs in the week before peak, using last term's transactions as a replay rather than live double entry. Replaying a day of real forms onto the new system is a respectable parallel test.",
+        "End the parallel period on a criterion, not on fatigue. For example: three consecutive days with no unmatched confirmed students, then the portal becomes authoritative and the workbook goes read-only. Write the criterion before the week begins."
+      ],
+      "definitions": [
+        {"term": "Parallel conversion", "meaning": "Operating the old and new systems together so outputs can be compared."},
+        {"term": "Authoritative channel", "meaning": "The one system whose record wins if the two disagree."},
+        {"term": "Shadow run", "meaning": "A copy of work into the new system while the old system remains the authority."},
+        {"term": "Tolerance", "meaning": "The agreed size of difference that still counts as a successful comparison."}
+      ],
+      "exampleTitle": "The workbook stays in charge for three days",
+      "example": [
+        "Clerks enrol in the workbook only. Each hour the references and confirmations are entered into the portal as a shadow. At 16:00 the analyst compares confirmed counts per module. On Thursday the portal shows four extra students because a clerk corrected the workbook after the copy. The defect is in the copy timing, not a reason to declare the portal authoritative.",
+        "The written end rule: three clean afternoons, then switch authority. Thursday does not count as clean. The rule prevents a hopeful Friday cutover."
+      ],
+      "application": [
+        "If you recommend parallel conversion, name the authoritative channel and the end criterion. Otherwise the strategy has no exit.",
+        "Prefer a replay of a previous day's forms when live double entry would break the counter."
+      ],
+      "tip": "Two systems may run. Only one may be authoritative.",
+      "takeaways": [
+        "Parallel conversion buys a comparison by doing the work twice",
+        "One channel must remain authoritative during the run",
+        "Students should not be sent to both queues",
+        "The period ends on a written criterion, not when people are tired"
+      ],
+      "revision": [
+        "Why is a shadow run kinder than asking students to submit twice?",
+        "What does authoritative mean if the two systems disagree?",
+        "Give an end criterion for a parallel week."
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "During a parallel run, what must be true if the workbook and the portal disagree?",
+          "options": [
+            "Both are equally official",
+            "A pre-chosen channel wins",
+            "The student chooses",
+            "The disagreement is ignored"
+          ],
+          "correct": 1,
+          "explanation": "One channel is authoritative. Otherwise the organisation has two truths and the comparison cannot decide a defect."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Parallel conversion is mainly a way to reduce staff effort during the switch.",
+          "correct": false,
+          "explanation": "Parallel conversion increases effort. The benefit is comparison and a safer judgement, not a lighter week."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a run called when work is copied into the new system while the old one remains the authority?",
+          "answers": ["shadow", "shadow run", "a shadow run"],
+          "explanation": "A shadow run lets you compare without making the new system official yet."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Clerks cannot enter each student twice during peak week. How can you still get a parallel comparison, and which channel stays authoritative?",
+          "points": ["replay or copy from the old channel", "the old channel stays authoritative until the criterion is met"],
+          "explanation": "A replay or an hourly copy creates the comparison without a second student queue. Authority stays with the old system until the written end rule is satisfied."
+        }
+      ],
+      "summary": "Parallel conversion compares old and new by doing or replaying the work twice, while one channel remains the authority. It costs attention, so it needs an end criterion and should not force students through two queues. Use it when a silent mismatch is more expensive than the extra effort."
+    },
+    {
+      "title": "Phased Conversion",
+      "description": "Switching by slice — a faculty, a process, or a cohort — so a mistake does not cover the whole university.",
+      "durationMinutes": 16,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Describe phased conversion and legal ways to slice it",
+        "Explain the interfacing problem between live slices",
+        "Choose a slice order that respects dependencies"
+      ],
+      "introduction": [
+        "Phased conversion does not switch the whole organisation at once. One slice moves to the new system while the rest stay on the old one. The slice might be the School of Computing, or only the payment-reference process, or only first-years.",
+        "The strategy contains risk inside the slice. It creates a new problem: the slices must still form one university."
+      ],
+      "explanation": [
+        "A phase needs a boundary you can explain. By faculty works if students rarely enrol across faculties in the same morning. By process works if recording a payment can go live before refusal reasons do. By cohort works if first-years can be separated from continuing students. A slice that is only whoever happens to be in the room is not a phase. It is confusion.",
+        "Dependencies order the phases. You cannot switch class lists to the new system while enrolments are still born only in the workbook, unless a feed is designed. The feed is part of the phase plan. Data about a student who takes a module in another faculty must have a stated home. If both faculties think they are authoritative, the phase boundary is wrong.",
+        "Each phase is a small conversion of its own, with direct or parallel tactics inside it, a checklist, and a review before the next slice starts. Phased conversion fails when phase two begins on the calendar even though phase one did not meet its criterion. The calendar serves the criterion, not the other way round.",
+        "The benefit is learning and containment. A bad message discovered in one school can be rewritten before the next school. The cost is a longer period of mixed operation and the interface work between old and new. For a multi-campus university that cost is often justified."
+      ],
+      "definitions": [
+        {"term": "Phased conversion", "meaning": "Moving to the new system one defined slice at a time."},
+        {"term": "Slice", "meaning": "The faculty, process, or cohort included in the current phase."},
+        {"term": "Dependency", "meaning": "A fact or process that must already be live because a later slice relies on it."},
+        {"term": "Interface", "meaning": "The agreed feed that keeps a slice on the new system consistent with slices still on the old one."}
+      ],
+      "exampleTitle": "Payments first, then refusals, then the next school",
+      "example": [
+        "Phase 1 in the School of Computing: clerks record payment references in the portal, while module confirmation stays in the workbook. A nightly list keeps the two aligned. Phase 2 adds confirmation and refusal reasons once references have been clean for three days. Phase 3 repeats the pair in the next school.",
+        "The school boundary is real because cross-school enrolments are rare in week one and are handled as exceptions on paper, counted, not ignored."
+      ],
+      "application": [
+        "Draw the phases as a short table: slice, what becomes authoritative, dependency, exit criterion. A Gantt chart of hope is not a phase plan.",
+        "Name the exception path for a student who does not fit the slice. Exceptions that are shrugged off become the next crisis."
+      ],
+      "tip": "A phase without an exit criterion is just a date.",
+      "takeaways": [
+        "Phases need a real boundary: faculty, process, or cohort",
+        "Order slices by dependency and design the feed between them",
+        "Each phase has its own checklist and exit criterion",
+        "Mixed operation is the cost you pay for containment"
+      ],
+      "revision": [
+        "Give one sensible slice for a university and one slice that is too vague.",
+        "Why might payment references go live before refusal reasons?",
+        "What happens if the next faculty starts before the exit criterion is met?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which slice is the clearest phase boundary?",
+          "options": [
+            "Whoever is at the counter at 10:00",
+            "The School of Computing, with cross-school cases handled as counted exceptions",
+            "Anyone who prefers the new system",
+            "Every second student"
+          ],
+          "correct": 1,
+          "explanation": "A faculty with a stated exception path is a real slice. A crowd, a preference, or every second student cannot be operated or supported."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Later phases may start on schedule even when the current phase missed its exit criterion.",
+          "correct": false,
+          "explanation": "The criterion gates the next slice. Starting anyway spreads a known problem and abandons the point of phasing."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the agreed feed between a slice on the new system and a slice still on the old one called in this lesson?",
+          "answers": ["interface", "an interface"],
+          "explanation": "The interface keeps the slices consistent. Without it, each slice becomes a separate truth."
+        },
+        {
+          "kind": "structured",
+          "prompt": "You want references live before full confirmation. Name the first slice and the dependency the second slice must wait for.",
+          "points": ["payment references in one school", "clean references before confirmation switches"],
+          "explanation": "The first slice is the reference process in a bounded school. Confirmation waits until that slice meets its criterion, because refusal and seating depend on trustworthy payments."
+        }
+      ],
+      "summary": "Phased conversion moves a defined slice, in dependency order, with a feed to whatever remains on the old system. Each phase needs an exit criterion. The gain is a contained mistake. The cost is a period of mixed operation that must be designed, not hoped away."
+    },
+    {
+      "title": "Pilot Conversion",
+      "description": "A live trial with one real group, used to learn before the rest of the university is committed.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Distinguish a pilot from a prototype and from a phase",
+        "Choose a pilot group that can represent the real work",
+        "Decide what evidence would justify widening the pilot"
+      ],
+      "introduction": [
+        "A pilot is a live use of the new system by a real group, with the intention of learning before a wider conversion. It is not a demonstration to the dean, and it is not a paper prototype. Real references are recorded. Real students receive real decisions.",
+        "Because it is live, a pilot needs the same fallback as any other conversion. Because it is a trial, it also needs a question: what must we learn before we continue?"
+      ],
+      "explanation": [
+        "The pilot group should exercise the risky rules. A quiet postgraduate desk that never sees mobile-money delays is a poor pilot for a payment-reference problem. The School of Computing's first-year counter, for a limited set of modules, is a better pilot if those students actually pay and enrol the way the rest of the university does. State the ways the group is not representative, such as smaller numbers.",
+        "A pilot differs from a later phase because its main product is evidence, not coverage. You might measure time to record a reference, number of duplicate rejections, and whether students understand the refusal sentence. Widening is allowed only if those measures meet targets you wrote in advance. A pilot that widens because the sponsor is impatient has stopped being a pilot.",
+        "Support the pilot more heavily than you will support the full rollout, and do not pretend otherwise. An analyst on site, a direct line to the developer, and a daily review are how you learn. The full rollout will not have that staffing. If the system only works with an analyst standing there, the pilot has failed even if the queue looked calm.",
+        "Exit paths are explicit. Widen, change and re-pilot, or stop. Stopping is allowed. A pilot that cannot stop is a phased rollout wearing a softer name."
+      ],
+      "definitions": [
+        {"term": "Pilot conversion", "meaning": "Live use by one real group, designed to produce evidence before a wider switch."},
+        {"term": "Representative group", "meaning": "A pilot group that actually meets the problems the system is meant to handle."},
+        {"term": "Exit criterion", "meaning": "The pre-written evidence required before the pilot widens, changes, or stops."},
+        {"term": "Prototype", "meaning": "A sketch or partial build used to learn, which is not yet live operations."}
+      ],
+      "exampleTitle": "IT211 for one intake, with numbers",
+      "example": [
+        "For three days, first-years requesting IT211 and two neighbouring modules use the portal. Other requests stay on the workbook. The analyst is present. Targets written on Monday: at least 90 percent of references stored without retyping, every refusal shows a glossary reason, and no shared password is used. On Wednesday, reasons are clear but clerks still share one login. The pilot does not widen. The next step is to fix accounts and re-pilot, not to declare victory.",
+        "The group is slightly kinder than the main counter because the module set is small. That limit is written beside the results so nobody over-claims."
+      ],
+      "application": [
+        "Write the pilot question and the numeric targets in the plan. After the trial, report against those targets, including the ones you missed.",
+        "Do not call a classroom demo a pilot. If no live decision was recorded, say prototype."
+      ],
+      "tip": "A pilot that is not allowed to stop was never a pilot.",
+      "takeaways": [
+        "A pilot is live use by a group chosen to meet the real risks",
+        "Its product is evidence against pre-written targets",
+        "Extra support is part of the method and must not be required forever",
+        "Widen, change, or stop are all legitimate exits"
+      ],
+      "revision": [
+        "Why is a quiet office a weak pilot for payment delays?",
+        "How is a pilot different from a prototype?",
+        "What would you do if the only failed target was shared passwords?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "What is the main product of a pilot conversion?",
+          "options": [
+            "Evidence about live use before a wider switch",
+            "A poster for the dean",
+            "A normalised table",
+            "The retirement of every old system on day one"
+          ],
+          "correct": 0,
+          "explanation": "The pilot exists to learn from real use. Coverage of the whole university is a later decision."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A pilot may widen even when a pre-written target failed, as long as the queue looked calm.",
+          "correct": false,
+          "explanation": "Targets gate the exit. Calm appearance does not replace a failed criterion such as shared passwords."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a sketch or partial system called when it is not yet handling live decisions?",
+          "answers": ["prototype", "a prototype"],
+          "explanation": "A prototype supports learning before live operations. A pilot is live. The words are not interchangeable."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Name a representative pilot group for mobile-money references and one target that would stop you from widening it.",
+          "points": ["a real counter that sees those payments", "a missed target such as shared logins or failed reasons"],
+          "explanation": "The group must meet the actual payment problem. A failed pre-written target, not impatience, decides whether the pilot widens."
+        }
+      ],
+      "summary": "Pilot conversion puts one representative group on the live system to gather evidence against targets written in advance. It needs fallback and extra support, and it must be allowed to stop or repeat. Widening is a decision, not an assumption."
+    },
+    {
+      "title": "Software Testing Fundamentals",
+      "description": "What a test is for, how a case is written, and why the author of a requirement is not finished when coding starts.",
+      "durationMinutes": 16,
+      "difficulty": "beginner",
+      "objectives": [
+        "Explain the purpose of testing as finding disagreements with an agreed target",
+        "Write a test case with input, steps, and an expected result",
+        "Record a fault so it can be retested"
+      ],
+      "introduction": [
+        "Testing is not a ceremony at the end if everyone is tired. It is a comparison between the running system and a target that was written earlier: the requirement, the design, or both.",
+        "A test that cannot fail is not a test. This lesson fixes the shape of a case and of a fault report before the next lesson names the levels at which those cases run."
+      ],
+      "explanation": [
+        "The target comes first. For the duplicate reference, the target is FR-02 and the design message. The test case names the starting state, the action, and the expected result. Starting state: reference ABC123 already stored for student A. Action: clerk enters ABC123 for student B. Expected result: no new payment row, and the clerk sees that the reference is already used. If the expected result is filled in after you see the screen, you have described behaviour, not tested it.",
+        "Include cases that should succeed and cases that should be refused. Teams that only test the happy path ship the unhappy path unexamined, which is the path the counter will hit. Also test the boundary: a reference of the maximum length, and one character too long, if the design stated a length.",
+        "A fault report says what you did, what you expected, and what happened, with the requirement identifier. It does not say the system is useless. After a fix, the same case is run again. Retest on a new build that also changed unrelated rules is how old faults return. Note the build you tested.",
+        "The analyst's contribution is the expected result, taken from the specification, and a judgement when the fault reveals a wrong requirement rather than a wrong program. Testers who are handed only a URL and told to click around are being asked to invent the target. That is validation done too late and too vaguely."
+      ],
+      "definitions": [
+        {"term": "Test case", "meaning": "A specified starting state, action, and expected result used to probe one behaviour."},
+        {"term": "Expected result", "meaning": "What the agreed target says should happen, written before the run."},
+        {"term": "Fault", "meaning": "A mismatch between observed behaviour and the expected result."},
+        {"term": "Retest", "meaning": "Running the same case again after a fix, on a named build."}
+      ],
+      "exampleTitle": "FR-02 as a case, not a vibe",
+      "example": [
+        "Case T-02. Build 0.3. Precondition: payment reference ABC123 stored for 2024-1184. Steps: sign in as a clerk, open 2024-2201, enter ABC123, save. Expected: save refused, message that the reference is already used, still one row with that reference. Observed on the first run: save accepted. Fault F-02 filed against FR-02. After the fix, T-02 is repeated on build 0.4 and passes.",
+        "A second case, T-03, enters a new reference and expects a stored row. Success and failure are both specified."
+      ],
+      "application": [
+        "Put a numbered test table in the report with at least one failing-path case per must requirement. Screenshots without expected results do not count as cases.",
+        "When a test fails, quote the requirement. If the requirement is the problem, change the requirement openly and then change the expected result."
+      ],
+      "tip": "Write the expected result in a sentence you could be wrong about.",
+      "takeaways": [
+        "A test compares behaviour with a target written first",
+        "Cases need a starting state, steps, and an expected result",
+        "Happy paths and refusal paths both belong in the set",
+        "Faults are retested on a named build"
+      ],
+      "revision": [
+        "What three parts does a test case need?",
+        "Why is a screenshot without an expected result weak?",
+        "What should a fault report cite besides the click that failed?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "When is the expected result written?",
+          "options": ["After the screen looks fine", "Before the case is run", "Only if the dean asks", "Never, testers should improvise"],
+          "correct": 1,
+          "explanation": "The expected result is the target. Writing it afterwards means the test cannot independently fail."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "Testing only the successful enrolment is enough if that path looks good.",
+          "correct": false,
+          "explanation": "Refusals and duplicates are the paths the counter will hit. They need their own cases."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is a mismatch between what happened and the expected result called?",
+          "answers": ["fault", "a fault"],
+          "explanation": "A fault is that mismatch. The report should be specific enough to retest after a fix."
+        },
+        {
+          "kind": "structured",
+          "prompt": "Draft the expected result for a duplicate reference, and say what a passing run must not do.",
+          "points": ["the clerk is told the reference is already used", "a second payment row is not stored"],
+          "explanation": "The case expects a refusal message and no new row. A success message or a second row is a fault against FR-02."
+        }
+      ],
+      "summary": "A test case freezes a starting state, an action, and an expected result taken from the specification. Run both the success and the refusal. File faults with the requirement number, and retest the same case on the build that claims to fix it."
+    },
+    {
+      "title": "Unit, Integration, System and Acceptance Testing",
+      "description": "Four levels of testing, who usually performs them, and how they stack for a registration release.",
+      "durationMinutes": 18,
+      "difficulty": "intermediate",
+      "objectives": [
+        "Distinguish unit, integration, system, and acceptance testing",
+        "Give a registration example of each level",
+        "Explain why acceptance is the sponsor's comparison with requirements"
+      ],
+      "introduction": [
+        "The same requirement can be probed at several levels. A developer can test the uniqueness check in isolation. A later test can watch that check talk to Finance. A system test can walk the clerk's whole task. An acceptance test asks whether the bursar recognises the behaviour as what was signed.",
+        "Confusing these levels leads to a project that has many green unit tests and a counter that still cannot work."
+      ],
+      "explanation": [
+        "Unit testing checks a small piece, such as a function that decides whether a reference may be stored, with fake neighbours. It is fast and local. It does not prove the screen, the database, and Finance agree. Integration testing checks the joins: application to database, application to Finance, or the copy from the workbook. Failures here are often about formats and missing rows, not about a single if statement.",
+        "System testing exercises the release as a whole against the specification, in an environment that resembles live. The duplicate-reference case, the fee refusal, and the class list are system tests when they use the real screens and a realistic data set. System testing is where non-functional checks such as the three-second lookup also belong, under a stated load.",
+        "Acceptance testing is run with the sponsor or the users, against the requirements they signed, not against the developer's private intentions. A script walks must requirements. The bursar either accepts the release or sends it back with faults. Acceptance is not the moment to invent new scope. New wishes become change requests.",
+        "All four can be planned from the same identifiers. FR-02 has a unit example, an integration example through the database constraint, a system case on the clerk's screen, and an acceptance step the bursar watches. If a level is skipped, say which risk you are accepting. Silence usually means the system level was never done."
+      ],
+      "definitions": [
+        {"term": "Unit testing", "meaning": "Checking a small piece in isolation, often with neighbours replaced by fakes."},
+        {"term": "Integration testing", "meaning": "Checking that parts work together across an interface, such as application and database."},
+        {"term": "System testing", "meaning": "Checking the whole release against the specification in a realistic environment."},
+        {"term": "Acceptance testing", "meaning": "Checking, with the sponsor or users, that the release meets the signed requirements."}
+      ],
+      "exampleTitle": "FR-02 at four levels",
+      "example": [
+        "Unit: the rule function returns already used when given a reference present in a fake list. Integration: saving through the database raises the uniqueness failure and the application turns it into the clerk's message. System: on the counter screen, with a loaded student set, the second save is refused and the list still shows one row. Acceptance: the bursar performs that script and signs the sheet for FR-02 or files a fault.",
+        "A green unit test alone would have missed a message that still said Error 409. The system level catches that. Acceptance catches a message the bursar will not say aloud."
+      ],
+      "table": {
+        "caption": "Who cares at each level",
+        "headers": ["Level", "Question", "Typical owner"],
+        "rows": [
+          ["Unit", "Does this rule function behave?", "Developer"],
+          ["Integration", "Do the parts speak?", "Developer with the analyst's interfaces"],
+          ["System", "Does the release meet the specification?", "Tester or analyst"],
+          ["Acceptance", "Does the sponsor recognise the signed behaviour?", "Bursar or sponsor"]
+        ]
+      },
+      "application": [
+        "Map each must requirement to the highest level you actually ran. If acceptance did not happen, do not write the university accepted the system.",
+        "Keep new ideas out of the acceptance script. Park them on the change-request list so the test stays about the signed target."
+      ],
+      "tip": "Unit tests do not accept a system. Sponsors do, against the specification.",
+      "takeaways": [
+        "Unit tests isolate a piece; integration tests cross a join",
+        "System tests walk the release against the specification",
+        "Acceptance tests are the sponsor's comparison with signed requirements",
+        "The same requirement identifier can appear at every level"
+      ],
+      "revision": [
+        "What can a unit test of the reference rule miss that a system test will see?",
+        "Who decides acceptance, and against which document?",
+        "Why are new wishes unwelcome during an acceptance script?"
+      ],
+      "checks": [
+        {
+          "kind": "mcq",
+          "prompt": "Which level asks the bursar to compare the release with the signed requirements?",
+          "options": ["Unit", "Integration", "A code review only", "Acceptance"],
+          "correct": 3,
+          "explanation": "Acceptance testing is the sponsor or user comparison with the signed specification. The other levels can pass and still leave the bursar unconvinced."
+        },
+        {
+          "kind": "true_false",
+          "prompt": "A complete set of passing unit tests proves the counter screen shows the right message.",
+          "correct": false,
+          "explanation": "Unit tests isolate rules. The message on the screen is a system-level concern and may still be wrong."
+        },
+        {
+          "kind": "short",
+          "prompt": "What is the test level that checks parts across an interface, such as the application and the database?",
+          "answers": ["integration", "integration testing"],
+          "explanation": "Integration testing targets the joins. It sits between isolated unit tests and a full system walk-through."
+        },
+        {
+          "kind": "structured",
+          "prompt": "FR-02 passes a unit test but the screen says Error 409. Which level failed, and what should acceptance do?",
+          "points": ["system testing should catch the message", "acceptance should not sign until the clerk-facing message is right"],
+          "explanation": "The rule may be correct while the interface is not. System testing compares the whole path. The bursar should refuse acceptance while the message is not the agreed one."
+        }
+      ],
+      "summary": "Unit, integration, system, and acceptance testing answer larger and larger questions, from a single rule to the sponsor's signed specification. Passing the lowest level does not imply the higher ones. Map each must requirement to the levels you really ran."
+    }
+  ]
+}

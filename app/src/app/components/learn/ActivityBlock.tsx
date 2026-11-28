@@ -55,15 +55,28 @@ function FlashcardView({ block }: { block: FlashcardBlock }) {
   );
 }
 
+function normalise(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function structuredCorrect(typed: string, answer: string) {
+  const points = answer.split("|").map((item) => normalise(item)).filter(Boolean);
+  if (!points.length) return false;
+  const given = normalise(typed);
+  return points.every((point) => given.includes(point));
+}
+
 function QuizView({ block }: { block: QuizBlock }) {
   const [selected, setSelected] = useState("");
   const [typed, setTyped] = useState("");
   const [checked, setChecked] = useState(false);
-  const correct =
-    block.kind === "blank"
-      ? typed.trim().toLowerCase() !== "" && typed.trim().toLowerCase() === block.answer.trim().toLowerCase()
-      : selected !== "" && selected === block.correctId;
-  if (block.kind === "blank") {
+  const written = block.kind === "blank" || block.kind === "structured";
+  const correct = written
+    ? block.kind === "structured"
+      ? structuredCorrect(typed, block.answer)
+      : typed.trim() !== "" && normalise(typed) === normalise(block.answer)
+    : selected !== "" && selected === block.correctId;
+  if (written) {
     return (
       <form
         className="lp-quiz"
@@ -73,9 +86,13 @@ function QuizView({ block }: { block: QuizBlock }) {
         }}
       >
         <p>
-          <FormattedText text={block.prompt || "Fill in the blank"} />
+          <FormattedText text={block.prompt || (block.kind === "structured" ? "Write a short answer" : "Fill in the blank")} />
         </p>
-        <input value={typed} onChange={(event) => setTyped(event.target.value)} aria-label="Your answer" />
+        {block.kind === "structured" ? (
+          <textarea value={typed} onChange={(event) => setTyped(event.target.value)} aria-label="Your answer" rows={4} />
+        ) : (
+          <input value={typed} onChange={(event) => setTyped(event.target.value)} aria-label="Your answer" />
+        )}
         <button type="submit">Check</button>
         {checked ? <p className={correct ? "cms-ok" : "cms-error"}>{correct ? "Correct." : "Not quite."} {block.explanation}</p> : null}
       </form>
