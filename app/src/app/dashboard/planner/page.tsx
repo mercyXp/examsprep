@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RevisionPlan } from "@/app/components/assist/RevisionPlan";
 import ExamTimetable from "@/app/components/dashboard/ExamTimetable";
 import AppShell from "@/app/components/shell/AppShell";
 import { getSessionUser, type SessionUser } from "@/lib/auth";
@@ -32,6 +33,7 @@ export default function PlannerPage() {
         ) : (
           <p className="dash-empty">Loading planner…</p>
         )}
+        <RevisionPlan />
         <article className="dash-card">
           <header className="dash-card-head">
             <h2>Daily goal</h2>

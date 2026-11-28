@@ -1,13 +1,14 @@
-import EmptyFeature from "@/app/components/dashboard/EmptyFeature";
+import { QuizBoard } from "@/app/components/assist/QuizBoard";
+import AppShell from "@/app/components/shell/AppShell";
 
 export const metadata = { title: "Quizzes — ExamsPrep" };
 
 export default function QuizzesPage() {
   return (
-    <EmptyFeature
-      title="Quizzes & Mock Exams"
-      summary="Practice papers will live here once they are published."
-      detail="No quizzes are published yet. When administrators release a mock exam, it will appear on this page with your attempt history."
-    />
+    <AppShell variant="student" title="Quizzes & Mock Exams" subtitle="Published quizzes, with audio for the instructions, questions, options, and explanations.">
+      <div className="dash-body">
+        <QuizBoard />
+      </div>
+    </AppShell>
   );
 }

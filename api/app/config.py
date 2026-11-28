@@ -23,6 +23,23 @@ class Settings(BaseSettings):
     ai_api_key: str = ""
     ai_base_url: str = "https://api.openai.com/v1"
     ai_model: str = "gpt-4o-mini"
+    # Shared budget for Firecrawl, ElevenLabs, vision, and practice calls.
+    # 0 disables the limit. Render free runs one instance, so memory is enough.
+    ai_rate_limit: int = 12
+    ai_rate_window_seconds: int = 600
+    # Firecrawl free credits are small. Crawl stays short; JSON extract is optional.
+    firecrawl_api_key: str = ""
+    firecrawl_crawl_limit: int = 4
+    # ElevenLabs free tier. mp3_22050_32 stays under the paid bitrate requirement.
+    elevenlabs_api_key: str = ""
+    elevenlabs_voice_id: str = ""
+    elevenlabs_tts_model: str = "eleven_flash_v2_5"
+    elevenlabs_stt_model: str = "scribe_v2"
+    elevenlabs_max_chars: int = 2500
+    # Generated audio and snap photos are stored in Postgres (bytea), not the
+    # ephemeral Render disk. Keep each object small for the free 1 GB database.
+    audio_max_bytes: int = 4_000_000
+    snap_max_bytes: int = 4_000_000
     # Solana hackathon phase 1. Leave the keypairs empty until you deploy.
     # See docs/architecture/solana.md. Secrets stay on the API, never on Vercel.
     solana_rpc_url: str = "https://api.devnet.solana.com"
