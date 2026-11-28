@@ -291,7 +291,7 @@ export default function AdminCoursesPage() {
                           {scope?.canManageCatalogue ? (
                             <button type="button" onClick={() => openEditor(item)}>Edit module</button>
                           ) : null}
-                          <Link href={`/admin/lessons?module=${item.id}`}>Lessons</Link>
+                          <Link href={`/admin/lessons/${item.id}`}>Lessons</Link>
                         </div>
                       ) : null}
                     </div>

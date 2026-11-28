@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ChevronDown, Redo2, Undo2 } from "lucide-react";
 import { SlideStage } from "@/app/components/learn/SlideStage";
@@ -31,6 +31,8 @@ import {
   loadLesson,
   loadLessons,
   loadModules,
+  lessonEditorHref,
+  lessonReturnPath,
   loadScope,
   saveLessonContent,
   saveLessonMeta,
@@ -69,6 +71,7 @@ const MODES = [
 
 export default function LessonStudio({ lessonId }: { lessonId: string }) {
   const router = useRouter();
+  const backHref = lessonReturnPath(useSearchParams().get("from"));
   const [modules, setModules] = useState<AdminModule[]>([]);
   const [chapters, setChapters] = useState<AdminChapter[]>([]);
   const [siblings, setSiblings] = useState<AdminLesson[]>([]);
@@ -659,7 +662,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                   setError(result.message);
                   return;
                 }
-                window.location.assign("/admin/lessons");
+                window.location.assign(backHref);
               }}
             >
               Delete draft
@@ -695,7 +698,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
         <aside className={`studio-tree${panel === "tree" ? " is-open" : ""}`}>
           <div className="studio-tree-head">
             <h2>Lesson Structure</h2>
-            <Link href="/admin/lessons" aria-label="Close studio">
+            <Link href={backHref} aria-label="Close studio">
               ×
             </Link>
           </div>
@@ -721,7 +724,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                             Lesson {lessonIndex + 1}: {item.title}
                           </strong>
                         ) : (
-                          <Link href={`/admin/lessons/${item.id}/edit`}>
+                          <Link href={lessonEditorHref(item.id, backHref)}>
                             Lesson {lessonIndex + 1}: {item.title}
                           </Link>
                         )}
@@ -737,7 +740,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                     .filter((item) => !item.chapterId)
                     .map((item) => (
                       <div key={item.id} className={`studio-lesson${item.id === lessonId ? " is-current" : ""}`}>
-                        {item.id === lessonId ? <strong>{item.title}</strong> : <Link href={`/admin/lessons/${item.id}/edit`}>{item.title}</Link>}
+                        {item.id === lessonId ? <strong>{item.title}</strong> : <Link href={lessonEditorHref(item.id, backHref)}>{item.title}</Link>}
                       </div>
                     ))}
                 </details>
@@ -812,7 +815,7 @@ export default function LessonStudio({ lessonId }: { lessonId: string }) {
                       setError(created.message);
                       return;
                     }
-                    router.push(`/admin/lessons/${created.data.item.id}/edit`);
+                    router.push(lessonEditorHref(created.data.item.id, backHref));
                   }}
                 >
                   Lesson
